@@ -173,42 +173,9 @@ public class PokemonBattleSim{
 						}
 					break;
 					default://other
-					clear();
-					System.out.println("Selected Pokemon: ");
-				
-					Pokemon tempPkmn = new Pokemon(selecshon);
-					System.out.println("Name:    "+tempPkmn.name);
-					System.out.println("Type:    "+tempPkmn.type);
-					System.out.println("HP:      "+tempPkmn.baseHP);
-					System.out.println("Attack:  "+tempPkmn.baseATK);
-					System.out.println("Defense: "+tempPkmn.baseDEF);
-					System.out.println("Speed:   "+tempPkmn.baseSPEED);
-					System.out.print("Weak to: ");
+
+					printSelectedMonInfo(selecshon);
 					
-					for(int i=0;i<tempPkmn.weakTo.length;i++){
-						System.out.print(tempPkmn.weakTo[i]);
-						if(i!=tempPkmn.weakTo.length-1){
-							System.out.print(", ");
-						}
-					}
-					System.out.println("");
-				
-					System.out.print("Resists: ");
-						
-					for(int i=0;i<tempPkmn.resists.length;i++){
-						System.out.print(tempPkmn.resists[i]);
-						if(i!=tempPkmn.resists.length-1){
-							System.out.print(", ");
-						}
-					}
-					System.out.println("");
-					
-					System.out.println("Moveset: ");
-					for(int i=0;i<4;i++){
-						System.out.println("        "+(i+1)+":"+tempPkmn.moveset[0][i]+" ("+tempPkmn.moveset[1][i]+")");
-					}
-					int totalstats =tempPkmn.baseATK+tempPkmn.baseDEF+tempPkmn.baseHP+tempPkmn.baseSPEED;
-					System.out.println("Total stat points: "+totalstats);
 					System.out.println("");
 					System.out.println("Confirm?  [1]: Yes [2]: No");
 					try{
@@ -220,7 +187,6 @@ public class PokemonBattleSim{
 							savePokemonInTeam(selecshon);
 						} else{
 							correctName=false;
-							tempPkmn=null;
 						}
 					}catch(InputMismatchException e){
 						correctName=false;
@@ -289,6 +255,8 @@ public class PokemonBattleSim{
 	//------misc variables for funsies---//
 	static int numbahOfTurns=0;
 	static int highestDamage=0;
+	static int totalPlayerDamage=0;
+	static int totalCPUDamage=0;
 	static String highestDamageName="";
 
 	//----------POKEMON BATTLE METHODS-------------//
@@ -575,6 +543,8 @@ public class PokemonBattleSim{
 				saveHighestDmg(playerMons[playerMonActive].name, trueDmg);
 			}
 			
+			totalPlayerDamage+=trueDmg;
+
 			if(getSmackedBich>cpuMons[cpuMonActive].currentHP){
 				getSmackedBich=cpuMons[cpuMonActive].currentHP;
 			}
@@ -730,9 +700,11 @@ public class PokemonBattleSim{
 				getSmackedBich=trueDmg;
 				saveHighestDmg(cpuMons[cpuMonActive].name, trueDmg);
 			}
+
+			totalCPUDamage+=trueDmg;
 			
 			if(getSmackedBich>playerMons[playerMonActive].currentHP){
-					getSmackedBich=playerMons[playerMonActive].currentHP;
+				getSmackedBich=playerMons[playerMonActive].currentHP;
 			}
 
 			clear();
@@ -822,9 +794,23 @@ public class PokemonBattleSim{
 		//run a check before calling this method
 		prevCpuMove="";
 		int switching=0;
-		do{
-			switching=rng.nextInt(cpuMons.length);
-		}while(checkSwitchIn(switching, cpuMonActive, cpuMons) || cpuMons[switching].currentHP==0);
+		//try to find a mon in cpu team with advantage over the active player pokemon
+		int advantageousBoi=cpuMonActive;
+		for(int i=0;i<playerMons.length;i++){
+			if(i!=cpuMonActive && cpuMons[i].currentHP>0){
+				String typ = cpuMons[i].type;
+				if(playerMons[playerMonActive].isWeakToType(typ)){
+					advantageousBoi=i;
+				}
+			}
+		}
+		if(advantageousBoi!=cpuMonActive){//successfully found mon
+			switching=advantageousBoi;
+		}else{
+			do{
+				switching=rng.nextInt(cpuMons.length);
+			}while(checkSwitchIn(switching, cpuMonActive, cpuMons) || cpuMons[switching].currentHP==0);
+		}
 		clear();
 		printBattleHUDThing();
 		System.out.println(cpuMons[cpuMonActive].name+" retreated!");
@@ -1325,7 +1311,13 @@ public class PokemonBattleSim{
 			}
 		}
 		cpuJustSwitched=false;
-		prevCpuMove=cpuMons[cpuMonActive].moveset[0][rand];
+		if(isMoveEffective(rand,cpuMons[cpuMonActive],playerMons[playerMonActive])==1){
+			//if superefective, dont register as prev used move
+			prevCpuMove="";
+		}else{
+			prevCpuMove=cpuMons[cpuMonActive].moveset[0][rand];
+		}
+
 		return rand;
 	}
 	//so many functions aaggfhghfhgfhgfjgfg
@@ -2405,6 +2397,44 @@ public class PokemonBattleSim{
 		 */
 	}
 
+	private static void printSelectedMonInfo(String selecshon) throws IOException, InterruptedException{
+		clear();
+		System.out.println("Selected Pokemon: ");
+		
+		Pokemon tempPkmn = new Pokemon(selecshon);
+		System.out.println("Name:    "+tempPkmn.name);
+		System.out.println("Type:    "+tempPkmn.type);
+		System.out.println("HP:      "+tempPkmn.baseHP);
+		System.out.println("Attack:  "+tempPkmn.baseATK);
+		System.out.println("Defense: "+tempPkmn.baseDEF);
+		System.out.println("Speed:   "+tempPkmn.baseSPEED);
+		System.out.print("Weak to: ");
+		
+		for(int i=0;i<tempPkmn.weakTo.length;i++){
+			System.out.print(tempPkmn.weakTo[i]);
+			if(i!=tempPkmn.weakTo.length-1){
+				System.out.print(", ");
+			}
+		}
+		System.out.println("");
+		System.out.print("Resists: ");
+			
+		for(int i=0;i<tempPkmn.resists.length;i++){
+			System.out.print(tempPkmn.resists[i]);
+			if(i!=tempPkmn.resists.length-1){
+				System.out.print(", ");
+			}
+		}
+		System.out.println("");
+					
+		System.out.println("Moveset: ");
+		for(int i=0;i<4;i++){
+			System.out.println("        "+(i+1)+":"+tempPkmn.moveset[0][i]+" ("+tempPkmn.moveset[1][i]+")");
+		}
+		int totalstats =tempPkmn.baseATK+tempPkmn.baseDEF+tempPkmn.baseHP+tempPkmn.baseSPEED;
+		System.out.println("Total stat points: "+totalstats);
+	}
+
 	private static void printMonInfo()throws IOException, InterruptedException{
 		//this just a copypaste
 		clear();
@@ -2695,6 +2725,9 @@ public class PokemonBattleSim{
 		wair(s,1);
 		System.out.println("Highest damage dealt: "+highestDamage+", by: "+highestDamageName);
 		wair(s,1);
+		System.out.println("Damage done by you: "+totalPlayerDamage);
+		wair(s,1);
+		System.out.println("Damage done by "+cpuName+": "+totalCPUDamage);
 	}
 
 	//------------OTHER METHODS---------------//
@@ -2775,7 +2808,8 @@ public class PokemonBattleSim{
 		String[] names = new String[]{
 			"Gary","Cyn","Sunna","Mario","Hop","Niko","Blue","Red","Green","Peter","N","Cebollin","CPU",
 			"Nokia","Moya","Evie","Luigi","Noodle","Joel","Oatmeal","Nestle","Panda","Pingu","Gaby",
-			"Maigol","Luci","Java","TWM","Sunflower","Nina","Lola","Obama","Guide","Steve","Freeman"
+			"Maigol","Luci","Java","TWM","Sunflower","Nina","Lola","Obama","Guide","Steve","Freeman","Goku",
+			"Cocuy","Socks","Bacon","Tocino","Arepa"
 		};
 
 		return names[rng.nextInt(names.length)];
