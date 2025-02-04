@@ -1879,19 +1879,19 @@ public class PokemonBattleSim{
 		//------try to free from poison/burn/paralysis------//
 		// player
 		if(playerMons[playerMonActive].isBurning && plyCanFreeFromAilment[0]){
-			if(rng.nextInt(10)>7){
+			if(rng.nextInt(11)>7){
 				playerMons[playerMonActive].isBurning=false;
 				System.out.println(playerMons[playerMonActive].name+" freed from burn!");
 				wair(s, 2);
 			}
 		}if(playerMons[playerMonActive].isPoisoned && plyCanFreeFromAilment[1]){
-			if(rng.nextInt(10)>7){
+			if(rng.nextInt(11)>7){
 				playerMons[playerMonActive].isPoisoned=false;
 				System.out.println(playerMons[playerMonActive].name+" cured itself from poison!");
 				wair(s, 2);
 			}
 		}if(playerMons[playerMonActive].isParalized && plyCanFreeFromAilment[2]){
-			if(rng.nextInt(10)>6){
+			if(rng.nextInt(11)>6){
 				playerMons[playerMonActive].isParalized=false;
 				System.out.println(playerMons[playerMonActive].name+" freed from paralysis!");
 				wair(s, 2);

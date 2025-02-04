@@ -3,6 +3,8 @@ An epic and totally awesome battle simulator for the terminal/cmd
 
 too lazy to make documentation on the code itself so here's the game mechanics
 
+##
+
 
 ## Pokemon's stats and attributes
 
@@ -37,6 +39,34 @@ Critical hit chance is dependant on the Pokemon's SPEED stat. Upon successful, d
 **Formula:** CRIT CHANCE = (current SPEED / 806) * 100.
 
 **NOTE:** Some moves (Like Night Slash) have increased critical hit chance. Others (Like Flower Trick) have guaranteed critical hits.
+
+### Status Ailments
+Status Ailments affect your Mon in various ways (yay)
+#### Burned
+Burning status can be inflicted by a few Fire Type Moves
+
+Burning deals damage equal to 1/9 of Base HP
+
+Chance to free from Burn: 25%
+
+#### Poisoned
+Poisoned status can be inflicted by some Poison type moves!!
+
+Poison deals damage equal to 1/10 of Base HP
+
+Chance to free from Poison: 25%
+
+#### Paralized
+Paralized status can be inflicted by most Electric type moves.
+
+Paralized status has a 50% chance to paralyze the Pokemon and prevent it from using a move during that turn. it also halves the SPEED stat.
+
+Chance to free from Paralysis: 30%
+#### Healing over time
+
+Healing over time will heal a bit of the Pokemon's HP at the end of each turn. it can only be gained with Status Moves.
+
+HoT cures the Pokemon's HP by 1/16 of its Base HP. It will last until the Pokemon faints or its switched out.
 
 ### Base and Current stats:
 **CURRENT STAT:** A Mon's current stats are their total stats. These get affected by buffs, debuffs, status ailments and so on. They get reset back to base when the Pokemon is switched out.
