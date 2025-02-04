@@ -34,7 +34,8 @@ public class PokemonBattleSim{
 		"Scizor","Mew","Alakazam",           "Froslass","Baxcalibur","Hydreigon",   "Zoroark","Solrock","Lunatone",
 		//-----page 3----//
 		"Delphox","Gyarados","Sceptile",     "Typhlosion","Greninja","Leafeon",     "Donphan","Corviknight","Umbreon",
-		"Jolteon","Espeon","Eevee",          "Arceus","Citrus","Toxicroak"};
+		"Jolteon","Espeon","Eevee",          "Arceus","Citrus","Toxicroak",         "Cyclizar","Garchomp","Gholdengo",
+		"Galvantula","Ceruledge","Chandelure","Flamigo","Zamazenta","Zacian",       "Magearna"};
 		
 		do{
 			clear();
@@ -610,7 +611,7 @@ public class PokemonBattleSim{
 				}else{
 					System.out.print("Damaged "+cpuMons[cpuMonActive].name+" for "+dmgVector[i]+" points");
 					if(i==numbHits-1){
-						System.out.print(" ("+(dmgToPrint*(i+1))+")!");
+						System.out.print(" ("+(trueDmg)+")!");
 					}
 					System.out.println();
 				}
@@ -768,7 +769,7 @@ public class PokemonBattleSim{
 				}else{
 					System.out.print("Damaged "+playerMons[playerMonActive].name+" for "+dmgVector[i]+" points");
 					if(i==numbHits-1){
-						System.out.print(" ("+(dmgToPrint*(i+1))+")!");
+						System.out.print(" ("+(trueDmg)+")!");
 					}
 					System.out.println();
 				}
@@ -1073,6 +1074,12 @@ public class PokemonBattleSim{
 					if(monlist[i].currentHP>0){
 						atk1+=baseatk1/reduce;
 					}
+				}
+			break;
+			case "MegaEvolutionHater":
+				String opMonName=pkmn2.name;
+				if(opMonName.contains("Mega-")){
+					atk1*=2;
 				}
 			break;
 		}
@@ -1561,6 +1568,7 @@ public class PokemonBattleSim{
 			case "Iron Defense": ret="buffdef"; break;
 			case "Amnesia": ret="buffdef2"; break;
 			case "Defend Order": ret="buffdef2"; break;
+			case "Acid Armor": ret="buffdef2"; break;
 			case "Toxic": ret="poison"; break;
 			case "Poison Powder": ret="poison"; break;
 			case "Will-O-Wisp": ret="burn"; break;
@@ -1572,6 +1580,8 @@ public class PokemonBattleSim{
 			case "Jungle Healing":ret="healhalf"; break;
 			case "Thunder Wave": ret="paralyze"; break;
 			case "Last Resort": ret="lr"; break;
+			case "Shift Gear": ret="buffatk&speed"; break;
+			case "String Shot": ret="debuffspeed2"; break;
 		}
 		return ret;
 	}
@@ -1615,6 +1625,12 @@ public class PokemonBattleSim{
 					cpuCanFreeFromAilment[2]=false;
 					wair(s,1);
 				}
+			break;
+			case "paralyze":
+				cpuMons[cpuMonActive].isParalized=true;
+				System.out.println(cpuMons[cpuMonActive].name+" is paralyzed! it may not move!");
+				cpuCanFreeFromAilment[2]=false;
+				wair(s,1);
 			break;
 			case "rngDebuffSpeed":
 				if(rng.nextInt(10)>5){
@@ -1724,6 +1740,12 @@ public class PokemonBattleSim{
 					plyCanFreeFromAilment[2]=false;
 					wair(s,1);
 				}
+			break;
+			case "paralyze":
+				playerMons[playerMonActive].isParalized=true;
+				System.out.println(playerMons[playerMonActive].name+" is paralyzed! it may not move!");
+				plyCanFreeFromAilment[2]=false;
+				wair(s,1);
 			break;
 			case "rngDebuffSpeed":
 				if(rng.nextInt(10)>5){
@@ -1879,19 +1901,19 @@ public class PokemonBattleSim{
 		//------try to free from poison/burn/paralysis------//
 		// player
 		if(playerMons[playerMonActive].isBurning && plyCanFreeFromAilment[0]){
-			if(rng.nextInt(11)>7){
+			if(rng.nextInt(10)>6){
 				playerMons[playerMonActive].isBurning=false;
 				System.out.println(playerMons[playerMonActive].name+" freed from burn!");
 				wair(s, 2);
 			}
 		}if(playerMons[playerMonActive].isPoisoned && plyCanFreeFromAilment[1]){
-			if(rng.nextInt(11)>7){
+			if(rng.nextInt(10)>6){
 				playerMons[playerMonActive].isPoisoned=false;
 				System.out.println(playerMons[playerMonActive].name+" cured itself from poison!");
 				wair(s, 2);
 			}
 		}if(playerMons[playerMonActive].isParalized && plyCanFreeFromAilment[2]){
-			if(rng.nextInt(11)>6){
+			if(rng.nextInt(10)>5){
 				playerMons[playerMonActive].isParalized=false;
 				System.out.println(playerMons[playerMonActive].name+" freed from paralysis!");
 				wair(s, 2);
@@ -3000,7 +3022,7 @@ class Pokemon{
 		String[] list = new String[]{//list of mon that can megaevolve
 			"Absol","Lopunny","Venusaur","Charizard","Blastoise","Ninetales","Mewtwo",
 			"Aggron","Blaziken","Gengar","Lucario", "Cinccino", "Audino","Alakazam","Pidgeot", "Heracross",
-			"Gardevoir","Mawile","Sceptile","Eevee","Citrus","Gyarados",
+			"Gardevoir","Mawile","Sceptile","Eevee","Citrus","Gyarados","Garchomp","Zamazenta","Zacian"
 		};
 
 		for(int i=0;i<list.length;i++){
@@ -3155,6 +3177,28 @@ class Pokemon{
 				this.type="Dragon";
 				this.moveset[0][1]="Draco Meteor";
 			break;
+			case "Garchomp":
+				addHP=30;
+				addAtk=10;
+				addDef=40;
+				addSpeed=-20;
+			break;
+			case "Zamazenta":
+				addHP=30;
+				addAtk=15;
+				addDef=40;
+				addSpeed=-10;
+				this.type="Steel";
+				this.moveset[0][2]="Behemoth Bash";
+			break;
+			case "Zacian":
+				addHP=0;
+				addAtk=35;
+				addDef=-40;
+				addSpeed=10;
+				this.type="Steel";
+				this.moveset[0][2]="Behemoth Blade";
+			break;
 			case "Eevee":
 				String listVee[] = new String[]{"Vaporeon","Jolteon","Flareon","Espeon","Umbreon","Leafeon","Glaceon","Sylveon"};
 				Random rng = new Random(); 
@@ -3256,7 +3300,8 @@ class Pokemon{
 		
 		if(movename.equals("Draining Kiss") || movename.equals("Life Leech")
 			|| movename.equals("Poison Leech") || movename.equals("Giga Drain")
-			|| movename.equals("Drain Punch") || movename.equals("Excite")){
+			|| movename.equals("Drain Punch") || movename.equals("Excite")
+			|| movename.equals("Bitter Blade")){
 			return "lifedrain";
 		}if(movename.equals("Flamethrower") || movename.equals("Scald")
 			|| movename.equals("Fire Blast")){
@@ -3277,12 +3322,13 @@ class Pokemon{
 		}if(movename.equals("Toxic Spikes")|| movename.equals("Poison Sting")){
 			return "rngPoison";
 		}if(movename.equals("Night Slash")||movename.equals("Attack Order")||movename.equals("Leaf Blade")
-			|| movename.equals("Psycho Cut")){
+			|| movename.equals("Psycho Cut") || movename.equals("Stone Edge") || movename.equals("Shadow Claw")){
 			return "highcritrate";
 		}if(movename.equals("Overheat") || movename.equals("Superpower")
-			|| movename.equals("Draco Meteor")|| movename.equals("Solar Beam")){
+			|| movename.equals("Draco Meteor")|| movename.equals("Solar Beam")
+			|| movename.equals("Fleur Cannon")){
 			return "overclock"; //idk what to name these
-		}if(movename.equals("Super Fang")){
+		}if(movename.equals("Super Fang") || movename.equals("Sacred Sword")){
 			return "ignoredef";
 		}if(movename.equals("Hyper Beam")||movename.equals("Giga Impact")
 			|| movename.equals("Plasma Fists")){
@@ -3294,7 +3340,7 @@ class Pokemon{
 		}if(movename.equals("Brave Bird")){
 			return "recoil";
 		}if(movename.equals("Pin Missile") || movename.equals("Water Shuriken") || movename.equals("Swift")
-			|| movename.equals("Powerful Bloom")){
+			|| movename.equals("Powerful Bloom") || movename.equals("Make it Rain")){
 			return "rngMultihit";
 		}if(movename.equals("Judgement")){
 			return "supEffective"; //soup
@@ -3310,6 +3356,10 @@ class Pokemon{
 			return "reverseGroupB";
 		}if(movename.equals("Revenge")){
 			return "avenger";
+		}if(movename.equals("Zap Cannon")){
+			return "paralyze";
+		}if(movename.equals("Behemoth Blade") || movename.equals("Behemoth Bash")){
+			return "MegaEvolutionHater";
 		}
 		
 		//----type only----//
@@ -4069,6 +4119,86 @@ class Pokemon{
 				type="Poison";
 				moveset = new String[][]{{"Group Beating","Venoshock","Drain Punch","Sword Dance"},{"","","",""}};
 			break;
+			case "Cyclizar":
+				baseHP=250;
+				baseATK=90;
+				baseDEF=60;
+				baseSPEED=125;
+				type="Dragon";
+				moveset = new String[][]{{"Dragon Tail","X-Scissor","Crunch","Shift Gear"},{"","","",""}};
+			break;
+			case "Garchomp":
+				baseHP=312;
+				baseATK=130;
+				baseDEF=95;
+				baseSPEED=90;
+				type="Dragon";
+				moveset = new String[][]{{"Dragon Rush","Earthquake","Stone Edge","Sword Dance"},{"","","",""}};
+			break;
+			case "Gholdengo":
+				baseHP=230;
+				baseATK=133;
+				baseDEF=90;
+				baseSPEED=70;
+				type="Steel";
+				moveset = new String[][]{{"Make it Rain","Shadow Ball","Psychic","Thunder Wave"},{"","","",""}};
+			break;
+			case "Galvantula":
+				baseHP=230;
+				baseATK=100;
+				baseDEF=90;
+				baseSPEED=100;
+				type="Electric";
+				moveset = new String[][]{{"Bug Buzz","Energy Ball","Thunder Wave","String Shot"},{"","","",""}};
+			break;
+			case "Ceruledge":
+				baseHP=225;
+				baseATK=130;
+				baseDEF=120;
+				baseSPEED=86;
+				type="Ghost";
+				moveset = new String[][]{{"Shadow Claw","Bitter Blade","X-Scissor","Sword Dance"},{"","","",""}};
+			break;
+			case "Chandelure":
+				baseHP=200;
+				baseATK=155;
+				baseDEF=80;
+				baseSPEED=80;
+				type="Ghost";
+				moveset = new String[][]{{"Hex","Overheat","Trailblaze","Acid Armor"},{"","","",""}};
+			break;
+			case "Flamigo":
+				baseHP=260;
+				baseATK=115;
+				baseDEF=40;
+				baseSPEED=90;
+				type="Flying";
+				moveset = new String[][]{{"Brave Bird","Double Kick","Cyclone","Roost"},{"","","",""}};
+			break;
+			case "Zamazenta":
+				baseHP=290;
+				baseATK=120;
+				baseDEF=115;
+				baseSPEED=110;
+				type="Fighting";									//behemoth bash
+				moveset = new String[][]{{"Close Combat","Solar Beam","Iron Head","Iron Defense"},{"","","",""}};
+			break;
+			case "Zacian":
+				baseHP=280;
+				baseATK=130;
+				baseDEF=80;
+				baseSPEED=120;
+				type="Fairy";										//behemoth blade
+				moveset = new String[][]{{"Sacred Sword","Play Rough","Iron Head","Sword Dance"},{"","","",""}};
+			break;
+			case "Magearna":
+				baseHP=275;
+				baseATK=130;
+				baseDEF=105;
+				baseSPEED=70;
+				type="Steel";
+				moveset = new String[][]{{"Fleur Cannon","Zap Cannon","Flash Cannon","Shift Gear"},{"","","",""}};
+			break;
 		}
 		
 		setTypesWnR();
@@ -4407,25 +4537,26 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		String[] table = {};
 		String[] moveTableStatus = new String[]{"Poison Powder","Will-O-Wisp","Sword Dance","Roar","Hone Claws","Calm Mind",
 		"Iron Defense","Toxic","Dragon Dance","Growl","Charm","Bulk Up","Heal Pulse","Charge","Roost","Extreme Speed","Amnesia",
-		"Aqua Ring","Impulse","Jungle Healing","Fake Tears","Scary Face","Agility","Defend Order","Work Up","Thunder Wave","Last Resort"};
+		"Aqua Ring","Impulse","Jungle Healing","Fake Tears","Scary Face","Agility","Defend Order","Work Up","Thunder Wave","Last Resort",
+		"Shift Gear","String Shot","Acid Armor"};
 		String[] moveTableAtkNormal = new String[]{"Quick Attack","Hyper Beam","Giga Impact","Super Fang","Facade","Swift","Judgement","Ascension","Group Beating"};
-		String[] moveTableAtkFire = new String[]{"Flamethrower","Flame Charge","Overheat","Fire Blast","Mystical Fire"};
+		String[] moveTableAtkFire = new String[]{"Flamethrower","Flame Charge","Overheat","Fire Blast","Mystical Fire","Bitter Blade"};
 		String[] moveTableAtkWater = new String[]{"Hydro Pump","Hydro Cannon","Surf","Whirlpool","Scald","Water Shuriken"};
-		String[] moveTableAtkElectric = new String[]{"Thunder","Thunder Fang","Electroweb","Overdrive","Plasma Fists"};
+		String[] moveTableAtkElectric = new String[]{"Thunder","Thunder Fang","Electroweb","Overdrive","Plasma Fists","Zap Cannon"};
 		String[] moveTableAtkGrass = new String[]{"Vine Whip","Giga Drain","Flower Trick","Trailblaze","Razor Leaf","Grass Knot","Wood Hammer","Leaf Blade","Solar Beam","Energy Ball","Powerful Bloom"};
 		String[] moveTableAtkIce = new String[]{"Ice Beam","Ice Fang","Freeze Dry","Blizzard","Ice Slash"};
-		String[] moveTableAtkFighting = new String[]{"Aura Sphere","Close Combat","Rock Smash","Body Slam","Double Kick","Hammer Arm","Drain Punch","HJ Kick","Superpower","Flying Press","Focus Blast","Body Press"};
+		String[] moveTableAtkFighting = new String[]{"Aura Sphere","Close Combat","Rock Smash","Body Slam","Double Kick","Hammer Arm","Drain Punch","HJ Kick","Superpower","Flying Press","Focus Blast","Body Press","Sacred Sword"};
 		String[] moveTableAtkPoison = new String[]{"Poison Leech","Toxic Spikes","Venoshock","Poison Sting"};
 		String[] moveTableAtkGround = new String[]{"Earthquake","Mud Slap","Earth Power","X","Excite"};
 		String[] moveTableAtkFlying = new String[]{"Wing Attack","Gust","Aerial Ace","Dual Wingbeat","Air Slash","Brave Bird","Cyclone"};
 		String[] moveTableAtkPsychic = new String[]{"Psystrike","Psychic","Dream Eater","Psybeam","Psycho Cut","Psyshock"};
 		String[] moveTableAtkBug = new String[]{"Bug Bite","Life Leech","Bug Buzz","Attack Order","Pin Missile","X-Scissor"};
 		String[] moveTableAtkRock = new String[]{"Rock Throw","Head Smash","Stone Edge"};
-		String[] moveTableAtkGhost = new String[]{"Shadow Ball","Hex","Shadow Sneak"};
+		String[] moveTableAtkGhost = new String[]{"Shadow Ball","Hex","Shadow Sneak","Shadow Claw"};
 		String[] moveTableAtkDragon = new String[]{"Dragon Breath","Dragon Rush","Dragon Pulse","Dragon Tail","Draco Meteor"};
 		String[] moveTableAtkDark = new String[]{"Pursuit","Bite","Sucker Punch","Crunch","Night Slash"};
-		String[] moveTableAtkSteel = new String[]{"Metal Claw","Iron Tail","Iron Head","Flash Cannon","Iron Hammer","Bullet Punch","Steel Wing"};
-		String[] moveTableAtkFairy = new String[]{"Moonblast","Play Rough","Draining Kiss","Halo"};
+		String[] moveTableAtkSteel = new String[]{"Metal Claw","Iron Tail","Iron Head","Flash Cannon","Iron Hammer","Bullet Punch","Steel Wing","Make it Rain","Behemoth Blade","Behemoth Bash"};
+		String[] moveTableAtkFairy = new String[]{"Moonblast","Play Rough","Draining Kiss","Halo","Fleur Cannon"};
 
 		switch (typ) {
 			case "status":table=moveTableStatus;break;
