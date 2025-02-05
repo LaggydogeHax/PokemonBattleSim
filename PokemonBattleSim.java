@@ -16,13 +16,9 @@ public class PokemonBattleSim{
 	static Random rng = new Random();
 	static Scanner tcl = new Scanner(System.in); //STATIC SCANNER, LES GOOOO
 	static String cpuName = getNewCPUName(); // random cpu name
-
-	public static void main(String[] args)throws IOException, InterruptedException{
-		String selecshon="";
-		boolean correctName=false;
-		boolean errBypass=false; //this is here so the invalid msg can be skipped o_o
-		int page=1,lastPage=3;
-		final String[] pkmnNamesVector = new String[]{
+	
+	private static String[] getPkmnNamesVector(){
+		String[] pkmnNamesVector = new String[]{
 		"Venusaur","Blastoise","Charizard",  "Meowscarada","Ninetales","Empoleon",  "Raichu","Mewtwo","Gengar",
 		"Dragonite","Absol","Gardevoir",     "Glaceon","Luxray","Lucario",          "Duraludon","Mismagius","Golisopod",
 		"Heracross","Rampardos","Lycanroc",  "Aurorus","Dugtrio","Sandlash",        "Arbok","Sneasler","Pidgeot",
@@ -37,11 +33,21 @@ public class PokemonBattleSim{
 		"Jolteon","Espeon","Eevee",          "Arceus","Citrus","Toxicroak",         "Cyclizar","Garchomp","Gholdengo",
 		"Galvantula","Ceruledge","Chandelure","Flamigo","Zamazenta","Zacian",       "Magearna"};
 		
+		return pkmnNamesVector;
+	}
+
+	public static void main(String[] args)throws IOException, InterruptedException{
+		String selecshon="";
+		boolean correctName=false;
+		boolean errBypass=false; //this is here so the invalid msg can be skipped o_o
+		int page=1,lastPage=3;
+		String[] pkmnNamesVector = getPkmnNamesVector();
+		
 		do{
 			clear();
 			selecshon="";
 			
-			System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4]"+Clr.R);
+			System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4 PRERELEASE1]"+Clr.R);
 			System.out.println("Choose a Pokemon!!");
 			System.out.println("Type its name to select it");
 			System.out.println("Type a number to view that page");
@@ -60,52 +66,16 @@ public class PokemonBattleSim{
 			selecshon=tcl.nextLine();
 
 			try{//auto capitalize
-				String autoCap1=selecshon.charAt(0)+"";
-				String autoCap2="";
-				String autoCap3="";
-
-				autoCap1=autoCap1.toUpperCase();
-				for(int i=1;i<selecshon.length();i++){
-					autoCap2+=selecshon.charAt(i); // remove first letter
-				}
-				autoCap2=autoCap2.toLowerCase();
-				for(int i=0;i<autoCap2.length();i++){
-					if(i!=0 && (autoCap2.charAt(i-1))==' '){//if previus char was a space, capitalize char
-						char upp = Character.toUpperCase(autoCap2.charAt(i));
-						autoCap3+=upp;//all thanks to the paradox mon -_-
-					}else{
-						autoCap3+=autoCap2.charAt(i);
-					}
-				}
-				selecshon=autoCap1+autoCap3;
-
-				if(selecshon.equals("Mew")){// xd
-					correctName=true;
-				}else{
-					if(selecshon.length()>3){
-						for(int i=0; i<pkmnNamesVector.length;i++){
-							if(pkmnNamesVector[i].contains(selecshon)){
-								correctName=true;
-								selecshon=pkmnNamesVector[i];
-								break;
-							} else{
-								correctName=false;
-							}
-						}
-					}else{
-						correctName=false;
-					}
-				}
 				
+				selecshon=autoCapitalizeMonName(selecshon);
+				correctName=isNameCorrect(selecshon);
 
 				if(selecshon.equals("Rng")){
 					correctName=true;
-				}
-				if(selecshon.equals("Custom")){
+				}if(selecshon.equals("Custom")){
 					correctName=true;
-				}if(selecshon.equals("Help") || selecshon.equals("6mon") || selecshon.equals("3mon")){
-					errBypass=true;
-				}if(selecshon.equals("Cpu")){
+				}if(selecshon.equals("Help") || selecshon.equals("6mon") || selecshon.equals("3mon")
+					|| selecshon.equals("Cpu") || selecshon.equals("Reset")){
 					errBypass=true;
 				}
 				
@@ -140,17 +110,41 @@ public class PokemonBattleSim{
 				if(selecshon.equals("Help")){
 					printHelpMMScreen();
 				}if(selecshon.equals("6mon")){
+					Pokemon[] mon1 = new Pokemon[6];
+					Pokemon[] mon2 = new Pokemon[6];
+					for(int i=0;i<playerMons.length;i++){
+						mon1[i]=playerMons[i];
+						mon2[i]=cpuMons[i];
+					}
 					playerMons = new Pokemon[6];
 					cpuMons = new Pokemon[6];
+					for(int i=0;i<playerMons.length;i++){
+						playerMons[i]=mon1[i];
+						cpuMons[i]=mon2[i];
+					}
 					System.out.println("Team size changed to 6 Pokemon");
 					wair(s,2);
 				}if(selecshon.equals("3mon")){
+					Pokemon[] mon1 = new Pokemon[3];
+					Pokemon[] mon2 = new Pokemon[3];
+					for(int i=0;i<2;i++){
+						mon1[i]=playerMons[i];
+						mon2[i]=cpuMons[i];
+					}
 					playerMons = new Pokemon[3];
 					cpuMons = new Pokemon[3];
+					for(int i=0;i<2;i++){
+						playerMons[i]=mon1[i];
+						cpuMons[i]=mon2[i];
+					}
 					System.out.println("Team size changed to 3 Pokemon");
 					wair(s,2);
 				}if(selecshon.equals("Cpu")){
-					cpuTeamManager();
+					cpuTeamManager(lastPage);
+				}if(selecshon.equals("Reset")){
+					playerMons= new Pokemon[playerMons.length];
+					System.out.println("Player Team has been reset.");
+					wair(s,2);
 				}
 				errBypass=false;
 			}
@@ -523,7 +517,7 @@ public class PokemonBattleSim{
 			System.out.println("Congratulations!!!!!!!!!!");
 			wair(s,1);
 			printMiscStats();
-			wair(s,5);
+			wair(s,3);
 		}
 		System.out.println("");
 		System.out.println("Press Enter to exit");
@@ -1015,7 +1009,7 @@ public class PokemonBattleSim{
 			break;
 			case "plus2hit":
 				atk1-=atk1/2;
-				atk1-=atk1/4;
+				atk1-=atk1/5;
 				doEmStab/=2;
 				nHits+=2;
 			break;
@@ -1190,7 +1184,7 @@ public class PokemonBattleSim{
 	private static int cpuAIHandler(){//still!! no intelligence!!
 		Pokemon myMon=playerMons[playerMonActive];
 		Pokemon cpuMon=cpuMons[cpuMonActive];
-		boolean shoulduse1=true,shoulduse2=true,shoulduse3=true,shoulduse4=true;
+		boolean[] shoulduse = {true,true,true,true};
 		String[] monsWeaknesses = myMon.weakTo;
 		String[] monsResistances = myMon.resists;
 		int rand=0;
@@ -1202,6 +1196,13 @@ public class PokemonBattleSim{
 				if(countAliveMonInTeam(cpuMons)>1){
 					int shouldswitch=rng.nextInt(100);
 					if(shouldswitch>69){
+						if(cpuMon.name.contains("Mega-")){
+							shouldswitch=rng.nextInt(100);
+							if(shouldswitch>69){
+								cpuJustSwitched=true;
+								return 69; //less likely to switch if mega evolved
+							}
+						}
 						cpuJustSwitched=true;
 						return 69; //30% chance to switch
 					}
@@ -1210,7 +1211,7 @@ public class PokemonBattleSim{
 		}
 		
 		//use item?
-		if(cpuMons[cpuMonActive].items.length>1){
+		if(cpuMons[cpuMonActive].items.length>1 && myMon.currentHP>=100){
 			//mega evolve?
 			if(cpuMons[cpuMonActive].canMegaEvolve() && cpuMon.currentHP>(cpuMon.baseHP/2) && cpuCanMegaEvolve){
 				if(rng.nextInt(100)>59){
@@ -1264,12 +1265,7 @@ public class PokemonBattleSim{
 			for(int i=0;i<4;i++){
 				for(int j=0;j<monsWeaknesses.length;j++){
 					if(cpuMon.moveset[1][i].contains(monsWeaknesses[j])){
-						switch(i){
-							case 0: shoulduse1=true; break;
-							case 1: shoulduse2=true; break;
-							case 2: shoulduse3=true; break;
-							case 3: shoulduse4=true; break;
-						}
+						shoulduse[i]=true;
 					}
 				}
 			}
@@ -1278,25 +1274,16 @@ public class PokemonBattleSim{
 			for(int i=0;i<4;i++){
 				for(int j=0;j<monsResistances.length;j++){
 					if(cpuMon.moveset[1][i].contains(monsResistances[j])){
-						switch(i){
-							case 0: shoulduse1=false; break;
-							case 1: shoulduse2=false; break;
-							case 2: shoulduse3=false; break;
-							case 3: shoulduse4=false; break;
-						}
+						shoulduse[i]=false;
 					}
 				}
 			}
 			//count nonUsables xd
 			int nonUsables=0;
-			if(!shoulduse1){
-				nonUsables++;
-			}if(!shoulduse2){
-				nonUsables++;
-			}if(!shoulduse3){
-				nonUsables++;
-			}if(!shoulduse4){
-				nonUsables++;
+			for(int i=0;i<shoulduse.length;i++){
+				if(shoulduse[i]==false){
+					nonUsables++;
+				}
 			}
 	
 			if(nonUsables==4){
@@ -1307,14 +1294,16 @@ public class PokemonBattleSim{
 				}
 			}else{
 				if(cpuMon.countAttackingMoves()==nonUsables){ //all attacking moves are not effective
-					shoulduse1=true; shoulduse2=true; shoulduse3=true; shoulduse4=true;
+					for(int i=0;i<shoulduse.length;i++){
+						shoulduse[i]=true;
+					}
 				}
 				do{
 					rand=rng.nextInt(4);
 					if(cpuMons[cpuMonActive].moveset[0][rand].equals(prevCpuMove)){
 						rand=rng.nextInt(4); //roll again ouo
 					}
-				}while(!epicCpuAiRandomMoveCheckerThing(shoulduse1, shoulduse2, shoulduse3, shoulduse4, rand));
+				}while(!epicCpuAiRandomMoveCheckerThing(shoulduse,rand));
 			}
 		}
 		cpuJustSwitched=false;
@@ -1330,18 +1319,12 @@ public class PokemonBattleSim{
 	//so many functions aaggfhghfhgfhgfjgfg
 	//(^bro also made another fuction just for this)
 	
-	private static boolean epicCpuAiRandomMoveCheckerThing(boolean nu1,boolean nu2,boolean nu3,boolean nu4, int num){//long ahh parameter list
+	private static boolean epicCpuAiRandomMoveCheckerThing(boolean[] nu, int num){
 		boolean ret=false;
-		if(num==0 && nu1==true){
-			ret=true;
-		}if(num==1 && nu2==true){
-			ret=true;
-		}if(num==2 && nu3==true){
-			ret=true;
-		}if(num==3 && nu4==true){
+		
+		if(nu[num]){
 			ret=true;
 		}
-
 		if(!moveIsAnAttack(cpuMons[cpuMonActive].moveset[1][num])){
 			ret=true;
 		}
@@ -2068,6 +2051,12 @@ public class PokemonBattleSim{
 				playerMons[playerMonActive].isBurning=true;
 				playerMons[playerMonActive].strike=true;
 				playerMons[playerMonActive].permaBurn=true;
+				playerMons[playerMonActive].decreaseStat("DEF");
+				playerMons[playerMonActive].decreaseStat("SPEED");
+				System.out.println(playerMons[playerMonActive].name+"'s DEF fell!");
+				wair(s,1);
+				System.out.println(playerMons[playerMonActive].name+"'s SPEED fell!");
+				wair(s,1);
 				System.out.println(playerMons[playerMonActive].name+ " will only deal "+Clr.RED_B+"Critical hits!"+Clr.R);
 				wair(s,2);
 			break;
@@ -2150,7 +2139,7 @@ public class PokemonBattleSim{
 		}
 	}
 
-	private static void cpuTeamManager()throws IOException, InterruptedException{
+	private static void cpuTeamManager(int lastpage)throws IOException, InterruptedException{
 		int op=0;
 		do{
 			clear();
@@ -2232,7 +2221,7 @@ public class PokemonBattleSim{
 						return;
 					}if(op==2){
 						tcl.nextLine();
-						cpuTeamManagerAssignPokemon();
+						cpuTeamManagerAssignPokemon(lastpage);
 						return;
 					}
 				}catch(Exception e){
@@ -2243,7 +2232,7 @@ public class PokemonBattleSim{
 		}
 	}
 	
-	private static void cpuTeamManagerAssignPokemon()throws IOException, InterruptedException{
+	private static void cpuTeamManagerAssignPokemon(int lastpage)throws IOException, InterruptedException{
 		int op=0;
 		do{
 			clear();
@@ -2285,12 +2274,96 @@ public class PokemonBattleSim{
 				if(custm!=null){
 					saveMonInCPUTeam2(custm);
 				}
+			}if(op==1){
+				String[] namesVector=getPkmnNamesVector();
+				int page=1;
+				boolean correctName=false;
+				boolean errBypass=false;
+				do{
+					String selecshon="";
+					clear();
+					System.out.println(Clr.WHITE_B+"--[CPU TEAM MANAGER]--"+Clr.R);
+					System.out.println("Type "+Clr.MAGENTA_B+"cancel"+Clr.R+" to go back");
+					System.out.print(cpuName+ "'s team: ");
+					for(int i=0;i<cpuMons.length;i++){
+						if(cpuMons[i]==null){
+							System.out.print("[...] ");
+						}else{
+							System.out.print("["+cpuMons[i].name+"] ");
+						}
+						if(i==2 && cpuMons.length>3){
+							System.out.println("");
+							System.out.print("     ");
+						}
+					}
+					System.out.println("\n");
+					printPkmnNamesPage(namesVector,page,lastpage);
+					
+					try{
+						System.out.print(">");
+						selecshon=tcl.nextLine();
+						
+						selecshon=autoCapitalizeMonName(selecshon);
+						correctName=isNameCorrect(selecshon);
+						
+						if(selecshon.equals("Cancel")){
+							return;
+						}
+					}catch(Exception e){
+						selecshon="";
+						correctName=false;
+						errBypass=false;
+					}
+					
+					if(!correctName && !errBypass){//try page switch
+						try{
+							int selecInt=0;
+							selecInt = Integer.parseInt(selecshon);
+							if(selecInt>0 && selecInt<=lastpage){
+								page=selecInt;
+								correctName=false;
+								errBypass=true;
+								selecshon="";
+							}else{
+								selecshon="";
+								errBypass=false;
+							}
+						}catch(NumberFormatException e){
+							selecshon=""; //will throw invalid option
+							errBypass=false;
+						}
+					}
+
+					if(!correctName && !errBypass){
+						System.out.println("Invalid option, please try again");
+						wair(s,1);
+					}
+					errBypass=false;
+					if(correctName){
+						clear();
+						printSelectedMonInfo(selecshon);
+						System.out.println("");
+						System.out.println("Confirm?  [1]: Yes [2]: No");
+						try{
+							int selecshon2 = tcl.nextInt();
+							tcl.nextLine();
+					
+							if(selecshon2==1){
+								correctName=true;
+								savePokemonInCPUTeam(selecshon);
+							} else{
+								correctName=false;
+							}
+						}catch(InputMismatchException e){
+							correctName=false;
+						}
+					}
+				}while(cpuMons[cpuMons.length-1]==null);
 			}
-			
 		}while(true);
 	}
 
-	private static void saveMonInCPUTeam2(Pokemon mon){
+	private static void saveMonInCPUTeam2(Pokemon mon){ // works with custom mon :3
 		for(int i=0;i<cpuMons.length;i++){
 			if(cpuMons[i]==null){
 				cpuMons[i]=mon;
@@ -2370,6 +2443,8 @@ public class PokemonBattleSim{
 		System.out.println("RNG: fills empty slots in your team with randomly\n selected Pokemon. then starts the battle.\n");
 		System.out.println("<Number>: view selected page of Pokemon.\n you can select any Pokemon while vieweing any page.\n");
 		System.out.println("<Pokemon Name>: select a Pokemon.\n tip: you can just type the first 4 letters.\n");
+		System.out.println("RESET: Deletes all Pokemon in your team. \n");
+		System.out.println("CPU: Enter the CPU Manager menu. \n");
 		System.out.println("6mon: Changes the Pokemon Team size to 6 Pokemon. \n");
 		System.out.println("3mon: Changes the Pokemon Team size to 3 Pokemon. \n");
 		System.out.println("HELP: brings up this very cool looking screen.");
@@ -2753,6 +2828,62 @@ public class PokemonBattleSim{
 	}
 
 	//------------OTHER METHODS---------------//
+
+	static private String autoCapitalizeMonName(String selecshon){
+		String autoCap1=selecshon.charAt(0)+"";
+		String autoCap2="";
+		String autoCap3="";
+		String[] pkmnNamesVector=getPkmnNamesVector();
+		
+		autoCap1=autoCap1.toUpperCase();
+		for(int i=1;i<selecshon.length();i++){
+			autoCap2+=selecshon.charAt(i); // remove first letter
+		}
+		autoCap2=autoCap2.toLowerCase();
+		for(int i=0;i<autoCap2.length();i++){
+			if(i!=0 && (autoCap2.charAt(i-1))==' '){//if previus char was a space, capitalize char
+				char upp = Character.toUpperCase(autoCap2.charAt(i));
+				autoCap3+=upp;//all thanks to the paradox mon -_-
+			}else{
+				autoCap3+=autoCap2.charAt(i);
+			}
+		}
+		selecshon=autoCap1+autoCap3;
+
+		if(selecshon.length()>3){
+			for(int i=0; i<pkmnNamesVector.length;i++){
+				if(pkmnNamesVector[i].contains(selecshon)){
+					selecshon=pkmnNamesVector[i];
+					break;
+				}
+			}
+		}
+		
+		return selecshon;
+	}
+	
+	static private boolean isNameCorrect(String selecshon){
+		//auto capitalize
+		boolean correctName=false;
+		String[] pkmnNamesVector=getPkmnNamesVector();
+		if(selecshon.equals("Mew")){// xd
+			correctName=true;
+		}else{
+			if(selecshon.length()>3){
+				for(int i=0; i<pkmnNamesVector.length;i++){
+					if(pkmnNamesVector[i].equals(selecshon)){
+						correctName=true;
+						break;
+					} else{
+						correctName=false;
+					}
+				}
+			}else{
+				correctName=false;
+			}
+		}
+		return correctName;
+	}
 
 	static private int[] randomizeMultihitValues(int dmg, int nHits){
 		int[] dmgVector = new int[nHits];
@@ -3344,7 +3475,7 @@ class Pokemon{
 			return "rngMultihit";
 		}if(movename.equals("Judgement")){
 			return "supEffective"; //soup
-		}if(movename.equals("Ice Slash")){
+		}if(movename.equals("Ice Slash") || movename.equals("SurgingStrikes")){
 			return "plus2hit";
 		}if(movename.equals("Halo")){
 			return "plus3hit";
@@ -3649,7 +3780,7 @@ class Pokemon{
 				baseDEF=55;
 				baseSPEED=90;
 				type="Fighting";
-				moveset = new String[][]{{"Close Combat","Aerial Ace","Iron Head","Bulk Up"},{"","","",""}};
+				moveset = new String[][]{{"Close Combat","Aerial Ace","SurgingStrikes","Bulk Up"},{"","","",""}};
 			break;
 			case "Audino":
 				baseHP=420;
@@ -4541,7 +4672,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		"Shift Gear","String Shot","Acid Armor"};
 		String[] moveTableAtkNormal = new String[]{"Quick Attack","Hyper Beam","Giga Impact","Super Fang","Facade","Swift","Judgement","Ascension","Group Beating"};
 		String[] moveTableAtkFire = new String[]{"Flamethrower","Flame Charge","Overheat","Fire Blast","Mystical Fire","Bitter Blade"};
-		String[] moveTableAtkWater = new String[]{"Hydro Pump","Hydro Cannon","Surf","Whirlpool","Scald","Water Shuriken"};
+		String[] moveTableAtkWater = new String[]{"Hydro Pump","Hydro Cannon","Surf","Whirlpool","Scald","Water Shuriken","SurgingStrikes"};
 		String[] moveTableAtkElectric = new String[]{"Thunder","Thunder Fang","Electroweb","Overdrive","Plasma Fists","Zap Cannon"};
 		String[] moveTableAtkGrass = new String[]{"Vine Whip","Giga Drain","Flower Trick","Trailblaze","Razor Leaf","Grass Knot","Wood Hammer","Leaf Blade","Solar Beam","Energy Ball","Powerful Bloom"};
 		String[] moveTableAtkIce = new String[]{"Ice Beam","Ice Fang","Freeze Dry","Blizzard","Ice Slash"};
