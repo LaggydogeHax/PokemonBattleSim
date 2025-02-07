@@ -47,7 +47,7 @@ public class PokemonBattleSim{
 			clear();
 			selecshon="";
 			
-			System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4 PRERELEASE1]"+Clr.R);
+			System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4 PRERELEASE1b]"+Clr.R);
 			System.out.println("Choose a Pokemon!!");
 			System.out.println("Type its name to select it");
 			System.out.println("Type a number to view that page");
@@ -238,6 +238,7 @@ public class PokemonBattleSim{
 	//---------------------------------------------//
 
 	static int moveSelec=0;
+	static int moveSelec2=0;
 	static int battleMenuSelec=0;  //<-- quite the important variables if i say so myself
 	static int cpuMoveSelec=0;
 	static boolean cpuJustSwitched=false; //<--prevent cpu from switching twice in a row
@@ -319,6 +320,26 @@ public class PokemonBattleSim{
 				}while(moveSelec!=1 && moveSelec!=2 && moveSelec!=3 && moveSelec!=4);
 			
 				moveSelec--;
+
+				if(playerMons[playerMonActive].energyDrink){
+					do{
+						clear();
+						printBattleHUDThing();
+						System.out.println("What should "+playerMons[playerMonActive].name+" do after "+playerMons[playerMonActive].moveset[0][moveSelec]+"?");
+						System.out.println("________________________________________________");
+						printPlayerActivePkmnMoveset(plyWillMegaEvolve);
+
+						try{
+							moveSelec2=tcl.nextInt();
+						}catch(InputMismatchException e){
+							moveSelec=69;
+							tcl.nextLine();
+						}
+						
+					}while(moveSelec2!=1 && moveSelec2!=2 && moveSelec2!=3 && moveSelec2!=4);
+					moveSelec2--;
+				}
+
 			}if(battleMenuSelec==2){ //SWITCH PLAYER POKEMON
 				p1SkipTurn=true;
 				playerSwitchMon();
@@ -369,7 +390,15 @@ public class PokemonBattleSim{
 					if(cpuMons[cpuMonActive].currentHP==0){
 						cpuSkipTurn=true;
 					}
+					if(playerMons[playerMonActive].energyDrink){
+						moveSelec=moveSelec2;
+						plyerTurn();
+						if(cpuMons[cpuMonActive].currentHP==0){
+							cpuSkipTurn=true;
+						}
+					}
 				}else{ p1SkipTurn=false;}
+
 				if(!cpuSkipTurn){
 					if(cpuWillMegaEvolve && cpuCanMegaEvolve){
 						cpuCanMegaEvolve=false;
@@ -412,6 +441,13 @@ public class PokemonBattleSim{
 					p1SkipTurn=rollForParalysis(playerMons[playerMonActive]);
 					if(!p1SkipTurn){
 						plyerTurn();
+						if(playerMons[playerMonActive].energyDrink){
+							moveSelec=moveSelec2;
+							plyerTurn();
+							if(cpuMons[cpuMonActive].currentHP==0){
+								cpuSkipTurn=true;
+							}
+						}
 					}else{
 						p1SkipTurn=false;
 					}
@@ -425,26 +461,11 @@ public class PokemonBattleSim{
 			//----------------------CPU------------------//
 			if(cpuMons[cpuMonActive].currentHP==0){//if mon ded-- i mean fainted
 				//change mon
-				int switching=0;
+				//int switching=0;
 				System.out.println(cpuMons[cpuMonActive].name+" fainted!");
 				wair(s,2);
 				if(checkAllCPUMons()){
-					do{
-						switching=rng.nextInt(cpuMons.length);
-					}while(checkSwitchIn(switching, cpuMonActive, cpuMons) || cpuMons[switching].currentHP==0);
-					clear();
-					printBattleHUDThing();
-					System.out.println(cpuMons[cpuMonActive].name+" retreated!");
-					wair(s,2);
-
-					cpuMons[cpuMonActive].resetStats();
-
-					cpuMonActive=switching;
-				
-					clear();
-					printBattleHUDThing();
-					System.out.println(cpuName+" sent out "+cpuMons[cpuMonActive].name+"!!");
-					wair(s,2);
+					cpuSwitchMon();
 					cpuSkipTurn=false;
 				}else{
 					System.out.println(cpuName+" is out of Pokemon!");
@@ -611,8 +632,9 @@ public class PokemonBattleSim{
 				}
 				wair(m,80000);
 			}
-			wair(s,1);
-
+			if(!playerMons[playerMonActive].energyDrink){
+				wair(s,1);
+			}
 			//if is special
 			specialMoveHandlerPlayerToCPU(moveSelec,getSmackedBich/numbHits);
 			wair(s,1);
@@ -1222,8 +1244,8 @@ public class PokemonBattleSim{
 			int selecItem=rng.nextInt(5);
 			switch(selecItem){
 				case 0:
-				if(cpuMon.currentHP<=(cpuMon.baseHP/2)){
-					if(rng.nextInt(100)>40){
+				if(cpuMon.currentHP<=(cpuMon.baseHP/2) && (cpuMon.hasMoveNameInMoveset("Jungle Healing")==false) && (cpuMon.hasMoveNameInMoveset("Roost")==false) && (cpuMon.hasMoveNameInMoveset("Healing Pulse")==false)){
+					if(rng.nextInt(100)>30){
 						return 660; //potion
 					}
 				}
@@ -1256,6 +1278,12 @@ public class PokemonBattleSim{
 					}
 				}
 				break;
+				case 5:
+				if(cpuMon.currentATK>80 || cpuMon.hasMoveNameInMoveset("Facade")){
+					if(rng.nextInt(100)>70){
+						return 670; //strike earrings
+					}
+				}
 			}
 		}
 
@@ -2053,11 +2081,28 @@ public class PokemonBattleSim{
 				playerMons[playerMonActive].permaBurn=true;
 				playerMons[playerMonActive].decreaseStat("DEF");
 				playerMons[playerMonActive].decreaseStat("SPEED");
+				playerMons[playerMonActive].decreaseStat("SPEED");
 				System.out.println(playerMons[playerMonActive].name+"'s DEF fell!");
 				wair(s,1);
-				System.out.println(playerMons[playerMonActive].name+"'s SPEED fell!");
+				System.out.println(playerMons[playerMonActive].name+"'s SPEED fell greatly!");
 				wair(s,1);
 				System.out.println(playerMons[playerMonActive].name+ " will only deal "+Clr.RED_B+"Critical hits!"+Clr.R);
+				wair(s,2);
+			break;
+			case "Energy Drink":
+				clear();
+				printBattleHUDThing();
+				System.out.println("You gave "+playerMons[playerMonActive].name+" an Energy Drink!");
+				wair(s,1);
+				playerMons[playerMonActive].energyDrink=true;
+				playerMons[playerMonActive].decreaseStat("ATK");
+				playerMons[playerMonActive].baseATK/=2;
+				playerMons[playerMonActive].resists= new String[]{"Nothing!"};
+				System.out.println(playerMons[playerMonActive].name+"'s ATK fell!");
+				wair(s,1);
+				System.out.println(playerMons[playerMonActive].name+"'s resistances were removed!");
+				wair(s,1);
+				System.out.println(playerMons[playerMonActive].name+" can use 2 moves per turn!");
 				wair(s,2);
 			break;
 			case "Mega Stone":
@@ -2134,6 +2179,24 @@ public class PokemonBattleSim{
 				cpuMons[cpuMonActive].currentATK-=cpuMons[cpuMonActive].baseATK;
 				cpuMons[cpuMonActive].numberOfHits+=1; //:3
 				System.out.println(cpuMons[cpuMonActive].name+ " gained another hit to its attacks!");
+				wair(s,2);
+			break;
+			case 670:
+				clear();
+				printBattleHUDThing();
+				System.out.println(cpuName+" gave "+cpuMons[cpuMonActive].name+" Strike Earrings!");
+				wair(s,1);
+				cpuMons[cpuMonActive].isBurning=true;
+				cpuMons[cpuMonActive].strike=true;
+				cpuMons[cpuMonActive].permaBurn=true;
+				cpuMons[cpuMonActive].decreaseStat("DEF");
+				cpuMons[cpuMonActive].decreaseStat("SPEED");
+				cpuMons[cpuMonActive].decreaseStat("SPEED");
+				System.out.println(cpuMons[cpuMonActive].name+"'s DEF fell!");
+				wair(s,1);
+				System.out.println(cpuMons[cpuMonActive].name+"'s SPEED fell greatly!");
+				wair(s,1);
+				System.out.println(cpuMons[cpuMonActive].name+ " will only deal "+Clr.RED_B+"Critical hits!"+Clr.R);
 				wair(s,2);
 			break;
 		}
@@ -2417,11 +2480,13 @@ public class PokemonBattleSim{
 
 		System.out.println("                 "+arrLeft+" Page "+page+" "+arrRight);
 		for(int i=from; i<=to;i++){
+			String space="";
 			if(coumter<3){
 				System.out.print(" "+namesVector[i]);
 				for(int j=0;j<=12-(namesVector[i].length());j++){
-					System.out.print(" ");
+					space+=" ";
 				}
+				System.out.print(space);
 				System.out.print("|");
 				coumter++;
 			} else{
@@ -2834,6 +2899,7 @@ public class PokemonBattleSim{
 		String autoCap2="";
 		String autoCap3="";
 		String[] pkmnNamesVector=getPkmnNamesVector();
+		String[] secretMons=PokemonMaker3000.getSuperSecretMonList();
 		
 		autoCap1=autoCap1.toUpperCase();
 		for(int i=1;i<selecshon.length();i++){
@@ -2855,6 +2921,11 @@ public class PokemonBattleSim{
 				if(pkmnNamesVector[i].contains(selecshon)){
 					selecshon=pkmnNamesVector[i];
 					break;
+				}if(i<secretMons.length){
+					if(secretMons[i].contains(selecshon)){
+						selecshon=secretMons[i];
+						break;
+					}
 				}
 			}
 		}
@@ -2864,25 +2935,26 @@ public class PokemonBattleSim{
 	
 	static private boolean isNameCorrect(String selecshon){
 		//auto capitalize
-		boolean correctName=false;
 		String[] pkmnNamesVector=getPkmnNamesVector();
+		String[] secretMons=PokemonMaker3000.getSuperSecretMonList();
 		if(selecshon.equals("Mew")){// xd
-			correctName=true;
+			return true;
 		}else{
 			if(selecshon.length()>3){
 				for(int i=0; i<pkmnNamesVector.length;i++){
 					if(pkmnNamesVector[i].equals(selecshon)){
-						correctName=true;
-						break;
-					} else{
-						correctName=false;
+						return true;
+					}if(i<secretMons.length){
+						if(secretMons[i].equals(selecshon)){
+							return true;
+						}
 					}
 				}
 			}else{
-				correctName=false;
+				return false;
 			}
 		}
-		return correctName;
+		return false;
 	}
 
 	static private int[] randomizeMultihitValues(int dmg, int nHits){
@@ -2998,7 +3070,7 @@ class Pokemon{
 	int numberOfHits=1;
 	int extraDmg=0;
 	String name,type;
-	boolean isPoisoned,isBurning,isParalized,healingOverTime,megaEvolved,strike,permaBurn;
+	boolean isPoisoned,isBurning,isParalized,healingOverTime,megaEvolved,strike,permaBurn,energyDrink;
 	String[] weakTo = new String[5]; //listing-weaknesses
 	String[] resists= new String[5]; //listing-resistances
 	String[][] moveset = new String[2][4]; //[0=Name; 1=Type][Slot]
@@ -4330,6 +4402,15 @@ class Pokemon{
 				type="Steel";
 				moveset = new String[][]{{"Fleur Cannon","Zap Cannon","Flash Cannon","Shift Gear"},{"","","",""}};
 			break;
+			case "Celebi ex":
+				baseHP=160;
+				baseATK=200;
+				baseDEF=1;
+				baseSPEED=50;
+				type="Grass";
+				moveset= new String[][]{{"Powerful Bloom","Powerful Bloom","Powerful Bloom","Powerful Bloom"},{"","","",""}};
+			break;
+
 		}
 		
 		setTypesWnR();
@@ -4344,13 +4425,14 @@ class Pokemon{
 		isBurning=false;
 		healingOverTime=false;
 		strike=false; //guaranteed crit
-		permaBurn=false;
+		permaBurn=false; //unremovable burn status
+		energyDrink=false; //+1 move per turn
 		moveset[1][0]=defineMove(moveset[0][0]);
 		moveset[1][1]=defineMove(moveset[0][1]);
 		moveset[1][2]=defineMove(moveset[0][2]);
 		moveset[1][3]=defineMove(moveset[0][3]);
 
-		items= new String[]{"Potion","X-Attack","X-Defense","X-Speed","","Dash Earring","Strike Earrings"};
+		items= new String[]{"Potion","X-Attack","X-Defense","X-Speed","","Dash Earring","Strike Earrings","Energy Drink"};
 		if(this.canMegaEvolve()){
 			items[4]="Mega Stone";
 		}
@@ -5491,6 +5573,13 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		System.out.println("");
 		System.out.println("");
 	}
+
+	public static String[] getSuperSecretMonList(){
+		String[] secretMonList = new String[]{"Celebi ex"};
+
+		return secretMonList;
+	}
+
 }// pokimonmaker3000 class ends frfr
 
 enum Clr{
