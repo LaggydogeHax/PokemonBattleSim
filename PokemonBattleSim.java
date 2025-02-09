@@ -31,7 +31,7 @@ public class PokemonBattleSim{
 		//-----page 3----//
 		"Delphox","Gyarados","Sceptile",     "Typhlosion","Greninja","Leafeon",     "Donphan","Corviknight","Umbreon",
 		"Jolteon","Espeon","Eevee",          "Arceus","Citrus","Toxicroak",         "Cyclizar","Garchomp","Gholdengo",
-		"Galvantula","Ceruledge","Chandelure","Flamigo","Zamazenta","Zacian",       "Magearna"};
+		"Galvantula","Ceruledge","Chandelure","Flamigo","Zamazenta","Zacian",       "Magearna","Cresselia","Kingambit"};
 		
 		return pkmnNamesVector;
 	}
@@ -368,9 +368,6 @@ public class PokemonBattleSim{
 
 			//---epic battle preparations----//
 			
-			playerMons[playerMonActive].extraDmg=rng.nextInt(7);
-			cpuMons[cpuMonActive].extraDmg=rng.nextInt(7);
-			
 			playerFirst=whoGoesFirst();
 			if(plyWillMegaEvolve && playerFirst && !p1SkipTurn && plyCanMegaEvolve){
 				plyWillMegaEvolve=false;
@@ -548,6 +545,7 @@ public class PokemonBattleSim{
 	}
 
 	private static void plyerTurn()throws IOException, InterruptedException{
+		playerMons[playerMonActive].extraDmg=rng.nextInt(7);
 		if(moveIsAnAttack(playerMons[playerMonActive].moveset[1][moveSelec])){//player mon attacks cpu mon
 			int trueDmg=damageCalc(playerMons[playerMonActive], cpuMons[cpuMonActive], moveSelec,0);
 			int getSmackedBich=trueDmg;
@@ -576,9 +574,6 @@ public class PokemonBattleSim{
 			wair(s,1);
 			
 			switch (isMoveEffective(moveSelec, playerMons[playerMonActive], cpuMons[cpuMonActive])){
-				case 0:
-					//neutral ouo
-				break;
 				case 1:
 					System.out.println("It's super effective!!");
 					wair(s,1);
@@ -597,24 +592,39 @@ public class PokemonBattleSim{
 			
 			//print dmg dealt
 			int numbHits=playerMons[playerMonActive].numberOfHits;
-			if(playerMons[playerMonActive].isSpecialMove(moveSelec)=="rngMultihit"){
-				numbHits+=playerMons[playerMonActive].extraDmg;
-			}if(playerMons[playerMonActive].isSpecialMove(moveSelec)=="plus2hit"){
-				numbHits+=2;
-			}if(playerMons[playerMonActive].moveset[0][moveSelec].equals("X")){
-				numbHits+=1;
-			}if(playerMons[playerMonActive].isSpecialMove(moveSelec)=="plus3hit"){
-				numbHits+=3;
-			}if(playerMons[playerMonActive].isSpecialMove(moveSelec)=="groupB"){
-				numbHits+=countAliveMonInTeam(playerMons);
-				numbHits--;
-			}if(playerMons[playerMonActive].isSpecialMove(moveSelec)=="reverseGroupB"){
-				numbHits+=countAliveMonInTeam(cpuMons);
-				numbHits--;
-				if(cpuMons[cpuMonActive].currentHP==0){
-					numbHits++;
-				}
+			switch(playerMons[playerMonActive].isSpecialMove(moveSelec)){
+				case "rngMultihit":
+					numbHits+=playerMons[playerMonActive].extraDmg;
+				break;
+				case "plus2hit":
+					numbHits+=2;
+				break;
+				case "plus3hit":
+					numbHits+=3;
+				break;
+				case "adversity":
+					if(playerMons[playerMonActive].moveset[0][moveSelec].equals("X")){
+						numbHits++;
+					}
+				break;
+				case "groupB":
+					numbHits+=countAliveMonInTeam(playerMons);
+					numbHits--;
+				break;
+				case "reverseGroupB":
+					numbHits+=countAliveMonInTeam(cpuMons);
+					numbHits--;
+					if(cpuMons[cpuMonActive].currentHP==0){
+						numbHits++;
+					}
+				break;
+				case "avenger":
+					if(countAliveMonInTeam(playerMons)==1){
+						numbHits++;
+					}
+				break;
 			}
+
 			int dmgToPrint=(trueDmg/numbHits);
 			int[] dmgVector=null;
 			if(numbHits>1){
@@ -707,6 +717,7 @@ public class PokemonBattleSim{
 	}
 
 	private static void cpuTurn()throws IOException, InterruptedException{
+		cpuMons[cpuMonActive].extraDmg=rng.nextInt(7);
 		if(moveIsAnAttack(cpuMons[cpuMonActive].moveset[1][cpuMoveSelec])){//cpu mon attacks player mon
 			int trueDmg=damageCalc(cpuMons[cpuMonActive], playerMons[playerMonActive], cpuMoveSelec,1);
 			int getSmackedBich=trueDmg;
@@ -756,24 +767,39 @@ public class PokemonBattleSim{
 			
 			//print dmg dealt
 			int numbHits=cpuMons[cpuMonActive].numberOfHits;
-			if(cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec)=="rngMultihit"){
-				numbHits+=cpuMons[cpuMonActive].extraDmg;
-			}if(cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec)=="plus2hit"){
-				numbHits+=2;
-			}if(cpuMons[cpuMonActive].moveset[0][cpuMoveSelec].equals("X")){
-				numbHits+=1;
-			}if(cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec)=="plus3hit"){
-				numbHits+=3;
-			}if(cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec)=="groupB"){
-				numbHits+=countAliveMonInTeam(cpuMons);
-				numbHits--;
-			}if(cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec)=="reverseGroupB"){
-				numbHits+=countAliveMonInTeam(playerMons);
-				numbHits--;
-				if(playerMons[playerMonActive].currentHP==0){
-					numbHits++;
-				}
+			switch(cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec)){
+				case "rngMultihit":
+					numbHits+=cpuMons[cpuMonActive].extraDmg;
+				break;
+				case "plus2hit":
+					numbHits+=2;
+				break;
+				case "plus3hit":
+					numbHits+=3;
+				break;
+				case "adversity":
+					if(cpuMons[cpuMonActive].moveset[0][moveSelec].equals("X")){
+						numbHits++;
+					}
+				break;
+				case "groupB":
+					numbHits+=countAliveMonInTeam(cpuMons);
+					numbHits--;
+				break;
+				case "reverseGroupB":
+					numbHits+=countAliveMonInTeam(playerMons);
+					numbHits--;
+					if(cpuMons[cpuMonActive].currentHP==0){
+						numbHits++;
+					}
+				break;
+				case "avenger":
+					if(countAliveMonInTeam(cpuMons)==1){
+						numbHits++;
+					}
+				break;
 			}
+
 			int dmgToPrint=(trueDmg/numbHits);
 			int[] dmgVector=null;
 			if(numbHits>1){
@@ -1047,6 +1073,17 @@ public class PokemonBattleSim{
 					nHits+=1;
 					atk1-=atk1/3;
 				}
+				if(pkmn1.energyDrink){
+					atk1-=atk1/3;
+				}
+			break;
+			case "adversity2":
+				atk1/=3;
+				lostHP=pkmn1.baseHP- pkmn1.currentHP;
+				atk1+=lostHP/2;
+				if(pkmn1.energyDrink){
+					atk1-=atk1/3;
+				}
 			break;
 			case "supEffective":
 				atk1-=atk1/3;
@@ -1096,6 +1133,30 @@ public class PokemonBattleSim{
 				String opMonName=pkmn2.name;
 				if(opMonName.contains("Mega-")){
 					atk1*=2;
+				}
+			break;
+			case "avenger":
+				//fallen allies = more power for this move
+				atk1-=atk1/4;
+				if(turnOf==0){
+					monlist = new Pokemon[playerMons.length];
+					monlist=playerMons;
+				}else{
+					monlist = new Pokemon[cpuMons.length];
+					monlist=cpuMons;
+				}
+				
+				if(monlist.length>3){reduce=4;}else{reduce=2;}
+				
+				for(int i=0;i<monlist.length;i++){
+					if(monlist[i].currentHP<1){
+						atk1+=baseatk1/reduce;
+					}
+				}
+				if(countAliveMonInTeam(playerMons)==1 && turnOf==0){
+					nHits+=1;
+				}if(countAliveMonInTeam(cpuMons)==1 && turnOf==1){
+					nHits+=1;
 				}
 			break;
 		}
@@ -1573,6 +1634,7 @@ public class PokemonBattleSim{
 			case "Dragon Dance": ret="buffatk&speed"; break;
 			case "Growl": ret="debuffatk"; break;
 			case "Charm": ret="debuffatk2"; break;
+			case "Metal Sound": ret="debuffatk2"; break;
 			case "Agility": ret="buffspeed2"; break;
 			case "Scary Face": ret="debuffspeed2"; break;
 			case "Bulk Up": ret="buffatk&def"; break;
@@ -1593,6 +1655,7 @@ public class PokemonBattleSim{
 			case "Last Resort": ret="lr"; break;
 			case "Shift Gear": ret="buffatk&speed"; break;
 			case "String Shot": ret="debuffspeed2"; break;
+			case "Lunar Plumage": ret="hot"; break;
 		}
 		return ret;
 	}
@@ -2097,6 +2160,18 @@ public class PokemonBattleSim{
 				playerMons[playerMonActive].energyDrink=true;
 				playerMons[playerMonActive].decreaseStat("ATK");
 				playerMons[playerMonActive].baseATK/=2;
+				String[]res=playerMons[playerMonActive].resists;
+				String[]wek=playerMons[playerMonActive].weakTo;
+				String[]newWeakto=new String[(res.length)+(wek.length)];
+				for(int i=0;i<wek.length;i++){
+					newWeakto[i]=wek[i];
+				}
+				int j=0;
+				for(int i=wek.length;i<newWeakto.length;i++){
+					newWeakto[i]=res[j];
+					j++;
+				}
+				playerMons[playerMonActive].weakTo=newWeakto;
 				playerMons[playerMonActive].resists= new String[]{"Nothing!"};
 				System.out.println(playerMons[playerMonActive].name+"'s ATK fell!");
 				wair(s,1);
@@ -3133,6 +3208,9 @@ class Pokemon{
 			break;
 			case "SPEED":
 				this.currentSPEED+=(this.baseSPEED/4);
+				if(this.currentSPEED>800){
+					this.currentSPEED=800; //nu uh
+				}
 			break;
 		}
 	}
@@ -3143,6 +3221,10 @@ class Pokemon{
 			this.currentHP=this.baseHP;
 			break;
 			case "half":
+			if(this.energyDrink){
+				this.healSelf("third");
+				return;
+			}
 			this.currentHP+=(this.baseHP/2);
 			if(this.currentHP>this.baseHP){
 				this.currentHP=this.baseHP;
@@ -3515,7 +3597,7 @@ class Pokemon{
 			|| movename.equals("Shadow Ball") || movename.equals("Bug Buzz")|| movename.equals("Energy Ball")
 			|| movename.equals("Focus Blast") || movename.equals("Psychic")){
 			return "rngDebuffDef";
-		}if(movename.equals("Play Rough")){
+		}if(movename.equals("Play Rough") || movename.equals("Aurora Beam")){
 			return "rngDebuffAtk";
 		}if(movename.equals("Flame Charge") || movename.equals("Dragon Rush")
 		|| movename.equals("Trailblaze")){
@@ -3553,11 +3635,13 @@ class Pokemon{
 			return "plus3hit";
 		}if(movename.equals("X") || movename.equals("Ascension")){
 			return "adversity";
+		}if(movename.equals("Assurance")){
+			return "adversity2";
 		}if(movename.equals("Group Beating")){
 			return "groupB";
 		}if(movename.equals("Cyclone")){
 			return "reverseGroupB";
-		}if(movename.equals("Revenge")){
+		}if(movename.equals("Retaliate")){
 			return "avenger";
 		}if(movename.equals("Zap Cannon")){
 			return "paralyze";
@@ -4403,14 +4487,29 @@ class Pokemon{
 				moveset = new String[][]{{"Fleur Cannon","Zap Cannon","Flash Cannon","Shift Gear"},{"","","",""}};
 			break;
 			case "Celebi ex":
-				baseHP=160;
-				baseATK=200;
+				baseHP=130;
+				baseATK=230;
 				baseDEF=1;
 				baseSPEED=50;
 				type="Grass";
 				moveset= new String[][]{{"Powerful Bloom","Powerful Bloom","Powerful Bloom","Powerful Bloom"},{"","","",""}};
 			break;
-
+			case "Cresselia":
+				baseHP=290;
+				baseATK=90;
+				baseDEF=130;
+				baseSPEED=95;
+				type="Psychic";
+				moveset = new String[][]{{"Psychic","Aurora Beam","Shadow Ball","Lunar Plumage"},{"","","",""}};
+			break;
+			case "Kingambit":
+				baseHP=310;
+				baseATK=125;
+				baseDEF=110;
+				baseSPEED=62;
+				type="Dark";
+				moveset = new String[][]{{"Retaliate","Assurance","Metal Sound","Sword Dance"},{"","","",""}};
+			break;
 		}
 		
 		setTypesWnR();
@@ -4751,13 +4850,13 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		String[] moveTableStatus = new String[]{"Poison Powder","Will-O-Wisp","Sword Dance","Roar","Hone Claws","Calm Mind",
 		"Iron Defense","Toxic","Dragon Dance","Growl","Charm","Bulk Up","Heal Pulse","Charge","Roost","Extreme Speed","Amnesia",
 		"Aqua Ring","Impulse","Jungle Healing","Fake Tears","Scary Face","Agility","Defend Order","Work Up","Thunder Wave","Last Resort",
-		"Shift Gear","String Shot","Acid Armor"};
-		String[] moveTableAtkNormal = new String[]{"Quick Attack","Hyper Beam","Giga Impact","Super Fang","Facade","Swift","Judgement","Ascension","Group Beating"};
+		"Shift Gear","String Shot","Acid Armor","Lunar Plumage","Metal Sound"};
+		String[] moveTableAtkNormal = new String[]{"Quick Attack","Hyper Beam","Giga Impact","Super Fang","Facade","Swift","Judgement","Ascension","Group Beating","Retaliate"};
 		String[] moveTableAtkFire = new String[]{"Flamethrower","Flame Charge","Overheat","Fire Blast","Mystical Fire","Bitter Blade"};
 		String[] moveTableAtkWater = new String[]{"Hydro Pump","Hydro Cannon","Surf","Whirlpool","Scald","Water Shuriken","SurgingStrikes"};
 		String[] moveTableAtkElectric = new String[]{"Thunder","Thunder Fang","Electroweb","Overdrive","Plasma Fists","Zap Cannon"};
 		String[] moveTableAtkGrass = new String[]{"Vine Whip","Giga Drain","Flower Trick","Trailblaze","Razor Leaf","Grass Knot","Wood Hammer","Leaf Blade","Solar Beam","Energy Ball","Powerful Bloom"};
-		String[] moveTableAtkIce = new String[]{"Ice Beam","Ice Fang","Freeze Dry","Blizzard","Ice Slash"};
+		String[] moveTableAtkIce = new String[]{"Ice Beam","Ice Fang","Freeze Dry","Blizzard","Ice Slash","Aurora Beam"};
 		String[] moveTableAtkFighting = new String[]{"Aura Sphere","Close Combat","Rock Smash","Body Slam","Double Kick","Hammer Arm","Drain Punch","HJ Kick","Superpower","Flying Press","Focus Blast","Body Press","Sacred Sword"};
 		String[] moveTableAtkPoison = new String[]{"Poison Leech","Toxic Spikes","Venoshock","Poison Sting"};
 		String[] moveTableAtkGround = new String[]{"Earthquake","Mud Slap","Earth Power","X","Excite"};
@@ -4767,7 +4866,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		String[] moveTableAtkRock = new String[]{"Rock Throw","Head Smash","Stone Edge"};
 		String[] moveTableAtkGhost = new String[]{"Shadow Ball","Hex","Shadow Sneak","Shadow Claw"};
 		String[] moveTableAtkDragon = new String[]{"Dragon Breath","Dragon Rush","Dragon Pulse","Dragon Tail","Draco Meteor"};
-		String[] moveTableAtkDark = new String[]{"Pursuit","Bite","Sucker Punch","Crunch","Night Slash"};
+		String[] moveTableAtkDark = new String[]{"Pursuit","Bite","Sucker Punch","Crunch","Night Slash","Assurance"};
 		String[] moveTableAtkSteel = new String[]{"Metal Claw","Iron Tail","Iron Head","Flash Cannon","Iron Hammer","Bullet Punch","Steel Wing","Make it Rain","Behemoth Blade","Behemoth Bash"};
 		String[] moveTableAtkFairy = new String[]{"Moonblast","Play Rough","Draining Kiss","Halo","Fleur Cannon"};
 
