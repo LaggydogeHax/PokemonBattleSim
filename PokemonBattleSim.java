@@ -31,7 +31,8 @@ public class PokemonBattleSim{
 		//-----page 3----//
 		"Delphox","Gyarados","Sceptile",     "Typhlosion","Greninja","Leafeon",     "Donphan","Corviknight","Umbreon",
 		"Jolteon","Espeon","Eevee",          "Arceus","Citrus","Toxicroak",         "Cyclizar","Garchomp","Gholdengo",
-		"Galvantula","Ceruledge","Chandelure","Flamigo","Zamazenta","Zacian",       "Magearna","Cresselia","Kingambit"};
+		"Galvantula","Ceruledge","Chandelure","Flamigo","Zamazenta","Zacian",       "Magearna","Cresselia","Kingambit",
+		"Azumarill"};
 		
 		return pkmnNamesVector;
 	}
@@ -47,7 +48,7 @@ public class PokemonBattleSim{
 			clear();
 			selecshon="";
 			
-			System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4 PRERELEASE1b]"+Clr.R);
+			System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4 PRERELEASE2a]"+Clr.R);
 			System.out.println("Choose a Pokemon!!");
 			System.out.println("Type its name to select it");
 			System.out.println("Type a number to view that page");
@@ -203,6 +204,7 @@ public class PokemonBattleSim{
 		printPlayerTeam();
 		System.out.println("                 VS");
 		printCPUTeam();
+		System.out.println("");
 		wair(s,1);
 		System.out.println("Epic battle begins in:");
 		wair(s,1);
@@ -332,7 +334,7 @@ public class PokemonBattleSim{
 						try{
 							moveSelec2=tcl.nextInt();
 						}catch(InputMismatchException e){
-							moveSelec=69;
+							moveSelec2=69;
 							tcl.nextLine();
 						}
 						
@@ -576,18 +578,18 @@ public class PokemonBattleSim{
 			switch (isMoveEffective(moveSelec, playerMons[playerMonActive], cpuMons[cpuMonActive])){
 				case 1:
 					System.out.println("It's super effective!!");
-					wair(s,1);
+					wair(m,750000); //2/3 of a second
 				break;
 				case 2:
 					System.out.println("It's not very effective...");
-					wair(s,1);
+					wair(m,750000);
 				break;
 			}
 			
 			if(crit){
 				System.out.println(Clr.RED_B+"Critical Hit!!"+Clr.R);
 				crit=false;
-				wair(s,1);
+				wair(m,750000);
 			}
 			
 			//print dmg dealt
@@ -751,18 +753,18 @@ public class PokemonBattleSim{
 				break;
 				case 1:
 					System.out.println("It's super effective!!");
-					wair(s,1);
+					wair(m,750000);
 				break;
 				case 2:
 					System.out.println("It's not very effective...");
-					wair(s,1);
+					wair(m,750000);
 				break;
 			}
 			
 			if(crit){
 				System.out.println(Clr.RED_B+"Critical Hit!!"+Clr.R);
 				crit=false;
-				wair(s,1);
+				wair(m,750000);
 			}
 			
 			//print dmg dealt
@@ -1158,6 +1160,10 @@ public class PokemonBattleSim{
 				}if(countAliveMonInTeam(cpuMons)==1 && turnOf==1){
 					nHits+=1;
 				}
+			break;
+			case "kamikaze":
+				atk1+=doEmStab;
+				atk1*=4; //AAAAAAAAAAAAA
 			break;
 		}
 
@@ -1759,6 +1765,7 @@ public class PokemonBattleSim{
 				clear();
 				printBattleHUDThing();
 				System.out.println(playerMons[playerMonActive].name+" hurt itself in recoil!");
+				wair(s,1);
 			break;
 			case "adversity":
 				if(playerMons[playerMonActive].moveset[0][moveSelec].equals("Ascension")){
@@ -1771,6 +1778,30 @@ public class PokemonBattleSim{
 				playerMons[playerMonActive].decreaseStat("SPEED");
 				System.out.println(playerMons[playerMonActive].name+"'s SPEED fell!");
 				wair(s,1);
+			break;
+			case "kamikaze":
+				playerMons[playerMonActive].currentHP=0;
+				System.out.println(playerMons[playerMonActive].name+" Exploded!!!");
+				wair(s,1);
+			break;
+			case "debuffIfBoosted":
+				Pokemon enemiMon = cpuMons[cpuMonActive];
+				if(enemiMon.currentATK>enemiMon.baseATK || enemiMon.currentDEF>enemiMon.baseDEF || enemiMon.currentSPEED>enemiMon.baseSPEED){
+					int todebuff=rng.nextInt(3);
+					if(todebuff==0){
+						cpuMons[cpuMonActive].decreaseStat("ATK");
+						System.out.println(cpuMons[cpuMonActive].name+"'s ATK fell!");
+						wair(s,1);
+					}if(todebuff==1){
+						cpuMons[cpuMonActive].decreaseStat("DEF");
+						System.out.println(cpuMons[cpuMonActive].name+"'s DEF fell!");
+						wair(s,1);
+					}else{
+						cpuMons[cpuMonActive].decreaseStat("SPEED");
+						System.out.println(cpuMons[cpuMonActive].name+"'s SPEED fell!");
+						wair(s,1);
+					}
+				}
 			break;
 		}
 	}
@@ -1874,6 +1905,7 @@ public class PokemonBattleSim{
 				clear();
 				printBattleHUDThing();
 				System.out.println(cpuMons[cpuMonActive].name+" hurt itself in recoil!");
+				wair(s,1);
 			break;
 			case "adversity":
 				if(cpuMons[cpuMonActive].moveset[0][cpuMoveSelec].equals("Ascension")){
@@ -1886,6 +1918,30 @@ public class PokemonBattleSim{
 				cpuMons[cpuMonActive].decreaseStat("SPEED");
 				System.out.println(cpuMons[cpuMonActive].name+"'s SPEED fell!");
 				wair(s,1);
+			break;
+			case "kamikaze":
+				cpuMons[cpuMonActive].currentHP=0;
+				System.out.println(cpuMons[cpuMonActive].name+" Exploded!!!");
+				wair(s,1);
+			break;
+			case "debuffIfBoosted":
+				Pokemon enemiMon = playerMons[playerMonActive];
+				if(enemiMon.currentATK>enemiMon.baseATK || enemiMon.currentDEF>enemiMon.baseDEF || enemiMon.currentSPEED>enemiMon.baseSPEED){
+					int todebuff=rng.nextInt(3);
+					if(todebuff==0){
+						playerMons[playerMonActive].decreaseStat("ATK");
+						System.out.println(playerMons[playerMonActive].name+"'s ATK fell!");
+						wair(s,1);
+					}if(todebuff==1){
+						playerMons[playerMonActive].decreaseStat("DEF");
+						System.out.println(playerMons[playerMonActive].name+"'s DEF fell!");
+						wair(s,1);
+					}else{
+						playerMons[playerMonActive].decreaseStat("SPEED");
+						System.out.println(playerMons[playerMonActive].name+"'s SPEED fell!");
+						wair(s,1);
+					}
+				}
 			break;
 		}
 	}
@@ -1932,8 +1988,6 @@ public class PokemonBattleSim{
 		}else{
 			playerMons[playerMonActive].resetStats();
 		}
-		
-
 		//--------cpu
 		if(cpuMons[cpuMonActive].currentHP!=0){
 			if(cpuMons[cpuMonActive].healingOverTime && cpuMons[cpuMonActive].currentHP!=cpuMons[cpuMonActive].baseHP){
@@ -3109,7 +3163,7 @@ public class PokemonBattleSim{
 			"Gary","Cyn","Sunna","Mario","Hop","Niko","Blue","Red","Green","Peter","N","Cebollin","CPU",
 			"Nokia","Moya","Evie","Luigi","Noodle","Joel","Oatmeal","Nestle","Panda","Pingu","Gaby",
 			"Maigol","Luci","Java","TWM","Sunflower","Nina","Lola","Obama","Guide","Steve","Freeman","Goku",
-			"Cocuy","Socks","Bacon","Tocino","Arepa"
+			"Cocuy","Socks","Bacon","Tocino","Arepa","Sans","Meevin","Zazu","Kevin","May"
 		};
 
 		return names[rng.nextInt(names.length)];
@@ -3583,70 +3637,132 @@ class Pokemon{
 		String movename=this.moveset[0][moveIndex];
 		String movetype=this.moveset[1][moveIndex];
 		
-		if(movename.equals("Draining Kiss") || movename.equals("Life Leech")
-			|| movename.equals("Poison Leech") || movename.equals("Giga Drain")
-			|| movename.equals("Drain Punch") || movename.equals("Excite")
-			|| movename.equals("Bitter Blade")){
-			return "lifedrain";
-		}if(movename.equals("Flamethrower") || movename.equals("Scald")
-			|| movename.equals("Fire Blast")){
-			return "rngBurn";
-		}if(movename.equals("Mud Slap") || movename.equals("Electroweb")){
-			return "rngDebuffSpeed";
-		}if(movename.equals("Crunch")|| movename.equals("Earth Power")|| movename.equals("Hammer Arm")
-			|| movename.equals("Shadow Ball") || movename.equals("Bug Buzz")|| movename.equals("Energy Ball")
-			|| movename.equals("Focus Blast") || movename.equals("Psychic")){
-			return "rngDebuffDef";
-		}if(movename.equals("Play Rough") || movename.equals("Aurora Beam")){
-			return "rngDebuffAtk";
-		}if(movename.equals("Flame Charge") || movename.equals("Dragon Rush")
-		|| movename.equals("Trailblaze")){
-			return "buffspeed";
-		}if(movename.equals("Double Kick")||movename.equals("Dual Wingbeat")){
-			return "doublehit";
-		}if(movename.equals("Toxic Spikes")|| movename.equals("Poison Sting")){
-			return "rngPoison";
-		}if(movename.equals("Night Slash")||movename.equals("Attack Order")||movename.equals("Leaf Blade")
-			|| movename.equals("Psycho Cut") || movename.equals("Stone Edge") || movename.equals("Shadow Claw")){
-			return "highcritrate";
-		}if(movename.equals("Overheat") || movename.equals("Superpower")
-			|| movename.equals("Draco Meteor")|| movename.equals("Solar Beam")
-			|| movename.equals("Fleur Cannon")){
-			return "overclock"; //idk what to name these
-		}if(movename.equals("Super Fang") || movename.equals("Sacred Sword")){
-			return "ignoredef";
-		}if(movename.equals("Hyper Beam")||movename.equals("Giga Impact")
-			|| movename.equals("Plasma Fists")){
-			return "powerboost";//+1/2 atk boost
-		}if(movename.equals("Mystical Fire")){
-			return "debuffatk";
-		}if(movename.equals("Psyshock") || movename.equals("Body Slam")){
-			return "defisatk"; //use enemy def as atk
-		}if(movename.equals("Brave Bird")){
-			return "recoil";
-		}if(movename.equals("Pin Missile") || movename.equals("Water Shuriken") || movename.equals("Swift")
-			|| movename.equals("Powerful Bloom") || movename.equals("Make it Rain")){
-			return "rngMultihit";
-		}if(movename.equals("Judgement")){
-			return "supEffective"; //soup
-		}if(movename.equals("Ice Slash") || movename.equals("SurgingStrikes")){
-			return "plus2hit";
-		}if(movename.equals("Halo")){
-			return "plus3hit";
-		}if(movename.equals("X") || movename.equals("Ascension")){
-			return "adversity";
-		}if(movename.equals("Assurance")){
-			return "adversity2";
-		}if(movename.equals("Group Beating")){
-			return "groupB";
-		}if(movename.equals("Cyclone")){
-			return "reverseGroupB";
-		}if(movename.equals("Retaliate")){
-			return "avenger";
-		}if(movename.equals("Zap Cannon")){
-			return "paralyze";
-		}if(movename.equals("Behemoth Blade") || movename.equals("Behemoth Bash")){
-			return "MegaEvolutionHater";
+		switch(movename){
+			//heal half of dmg dealt, -33% ATK
+			case "Draining Kiss": return "lifedrain";
+			case "Life Leech": return "lifedrain";
+			case "Poison Leech": return "lifedrain";
+			case "Giga Drain": return "lifedrain";
+			case "Drain Punch": return "lifedrain";
+			case "Bitter Blade": return "lifedrain";
+			case "Excite": return "lifedrain";
+			
+			//random chance to apply burn
+			case "Flamethrower": return "rngBurn";
+			case "Scald": return "rngBurn";
+			case "Fire Blast": return "rngBurn";
+			
+			//debuff enemy speed at random
+			case "Mud Slap": return "rngDebuffSpeed";
+			case "Electroweb": return "rngDebuffSpeed";
+			case "Muddy Water": return "rngDebuffSpeed";
+			
+			//debuff enemy def at random
+			case "Crunch": return "rngDebuffDef";
+			case "Earth Power": return "rngDebuffDef";
+			case "Hammer Arm": return "rngDebuffDef";
+			case "Shadow Ball": return "rngDebuffDef";
+			case "Bug Buzz": return "rngDebuffDef";
+			case "Energy Ball": return "rngDebuffDef";
+			case "Focus Blast": return "rngDebuffDef";
+			case "Psychic": return "rngDebuffDef";
+			
+			//debuff enemy atk at random
+			case "Play Rough": return "rngDebuffAtk";
+			case "Aurora Beam": return "rngDebuffAtk";
+			
+			//buff self speed
+			case "Flame Charge": return "buffspeed";
+			case "Dragon Rush": return "buffspeed";
+			case "Trailblaze": return "buffspeed";
+			
+			//use move twice
+			case "Double Kick": return "doublehit";
+			case "Dual Wingbeat": return "doublehit";
+			
+			//apply poison at random
+			case "Toxic Spikes": return "rngPoison";
+			case "Poison Sting": return "rngPoison";
+			
+			//roll twice for critical hit
+			case "Night Slash": return "highcritrate";
+			case "Attack Order": return "highcritrate";
+			case "Leaf Blade": return "highcritrate";
+			case "Psycho Cut": return "highcritrate";
+			case "Stone Edge": return "highcritrate";
+			case "Shadow Claw": return "highcritrate";
+			
+			//x2 atk, debuff self atk twice after use
+			case "Overheat": return "overclock";
+			case "Superpower": return "overclock";
+			case "Draco Meteor": return "overclock";
+			case "Solar Beam": return "overclock";
+			case "Fleur Cannon": return "overclock";
+			
+			//act as if enemy def is 1
+			case "Super Fang": return "ignoredef";
+			case "Sacred Sword": return "ignoredef";
+			
+			//x1.5 atk, debuff speed after use
+			case "Hyper Beam": return "powerboost";
+			case "Plasma Fists": return "powerboost";
+			case "Giga Impact": return "powerboost";
+			
+			//debuff enemy atk
+			case "Mystical Fire": return "debuffatk";
+			
+			//use enemy def as atk value
+			case "Psyshock": return "defisatk";
+			case "Body Slam": return "defisatk";
+			
+			//more power but recieve a bit of dmg dealt as recoil
+			case "Brave Bird": return "recoil";
+
+			// random amount of hits 1-6;
+			case "Pin Missile": return "rngMultihit";
+			case "Powerful Bloom": return "rngMultihit";
+			case "Water Shuriken": return "rngMultihit";
+			case "Make it Rain": return "rngMultihit";
+			case "Swift": return "rngMultihit";
+			
+			//-33% atk, always super effective
+			case "Judgement": return "supEffective";
+			
+			//+2 hit
+			case "Ice Slash": return "plus2hit";
+			case "SurgingStrikes": return "plus2hit";
+			
+			// +3 hit
+			case "Halo": return "plus3hit";
+			
+			//gain half of lost hp as atk
+			case "X": return "adversity";
+			case "Ascension": return "adversity";
+			
+			//same but different (very useful comment)
+			case "Assurance": return "adversity2";
+			
+			//more hits and atk the more alive mon you got in team
+			case "Group Beating": return "groupB";
+
+			//more hits the more alive mon the enemy has in team
+			case "Cyclone": return "reverseGroupB";
+
+			//more power the less alive mon u got in team
+			case "Retaliate": return "avenger";
+			
+			// guaranteed paralysis
+			case "Zap Cannon": return "paralyze";
+			
+			//x2 atk if enemy is mega evolved
+			case "Behemoth Blade": return "MegaEvolutionHater";
+			case "Behemoth Bash": return "MegaEvolutionHater";
+
+			//randomly debuff one enemy stat if one of their stats is above base
+			case "Alluring Voice": return "debuffIfBoosted";
+			
+			//x4 atk, faint after use
+			case "MistyExplosion": return "kamikaze";
 		}
 		
 		//----type only----//
@@ -4510,6 +4626,14 @@ class Pokemon{
 				type="Dark";
 				moveset = new String[][]{{"Retaliate","Assurance","Metal Sound","Sword Dance"},{"","","",""}};
 			break;
+			case "Azumarill":
+				baseHP=300;
+				baseATK=80;
+				baseDEF=90;
+				baseSPEED=80;
+				type="Fairy";
+				moveset= new String[][]{{"Muddy Water","Alluring Voice","MistyExplosion","Amnesia"},{"","","",""}};
+			break;
 		}
 		
 		setTypesWnR();
@@ -4853,7 +4977,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		"Shift Gear","String Shot","Acid Armor","Lunar Plumage","Metal Sound"};
 		String[] moveTableAtkNormal = new String[]{"Quick Attack","Hyper Beam","Giga Impact","Super Fang","Facade","Swift","Judgement","Ascension","Group Beating","Retaliate"};
 		String[] moveTableAtkFire = new String[]{"Flamethrower","Flame Charge","Overheat","Fire Blast","Mystical Fire","Bitter Blade"};
-		String[] moveTableAtkWater = new String[]{"Hydro Pump","Hydro Cannon","Surf","Whirlpool","Scald","Water Shuriken","SurgingStrikes"};
+		String[] moveTableAtkWater = new String[]{"Hydro Pump","Hydro Cannon","Surf","Whirlpool","Scald","Water Shuriken","SurgingStrikes","Muddy Water"};
 		String[] moveTableAtkElectric = new String[]{"Thunder","Thunder Fang","Electroweb","Overdrive","Plasma Fists","Zap Cannon"};
 		String[] moveTableAtkGrass = new String[]{"Vine Whip","Giga Drain","Flower Trick","Trailblaze","Razor Leaf","Grass Knot","Wood Hammer","Leaf Blade","Solar Beam","Energy Ball","Powerful Bloom"};
 		String[] moveTableAtkIce = new String[]{"Ice Beam","Ice Fang","Freeze Dry","Blizzard","Ice Slash","Aurora Beam"};
@@ -4868,7 +4992,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		String[] moveTableAtkDragon = new String[]{"Dragon Breath","Dragon Rush","Dragon Pulse","Dragon Tail","Draco Meteor"};
 		String[] moveTableAtkDark = new String[]{"Pursuit","Bite","Sucker Punch","Crunch","Night Slash","Assurance"};
 		String[] moveTableAtkSteel = new String[]{"Metal Claw","Iron Tail","Iron Head","Flash Cannon","Iron Hammer","Bullet Punch","Steel Wing","Make it Rain","Behemoth Blade","Behemoth Bash"};
-		String[] moveTableAtkFairy = new String[]{"Moonblast","Play Rough","Draining Kiss","Halo","Fleur Cannon"};
+		String[] moveTableAtkFairy = new String[]{"Moonblast","Play Rough","Draining Kiss","Halo","Fleur Cannon","MistyExplosion","Alluring Voice"};
 
 		switch (typ) {
 			case "status":table=moveTableStatus;break;
