@@ -32,7 +32,7 @@ public class PokemonBattleSim{
 		"Delphox","Gyarados","Sceptile",     "Typhlosion","Greninja","Leafeon",     "Donphan","Corviknight","Umbreon",
 		"Jolteon","Espeon","Eevee",          "Arceus","Citrus","Toxicroak",         "Cyclizar","Garchomp","Gholdengo",
 		"Galvantula","Ceruledge","Chandelure","Flamigo","Zamazenta","Zacian",       "Magearna","Cresselia","Kingambit",
-		"Azumarill"};
+		"Azumarill","Gallade"};
 		
 		return pkmnNamesVector;
 	}
@@ -48,7 +48,7 @@ public class PokemonBattleSim{
 			clear();
 			selecshon="";
 			
-			System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4 PRERELEASE2a]"+Clr.R);
+			System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4 PRERELEASE2b]"+Clr.R);
 			System.out.println("Choose a Pokemon!!");
 			System.out.println("Type its name to select it");
 			System.out.println("Type a number to view that page");
@@ -673,9 +673,9 @@ public class PokemonBattleSim{
 				String monHP= "HP: ["+playerMons[i].currentHP+" / "+playerMons[i].baseHP+"]";
 				System.out.print("["+(i+1)+"] "+playerMons[i].name);
 				for(int j=0;j<16-playerMons[i].name.length();j++){
-				System.out.print(" ");
+					System.out.print(" ");
 				}
-				System.out.println("| "+monHP);
+				System.out.println("| "+monHP+"["+playerMons[i].type+"]");
 			}
 		}
 		System.out.println("");
@@ -702,7 +702,7 @@ public class PokemonBattleSim{
 
 		clear();
 		printBattleHUDThing();
-		System.out.println(playerMons[playerMonActive].name+" retreated!");
+		System.out.println(getRandomSwitchOutQuote(playerMons[playerMonActive].name));
 		wair(s,2);
 
 		playerMons[playerMonActive].resetStats();
@@ -714,7 +714,7 @@ public class PokemonBattleSim{
 		
 		clear();
 		printBattleHUDThing();
-		System.out.println("Go! "+playerMons[playerMonActive].name+"!!");
+		System.out.println(getRandomSwitchInQuote(playerMons[playerMonActive].name));
 		wair(s,2);
 	}
 
@@ -858,7 +858,7 @@ public class PokemonBattleSim{
 		}
 		clear();
 		printBattleHUDThing();
-		System.out.println(cpuMons[cpuMonActive].name+" retreated!");
+		System.out.println(getRandomSwitchOutQuote(cpuMons[cpuMonActive].name));
 		wair(s,2);
 
 		cpuMons[cpuMonActive].resetStats();
@@ -871,7 +871,7 @@ public class PokemonBattleSim{
 	
 		clear();
 		printBattleHUDThing();
-		System.out.println(cpuName+" sent out "+cpuMons[cpuMonActive].name+"!!");
+		System.out.println(getRandomSwitchInQuote(cpuMons[cpuMonActive].name,true));
 		wair(s,2);
 	}
 
@@ -983,6 +983,9 @@ public class PokemonBattleSim{
 	}
 
 	private static boolean rollForCrit(Pokemon mon, int movselec,Pokemon enemymon){
+		if(mon.isParalized){
+			mon.currentSPEED/=2;
+		}
 		if((mon.currentSPEED)>rng.nextInt(806)//RANDOM CRIT MWAHAHAHAHAHA
 			|| (mon.moveset[0][movselec].equals("Flower Trick"))){//Flower trick guaranteed crit
 				return true;
@@ -1286,7 +1289,7 @@ public class PokemonBattleSim{
 					int shouldswitch=rng.nextInt(100);
 					if(shouldswitch>69){
 						if(cpuMon.name.contains("Mega-")){
-							shouldswitch=rng.nextInt(100);
+							shouldswitch=rng.nextInt(80);
 							if(shouldswitch>69){
 								cpuJustSwitched=true;
 								return 69; //less likely to switch if mega evolved
@@ -1308,7 +1311,7 @@ public class PokemonBattleSim{
 				}
 			}
 
-			int selecItem=rng.nextInt(5);
+			int selecItem=rng.nextInt(6);
 			switch(selecItem){
 				case 0:
 				if(cpuMon.currentHP<=(cpuMon.baseHP/2) && (cpuMon.hasMoveNameInMoveset("Jungle Healing")==false) && (cpuMon.hasMoveNameInMoveset("Roost")==false) && (cpuMon.hasMoveNameInMoveset("Healing Pulse")==false)){
@@ -1346,7 +1349,7 @@ public class PokemonBattleSim{
 				}
 				break;
 				case 5:
-				if(cpuMon.currentATK>80 || cpuMon.hasMoveNameInMoveset("Facade")){
+				if(cpuMon.currentATK>80 || cpuMon.hasMoveNameInMoveset("Facade") || cpuMon.hasMoveNameInMoveset("Judgement")){
 					if(rng.nextInt(100)>70){
 						return 670; //strike earrings
 					}
@@ -2199,6 +2202,7 @@ public class PokemonBattleSim{
 				playerMons[playerMonActive].decreaseStat("DEF");
 				playerMons[playerMonActive].decreaseStat("SPEED");
 				playerMons[playerMonActive].decreaseStat("SPEED");
+				playerMons[playerMonActive].baseSPEED/=2;
 				System.out.println(playerMons[playerMonActive].name+"'s DEF fell!");
 				wair(s,1);
 				System.out.println(playerMons[playerMonActive].name+"'s SPEED fell greatly!");
@@ -2321,6 +2325,7 @@ public class PokemonBattleSim{
 				cpuMons[cpuMonActive].decreaseStat("DEF");
 				cpuMons[cpuMonActive].decreaseStat("SPEED");
 				cpuMons[cpuMonActive].decreaseStat("SPEED");
+				cpuMons[cpuMonActive].baseSPEED/=2;
 				System.out.println(cpuMons[cpuMonActive].name+"'s DEF fell!");
 				wair(s,1);
 				System.out.println(cpuMons[cpuMonActive].name+"'s SPEED fell greatly!");
@@ -3163,10 +3168,44 @@ public class PokemonBattleSim{
 			"Gary","Cyn","Sunna","Mario","Hop","Niko","Blue","Red","Green","Peter","N","Cebollin","CPU",
 			"Nokia","Moya","Evie","Luigi","Noodle","Joel","Oatmeal","Nestle","Panda","Pingu","Gaby",
 			"Maigol","Luci","Java","TWM","Sunflower","Nina","Lola","Obama","Guide","Steve","Freeman","Goku",
-			"Cocuy","Socks","Bacon","Tocino","Arepa","Sans","Meevin","Zazu","Kevin","May"
+			"Cocuy","Socks","Bacon","Tocino","Arepa","Sans","Meevin","Zazu","Kevin","May","Eleki","Glue"
 		};
 
 		return names[rng.nextInt(names.length)];
+	}
+
+	static private String getRandomSwitchInQuote(String monName, boolean nameCpu){
+		String[] quote = new String[]{
+			monName+" enters the field!", "Go, "+monName+"!", "It's "+monName+"!!"
+		};
+		
+		if(nameCpu){
+			String[] cpuQuotes = new String[]{
+				cpuName+" sent out "+monName+"!", cpuName+"'s "+monName+" has entered the battle!"
+			};
+			String[] quoteCopy = new String[quote.length+cpuQuotes.length];
+			for(int i=0;i<quote.length;i++){
+				quoteCopy[i]=quote[i];
+			}
+			int j=0;
+			for(int i=quote.length;i<quoteCopy.length;i++){
+				quoteCopy[i]=cpuQuotes[j];
+				j++;
+			}
+			quote=quoteCopy;
+		}
+		return quote[rng.nextInt(quote.length)];
+	}
+	
+	static private String getRandomSwitchInQuote(String monName){ //method overloading!!!!1
+		return getRandomSwitchInQuote(monName,false);
+	}
+	
+	static private String getRandomSwitchOutQuote(String monName){
+		String[] quote = new String[]{
+			monName+" retreated!", monName+" went back into its pokeball!" //ughh only 2 for now!???
+		};
+		return quote[rng.nextInt(quote.length)];
 	}
 
 	static void clear()throws IOException, InterruptedException{
@@ -3361,7 +3400,7 @@ class Pokemon{
 		String[] list = new String[]{//list of mon that can megaevolve
 			"Absol","Lopunny","Venusaur","Charizard","Blastoise","Ninetales","Mewtwo",
 			"Aggron","Blaziken","Gengar","Lucario", "Cinccino", "Audino","Alakazam","Pidgeot", "Heracross",
-			"Gardevoir","Mawile","Sceptile","Eevee","Citrus","Gyarados","Garchomp","Zamazenta","Zacian"
+			"Gardevoir","Mawile","Sceptile","Eevee","Citrus","Gyarados","Garchomp","Zamazenta","Zacian","Gallade"
 		};
 
 		for(int i=0;i<list.length;i++){
@@ -3538,6 +3577,13 @@ class Pokemon{
 				this.type="Steel";
 				this.moveset[0][2]="Behemoth Blade";
 			break;
+			case "Gallade":
+				addHP=0;
+				addAtk=35;
+				addDef=10;
+				addSpeed=-10;
+				this.moveset[0][0]="Sacred Sword";
+			break;
 			case "Eevee":
 				String listVee[] = new String[]{"Vaporeon","Jolteon","Flareon","Espeon","Umbreon","Leafeon","Glaceon","Sylveon"};
 				Random rng = new Random(); 
@@ -3604,9 +3650,17 @@ class Pokemon{
 		if(this.name.contains("Mega-")){
 			String nam="";
 			//remove mega from name xd
+			try{
+				//try to make a mon without Mega-. if fails, it's a custom mon with Mega- in the name -_-
+				Pokemon aye = new Pokemon(this.name.substring(5));
+			}catch(Exception e){
+				return;
+			}
+			
 			for(int i=5;i<this.name.length();i++){
 				nam+=this.name.charAt(i);
 			}
+			
 			//reset stats from base
 			this.name=nam;
 			Pokemon ref = new Pokemon(nam);
@@ -4500,7 +4554,7 @@ class Pokemon{
 			break;
 			case "Arceus":
 				baseHP=300;
-				baseATK=150;
+				baseATK=120;
 				baseDEF=150;
 				baseSPEED=50;
 				type="Normal";
@@ -4580,7 +4634,7 @@ class Pokemon{
 			break;
 			case "Zamazenta":
 				baseHP=290;
-				baseATK=120;
+				baseATK=110;
 				baseDEF=115;
 				baseSPEED=110;
 				type="Fighting";									//behemoth bash
@@ -4588,7 +4642,7 @@ class Pokemon{
 			break;
 			case "Zacian":
 				baseHP=280;
-				baseATK=130;
+				baseATK=120;
 				baseDEF=80;
 				baseSPEED=120;
 				type="Fairy";										//behemoth blade
@@ -4633,6 +4687,14 @@ class Pokemon{
 				baseSPEED=80;
 				type="Fairy";
 				moveset= new String[][]{{"Muddy Water","Alluring Voice","MistyExplosion","Amnesia"},{"","","",""}};
+			break;
+			case "Gallade":
+				baseHP=210;
+				baseATK=130;
+				baseDEF=65;
+				baseSPEED=115;
+				type="Fighting";
+				moveset = new String[][]{{"Focus Blast","Psycho Cut","Leaf Blade","Sword Dance"},{"","","",""}};
 			break;
 		}
 		
