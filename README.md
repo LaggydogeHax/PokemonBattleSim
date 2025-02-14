@@ -3,9 +3,6 @@ An epic and totally awesome battle simulator for the terminal/cmd
 
 too lazy to make documentation on the code itself so here's the game mechanics
 
-##
-
-
 ## Pokemon's stats and attributes
 
 ### HP
@@ -74,3 +71,26 @@ HoT cures the Pokemon's HP by 1/16 of its Base HP. It will last until the Pokemo
 **BASE STAT:** A Mon's base stats are its initial stats and they are different for each Pokemon. Most stat calculations are pulled from base stats and they cant be changed through normal means.
 
 **Example:** a +25% ATK buff is adding 25% of base ATK to current ATK.
+
+## The epik dmg calculation formula
+as of right now, the dmg calculation formula is like this:
+
+#### Variables explanation:
+**STAB** = (Same Type Attack Bonus) if the type of move used is the same as the pokemon, STAB is 50% of the Pokemon's BASE ATK, otherwise it's 0.
+
+**"Special Move properties"** = is what i call the stuff that makes a move special!! like giving more power under certain conditions! it doesnt always affect the ATK stat tho.
+
+**Total ATK** = ATK + (Special Move properties) + STAB.
+
+**Type weakness Mult** = x2 if the defending pokemon is weak to the move used, x0.5 if resistant, x1 if neutral.
+
+**Rng nonesense** = random value from -10 to 10.
+
+**Crit Damage Mult** = x2 if successful, x1 otherwise.
+
+**Number Of Hits** = a multiplier, more hits is like attacking multiple times in the same turn. default is 1.
+
+#### Final damage dealt:
+damage = TotalATK - (enemyDEF/400 x TotalATK) x (Type Weakness Mult) + (rng nonesense) x (Number of Hits) x (Crit Damage Mult)
+
+**NOTE:** damage cannot be lower than 1.
