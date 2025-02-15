@@ -1,5 +1,6 @@
 # PokemonBattleSim.java
 An epic and totally awesome battle simulator for the terminal/cmd
+
 this epik project originally started on November 8th 2024 yeyeye
 
 too lazy to make documentation on the code itself so here's the game mechanics
