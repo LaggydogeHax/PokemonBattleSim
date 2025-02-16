@@ -32,7 +32,7 @@ public class PokemonBattleSim{
 		"Delphox","Gyarados","Sceptile",     "Typhlosion","Greninja","Leafeon",     "Donphan","Corviknight","Umbreon",
 		"Jolteon","Espeon","Eevee",          "Arceus","Citrus","Toxicroak",         "Cyclizar","Garchomp","Gholdengo",
 		"Galvantula","Ceruledge","Chandelure","Flamigo","Zamazenta","Zacian",       "Magearna","Cresselia","Kingambit",
-		"Azumarill","Gallade"};
+		"Azumarill","Gallade","Seviper",     "Garganacl","Diance"};
 		
 		return pkmnNamesVector;
 	}
@@ -48,7 +48,7 @@ public class PokemonBattleSim{
 			clear();
 			selecshon="";
 			
-			System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4 PRERELEASE2b]"+Clr.R);
+			System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4 PRERELEASE3a]"+Clr.R);
 			System.out.println("Choose a Pokemon!!");
 			System.out.println("Type its name to select it");
 			System.out.println("Type a number to view that page");
@@ -568,11 +568,18 @@ public class PokemonBattleSim{
 			clear();
 			printBattleHUDThing();
 			System.out.println(playerMons[playerMonActive].name+" used "+playerMons[playerMonActive].moveset[0][moveSelec]+"!");
+			if(playerMons[playerMonActive].isSpecialMove(moveSelec).equals("magnitude")){
+				wair(m,750000);
+				System.out.println("Magnitude "+(playerMons[playerMonActive].extraDmg+4)+"!");
+			}
 			wair(s,1);
 			clear();
 			cpuMons[cpuMonActive].currentHP-=getSmackedBich;//applies dmg
 			printBattleHUDThing();
 			System.out.println(playerMons[playerMonActive].name+" used "+playerMons[playerMonActive].moveset[0][moveSelec]+"!");
+			if(playerMons[playerMonActive].isSpecialMove(moveSelec).equals("magnitude")){
+				System.out.println("Magnitude "+(playerMons[playerMonActive].extraDmg+4)+"!");
+			}
 			wair(s,1);
 			
 			switch (isMoveEffective(moveSelec, playerMons[playerMonActive], cpuMons[cpuMonActive])){
@@ -740,11 +747,18 @@ public class PokemonBattleSim{
 			clear();
 			printBattleHUDThing();
 			System.out.println(cpuMons[cpuMonActive].name+" used "+cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]+"!");
+			if(cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec).equals("magnitude")){
+				wair(m,750000);
+				System.out.println("Magnitude "+(cpuMons[cpuMonActive].extraDmg+4)+"!");
+			}
 			wair(s,1);
 			clear();
 			playerMons[playerMonActive].currentHP-=getSmackedBich;//applies dmg
 			printBattleHUDThing();
 			System.out.println(cpuMons[cpuMonActive].name+" used "+cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]+"!");
+			if(cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec).equals("magnitude")){
+				System.out.println("Magnitude "+(cpuMons[cpuMonActive].extraDmg+4)+"!");
+			}
 			wair(s,1);
 			
 			switch(isMoveEffective(cpuMoveSelec, cpuMons[cpuMonActive],playerMons[playerMonActive])){
@@ -1167,6 +1181,15 @@ public class PokemonBattleSim{
 			case "kamikaze":
 				atk1+=doEmStab;
 				atk1*=4; //AAAAAAAAAAAAA
+			break;
+			case "thundercage":
+				atk1+=pkmn2.baseHP/8;
+			break;
+			case "magnitude":
+				int mag = pkmn1.extraDmg;
+				atk1/=3;
+				atk1*=mag;
+				nHits+=mag/4;
 			break;
 		}
 
@@ -1634,6 +1657,7 @@ public class PokemonBattleSim{
 		String ret="";
 		switch(move){
 			case "Calm Mind": ret="buffatk&def"; break;
+			case "Coil": ret="buffatk&def"; break;
 			case "Sword Dance": ret="buffatk2"; break;
 			case "Work Up": ret="buffatk2"; break;
 			case "Charge": ret="buffatk2"; break;
@@ -1665,6 +1689,8 @@ public class PokemonBattleSim{
 			case "Shift Gear": ret="buffatk&speed"; break;
 			case "String Shot": ret="debuffspeed2"; break;
 			case "Lunar Plumage": ret="hot"; break;
+			case "Salt Cure": ret="hot"; break;
+			case "Rock Polish": ret="buffspeed2"; break;
 		}
 		return ret;
 	}
@@ -1804,6 +1830,13 @@ public class PokemonBattleSim{
 						System.out.println(cpuMons[cpuMonActive].name+"'s SPEED fell!");
 						wair(s,1);
 					}
+				}
+			break;
+			case "rngBuffDef":
+				if(rng.nextInt(2)>0){
+					playerMons[playerMonActive].raiseStat("DEF");
+					System.out.println(playerMons[playerMonActive].name+"'s DEF rose!");
+					wair(s,1);
 				}
 			break;
 		}
@@ -3398,9 +3431,11 @@ class Pokemon{
 
 	protected boolean canMegaEvolve(){
 		String[] list = new String[]{//list of mon that can megaevolve
+			//duh obviously absol goes first
 			"Absol","Lopunny","Venusaur","Charizard","Blastoise","Ninetales","Mewtwo",
 			"Aggron","Blaziken","Gengar","Lucario", "Cinccino", "Audino","Alakazam","Pidgeot", "Heracross",
-			"Gardevoir","Mawile","Sceptile","Eevee","Citrus","Gyarados","Garchomp","Zamazenta","Zacian","Gallade"
+			"Gardevoir","Mawile","Sceptile","Eevee","Citrus","Gyarados","Garchomp","Zamazenta","Zacian","Gallade",
+			"Diance"
 		};
 
 		for(int i=0;i<list.length;i++){
@@ -3584,7 +3619,14 @@ class Pokemon{
 				addSpeed=-10;
 				this.moveset[0][0]="Sacred Sword";
 			break;
-			case "Eevee":
+			case "Diance":
+				addHP=10;
+				addAtk=60;
+				addDef=-50;
+				addSpeed=40;
+				this.type="Fairy";
+			break;
+			case "Eevee": //eevee must go last in the switch statement o.o
 				String listVee[] = new String[]{"Vaporeon","Jolteon","Flareon","Espeon","Umbreon","Leafeon","Glaceon","Sylveon"};
 				Random rng = new Random(); 
 				Pokemon newVeeVee = new Pokemon(listVee[rng.nextInt(listVee.length)]);
@@ -3737,6 +3779,7 @@ class Pokemon{
 			//apply poison at random
 			case "Toxic Spikes": return "rngPoison";
 			case "Poison Sting": return "rngPoison";
+			case "Sludge Bomb": return "rngPoison";
 			
 			//roll twice for critical hit
 			case "Night Slash": return "highcritrate";
@@ -3746,12 +3789,13 @@ class Pokemon{
 			case "Stone Edge": return "highcritrate";
 			case "Shadow Claw": return "highcritrate";
 			
-			//x2 atk, debuff self atk twice after use
+			//x1.8 atk, debuff self atk twice after use
 			case "Overheat": return "overclock";
 			case "Superpower": return "overclock";
 			case "Draco Meteor": return "overclock";
 			case "Solar Beam": return "overclock";
 			case "Fleur Cannon": return "overclock";
+			case "Gigaton Hammer": return "overclock";
 			
 			//act as if enemy def is 1
 			case "Super Fang": return "ignoredef";
@@ -3761,6 +3805,7 @@ class Pokemon{
 			case "Hyper Beam": return "powerboost";
 			case "Plasma Fists": return "powerboost";
 			case "Giga Impact": return "powerboost";
+			case "Meteor Beam": return "powerboost";
 			
 			//debuff enemy atk
 			case "Mystical Fire": return "debuffatk";
@@ -3817,6 +3862,18 @@ class Pokemon{
 			
 			//x4 atk, faint after use
 			case "MistyExplosion": return "kamikaze";
+
+			//regieleki
+			case "Thunder Cage": return "thundercage";
+
+			//20% chance of paralysis for non-electric type moves
+			case "Lick": return "rngParalysis";
+
+			//random powah
+			case "Magnitude": return "magnitude";
+
+			//50% chance to buff def
+			case "Diamond Storm": return "rngBuffDef";
 		}
 		
 		//----type only----//
@@ -4058,7 +4115,7 @@ class Pokemon{
 				baseDEF=60;
 				baseSPEED=130;
 				type="Ground";
-				moveset = new String[][]{{"Earthquake","Sucker Punch","Hyper Beam","Sword Dance"},{"","","",""}};
+				moveset = new String[][]{{"Magnitude","Sucker Punch","Hyper Beam","Sword Dance"},{"","","",""}};
 			break;
 			case "Sandlash":
 				baseHP=280;
@@ -4134,11 +4191,11 @@ class Pokemon{
 			break;
 			case "Tinkaton":
 				baseHP=350;
-				baseATK=100;
+				baseATK=110;
 				baseDEF=80;
 				baseSPEED=85;
 				type="Fairy";
-				moveset = new String[][]{{"Play Rough","Iron Hammer","Dream Eater","Sword Dance"},{"","","",""}};
+				moveset = new String[][]{{"Play Rough","Gigaton Hammer","Dream Eater","Sword Dance"},{"","","",""}};
 			break;
 			//--I THOUGHT I HAD 36 MONS BEFORE WAVE 2 ALREADY BUT I WAS MISSING 3 ALL THIS TIME--//
 			//STEEL, DARK AND DRAGON o_o
@@ -4377,7 +4434,7 @@ class Pokemon{
 			break;
 			case "Aggron":
 				baseHP=290;
-				baseATK=80;
+				baseATK=90;
 				baseDEF=150;
 				baseSPEED=50;
 				type="Steel";
@@ -4695,6 +4752,38 @@ class Pokemon{
 				baseSPEED=115;
 				type="Fighting";
 				moveset = new String[][]{{"Focus Blast","Psycho Cut","Leaf Blade","Sword Dance"},{"","","",""}};
+			break;
+			case "Regieleki":
+				baseHP=250;
+				baseATK=130;
+				baseDEF=50;
+				baseSPEED=200;
+				type="Electric";
+				moveset = new String[][]{{"Electroweb","Thunder Cage","Zap Cannon","Charge"},{"","","",""}};
+			break;
+			case "Seviper":
+				baseHP=260;
+				baseATK=110;
+				baseDEF=70;
+				baseSPEED=70;
+				type="Poison";
+				moveset = new String[][]{{"Sludge Bomb","Lick","Venoshock","Coil"},{"","","",""}};
+			break;
+			case "Garganacl":
+				baseHP=380;
+				baseATK=100;
+				baseDEF=130;
+				baseSPEED=45;
+				type="Rock";
+				moveset = new String[][]{{"Meteor Beam","Earthquake","Iron Hammer","Salt Cure"},{"","","",""}};
+			break;
+			case "Diance":
+				baseHP=240;
+				baseATK=100;
+				baseDEF=150;
+				baseSPEED=50;
+				type="Rock";
+				moveset = new String[][]{{"Diamond Storm","Moonblast","Rock Smash","Rock Polish"},{"","","",""}};
 			break;
 		}
 		
@@ -5036,24 +5125,24 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		String[] moveTableStatus = new String[]{"Poison Powder","Will-O-Wisp","Sword Dance","Roar","Hone Claws","Calm Mind",
 		"Iron Defense","Toxic","Dragon Dance","Growl","Charm","Bulk Up","Heal Pulse","Charge","Roost","Extreme Speed","Amnesia",
 		"Aqua Ring","Impulse","Jungle Healing","Fake Tears","Scary Face","Agility","Defend Order","Work Up","Thunder Wave","Last Resort",
-		"Shift Gear","String Shot","Acid Armor","Lunar Plumage","Metal Sound"};
+		"Shift Gear","String Shot","Acid Armor","Lunar Plumage","Metal Sound","Coil","Salt Cure","Rock Polish"};
 		String[] moveTableAtkNormal = new String[]{"Quick Attack","Hyper Beam","Giga Impact","Super Fang","Facade","Swift","Judgement","Ascension","Group Beating","Retaliate"};
 		String[] moveTableAtkFire = new String[]{"Flamethrower","Flame Charge","Overheat","Fire Blast","Mystical Fire","Bitter Blade"};
 		String[] moveTableAtkWater = new String[]{"Hydro Pump","Hydro Cannon","Surf","Whirlpool","Scald","Water Shuriken","SurgingStrikes","Muddy Water"};
-		String[] moveTableAtkElectric = new String[]{"Thunder","Thunder Fang","Electroweb","Overdrive","Plasma Fists","Zap Cannon"};
+		String[] moveTableAtkElectric = new String[]{"Thunder","Thunder Fang","Electroweb","Overdrive","Plasma Fists","Zap Cannon","Thunder Cage"};
 		String[] moveTableAtkGrass = new String[]{"Vine Whip","Giga Drain","Flower Trick","Trailblaze","Razor Leaf","Grass Knot","Wood Hammer","Leaf Blade","Solar Beam","Energy Ball","Powerful Bloom"};
 		String[] moveTableAtkIce = new String[]{"Ice Beam","Ice Fang","Freeze Dry","Blizzard","Ice Slash","Aurora Beam"};
 		String[] moveTableAtkFighting = new String[]{"Aura Sphere","Close Combat","Rock Smash","Body Slam","Double Kick","Hammer Arm","Drain Punch","HJ Kick","Superpower","Flying Press","Focus Blast","Body Press","Sacred Sword"};
-		String[] moveTableAtkPoison = new String[]{"Poison Leech","Toxic Spikes","Venoshock","Poison Sting"};
-		String[] moveTableAtkGround = new String[]{"Earthquake","Mud Slap","Earth Power","X","Excite"};
+		String[] moveTableAtkPoison = new String[]{"Poison Leech","Toxic Spikes","Venoshock","Poison Sting","Sludge Bomb"};
+		String[] moveTableAtkGround = new String[]{"Earthquake","Mud Slap","Earth Power","X","Excite","Magnitude"};
 		String[] moveTableAtkFlying = new String[]{"Wing Attack","Gust","Aerial Ace","Dual Wingbeat","Air Slash","Brave Bird","Cyclone"};
 		String[] moveTableAtkPsychic = new String[]{"Psystrike","Psychic","Dream Eater","Psybeam","Psycho Cut","Psyshock"};
 		String[] moveTableAtkBug = new String[]{"Bug Bite","Life Leech","Bug Buzz","Attack Order","Pin Missile","X-Scissor"};
-		String[] moveTableAtkRock = new String[]{"Rock Throw","Head Smash","Stone Edge"};
-		String[] moveTableAtkGhost = new String[]{"Shadow Ball","Hex","Shadow Sneak","Shadow Claw"};
+		String[] moveTableAtkRock = new String[]{"Rock Throw","Head Smash","Stone Edge","Meteor Beam","Diamond Storm"};
+		String[] moveTableAtkGhost = new String[]{"Shadow Ball","Hex","Shadow Sneak","Shadow Claw","Lick"};
 		String[] moveTableAtkDragon = new String[]{"Dragon Breath","Dragon Rush","Dragon Pulse","Dragon Tail","Draco Meteor"};
 		String[] moveTableAtkDark = new String[]{"Pursuit","Bite","Sucker Punch","Crunch","Night Slash","Assurance"};
-		String[] moveTableAtkSteel = new String[]{"Metal Claw","Iron Tail","Iron Head","Flash Cannon","Iron Hammer","Bullet Punch","Steel Wing","Make it Rain","Behemoth Blade","Behemoth Bash"};
+		String[] moveTableAtkSteel = new String[]{"Metal Claw","Iron Tail","Iron Head","Flash Cannon","Iron Hammer","Bullet Punch","Steel Wing","Make it Rain","Behemoth Blade","Behemoth Bash","Gigaton Hammer"};
 		String[] moveTableAtkFairy = new String[]{"Moonblast","Play Rough","Draining Kiss","Halo","Fleur Cannon","MistyExplosion","Alluring Voice"};
 
 		switch (typ) {
@@ -5859,8 +5948,8 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		System.out.println("");
 	}
 
-	public static String[] getSuperSecretMonList(){
-		String[] secretMonList = new String[]{"Celebi ex"};
+	public static String[] getSuperSecretMonList(){ //extremely secret ok? shhh
+		String[] secretMonList = new String[]{"Celebi ex","Regieleki"};
 
 		return secretMonList;
 	}
