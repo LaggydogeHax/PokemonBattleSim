@@ -1462,7 +1462,7 @@ public class PokemonBattleSim{
 		}
 		if(!moveIsAnAttack(cpuMons[cpuMonActive].moveset[1][num])){
 			//tells the cpu if it should use these status moves depending on da situation
-			switch(statusMoveHandler(cpuMons[cpuMonActive].moveset[1][num])){
+			switch(statusMoveHandler(cpuMons[cpuMonActive].moveset[0][num])){
 				case "hot":
 					if(cpuMons[cpuMonActive].healingOverTime){
 						ret=false;}else{ret=true;
