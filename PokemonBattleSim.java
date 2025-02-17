@@ -2,6 +2,8 @@ import java.util.*;
 import java.io.*;
 import java.util.concurrent.*;
 
+// @author LaggyDogeHax :P
+
 public class PokemonBattleSim{
 	static final String OsName = System.getProperty("os.name");
 	static char s='s', m='m';
@@ -32,7 +34,7 @@ public class PokemonBattleSim{
 		"Delphox","Gyarados","Sceptile",     "Typhlosion","Greninja","Leafeon",     "Donphan","Corviknight","Umbreon",
 		"Jolteon","Espeon","Eevee",          "Arceus","Citrus","Toxicroak",         "Cyclizar","Garchomp","Gholdengo",
 		"Galvantula","Ceruledge","Chandelure","Flamigo","Zamazenta","Zacian",       "Magearna","Cresselia","Kingambit",
-		"Azumarill","Gallade","Seviper",     "Garganacl","Diance","Chien-Pao",      "Weavile","Yanmega"};
+		"Azumarill","Gallade","Seviper",     "Garganacl","Diance","Chien-Pao",      "Weavile","Yanmega","Kleavor"};
 		
 		return pkmnNamesVector;
 	}
@@ -48,7 +50,7 @@ public class PokemonBattleSim{
 			clear();
 			selecshon="";
 			
-			System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4 PRERELEASE4a]"+Clr.R);
+			System.out.println(Clr.GREEN_B+"[Pokemon Battle Sim beta4]"+Clr.R);
 			System.out.println("Choose a Pokemon!!");
 			System.out.println("Type its name to select it");
 			System.out.println("Type a number to view that page");
@@ -158,7 +160,6 @@ public class PokemonBattleSim{
 					break;
 					case "Custom": //----HELL YEA CUSTOM MON
 						Pokemon customMon=PokemonMaker3000.makeCustomMon();
-						tcl.nextLine();
 						if(customMon!=null){
 							for(int i=0;i<playerMons.length;i++){
 								if(playerMons[i]==null){
@@ -805,7 +806,7 @@ public class PokemonBattleSim{
 				case "reverseGroupB":
 					numbHits+=countAliveMonInTeam(playerMons);
 					numbHits--;
-					if(cpuMons[cpuMonActive].currentHP==0){
+					if(playerMons[playerMonActive].currentHP==0){
 						numbHits++;
 					}
 				break;
@@ -969,22 +970,22 @@ public class PokemonBattleSim{
 		}
 		
 		//-------quick attack------//
-		if(playerMons[playerMonActive].moveset[0][moveSelec].equals("Quick Attack")
-		|| cpuMons[cpuMonActive].moveset[0][cpuMoveSelec].equals("Quick Attack")){
+		if(playerMons[playerMonActive].isSpecialMove(moveSelec).equals("+priority")
+		|| cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec).equals("+priority")){
 			//iff if iff iff ififff if if
-			//yanderedev would be proud
-			if(playerMons[playerMonActive].moveset[0][moveSelec].equals("Quick Attack")
-			&& (cpuMons[cpuMonActive].moveset[0][cpuMoveSelec].equals("Quick Attack"))==false){
+			//yanderedev would be proud  // what
+			if(playerMons[playerMonActive].isSpecialMove(moveSelec).equals("+priority")
+			&& (cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec).equals("+priority"))==false){
 				playerfirst=true;
 			}else{
-				if(cpuMons[cpuMonActive].moveset[0][cpuMoveSelec].equals("Quick Attack")
-				&& (playerMons[playerMonActive].moveset[0][moveSelec].equals("Quick Attack"))==false){
+				if(cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec).equals("+priority")
+				&& (playerMons[playerMonActive].isSpecialMove(moveSelec).equals("+priority"))==false){
 					playerfirst=false;
 				}
 			}
 			// if both use it xd
-			if(playerMons[playerMonActive].moveset[0][moveSelec].equals("Quick Attack")
-			&& cpuMons[cpuMonActive].moveset[0][cpuMoveSelec].equals("Quick Attack")){
+			if(playerMons[playerMonActive].isSpecialMove(moveSelec).equals("+priority")
+			&& cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec).equals("+priority")){
 				if(rng.nextInt(2)==0){ // leave it to random chance frfr
 					playerfirst=true;
 				}else{
@@ -1038,7 +1039,7 @@ public class PokemonBattleSim{
 		hehehe-=10;
 
 		//time to test a new defense formula, using percentage dmg reduction
-		//def range from 0 to 270, 300=100% reduction, 270=90% reduction...
+		//def range from 0 to 300, 400=100% reduction, 300=75% reduction...
 		
 		//--if move has special conditions--//
 		switch(pkmn1.isSpecialMove(moveInteger)){
@@ -1464,51 +1465,72 @@ public class PokemonBattleSim{
 			switch(statusMoveHandler(cpuMons[cpuMonActive].moveset[1][num])){
 				case "hot":
 					if(cpuMons[cpuMonActive].healingOverTime){
-						ret=false;
-					}else{
-						ret=true;
+						ret=false;}else{ret=true;
 					}
 				break;
 				case "healhalf":
 					if(cpuMons[cpuMonActive].currentHP>cpuMons[cpuMonActive].baseHP/1.5){
-						ret=false;
-					}else{
-						ret=true;
+						ret=false;}else{ret=true;
+					}
+				break;
+				case "buffatk2":
+					if(cpuMons[cpuMonActive].currentATK>cpuMons[cpuMonActive].baseATK*2){
+						ret=false;}else{ret=true;
+					}
+				break;
+				case "buffatk":
+					if(cpuMons[cpuMonActive].currentATK>cpuMons[cpuMonActive].baseATK*2){
+						ret=false;}else{ret=true;
+					}
+				break;
+				case "buffdef2":
+					if(cpuMons[cpuMonActive].currentDEF>290){
+						ret=false;}else{ret=true;
+					}
+				break;
+				case "buffdef":
+					if(cpuMons[cpuMonActive].currentDEF>290){
+						ret=false;}else{ret=true;
+					}
+				break;
+				case "buffspeed2":
+					if(cpuMons[cpuMonActive].currentSPEED>playerMons[playerMonActive].currentSPEED*1.2){
+						ret=false;}else{ret=true;
 					}
 				break;
 				case "poison":
 					if(playerMons[playerMonActive].isPoisoned==false){
-						ret=true;
-					}else{
-						ret=false;
+						ret=true;}else{ret=false;
 					}
 				break;
 				case "burn":
 					if(playerMons[playerMonActive].isBurning==false){
-						ret=true;
-					}else{
-						ret=false;
+						ret=true;}else{ret=false;
 					}
 				break;
 				case "debuffatk":
 					if(playerMons[playerMonActive].currentATK<playerMons[playerMonActive].baseATK/2){
-						ret=false;
-					}else{
-						ret=true;
+						ret=false;}else{ret=true;
+					}
+				break;
+				case "debuffdef2":
+					if(playerMons[playerMonActive].currentDEF<50){
+						ret=false;}else{ret=true;
+					}
+				break;
+				case "debuffdef":
+					if(playerMons[playerMonActive].currentDEF<50){
+						ret=false;}else{ret=true;
 					}
 				break;
 				case "debuffspeed2":
 					if(playerMons[playerMonActive].currentSPEED<playerMons[playerMonActive].baseSPEED/2){
-						ret=false;
-					}else{
-						ret=true;
+						ret=false;}else{ret=true;
 					}
 				break;
 				case "paralyze":
 					if(playerMons[playerMonActive].isParalized==false){
-						ret=false;
-					}else{
-						ret=true;
+						ret=false;}else{ret=true;
 					}
 				break;
 				default:
@@ -2046,6 +2068,13 @@ public class PokemonBattleSim{
 					}
 				}
 			break;
+			case "rngBuffDef":
+				if(rng.nextInt(2)>0){
+					cpuMons[cpuMonActive].raiseStat("DEF");
+					System.out.println(cpuMons[cpuMonActive].name+"'s DEF rose!");
+					wair(s,1);
+				}
+			break;
 		}
 	}
 
@@ -2054,6 +2083,18 @@ public class PokemonBattleSim{
 		//and healing over time!
 		// array : 0=burn, 1=poison, 2=paralysis
 		// prevent the ailments from getting yeeted on the same turn
+		boolean playerFirst=whoGoesFirst();
+
+		if(playerFirst){
+			statusAilmentsPlayer();
+			statusAilmentsCPU();
+		}else{
+			statusAilmentsCPU();
+			statusAilmentsPlayer();
+		}
+	}
+
+	private static void statusAilmentsPlayer()throws IOException, InterruptedException{
 		//------playerer
 		if(playerMons[playerMonActive].currentHP!=0){
 			if(playerMons[playerMonActive].healingOverTime && playerMons[playerMonActive].currentHP != playerMons[playerMonActive].baseHP){
@@ -2091,6 +2132,29 @@ public class PokemonBattleSim{
 		}else{
 			playerMons[playerMonActive].resetStats();
 		}
+		// try to free from status ailment
+		if((playerMons[playerMonActive].isBurning && !playerMons[playerMonActive].permaBurn) && plyCanFreeFromAilment[0]){
+			if(rng.nextInt(10)>6){
+				playerMons[playerMonActive].isBurning=false;
+				System.out.println(playerMons[playerMonActive].name+" freed from burn!");
+				wair(s,2);
+			}
+		}if(playerMons[playerMonActive].isPoisoned && plyCanFreeFromAilment[1]){
+			if(rng.nextInt(10)>6){
+				playerMons[playerMonActive].isPoisoned=false;
+				System.out.println(playerMons[playerMonActive].name+" cured itself from poison!");
+				wair(s,2);
+			}
+		}if(playerMons[playerMonActive].isParalized && plyCanFreeFromAilment[2]){
+			if(rng.nextInt(10)>5){
+				playerMons[playerMonActive].isParalized=false;
+				System.out.println(playerMons[playerMonActive].name+" freed from paralysis!");
+				wair(s,2);
+			}
+		}
+	}
+
+	private static void statusAilmentsCPU()throws IOException, InterruptedException{
 		//--------cpu
 		if(cpuMons[cpuMonActive].currentHP!=0){
 			if(cpuMons[cpuMonActive].healingOverTime && cpuMons[cpuMonActive].currentHP!=cpuMons[cpuMonActive].baseHP){
@@ -2129,39 +2193,18 @@ public class PokemonBattleSim{
 			cpuMons[cpuMonActive].resetStats();
 		}
 
-		//------try to free from poison/burn/paralysis------//
-		// player
-		if(playerMons[playerMonActive].isBurning && plyCanFreeFromAilment[0]){
-			if(rng.nextInt(10)>6){
-				playerMons[playerMonActive].isBurning=false;
-				System.out.println(playerMons[playerMonActive].name+" freed from burn!");
-				wair(s, 2);
-			}
-		}if(playerMons[playerMonActive].isPoisoned && plyCanFreeFromAilment[1]){
-			if(rng.nextInt(10)>6){
-				playerMons[playerMonActive].isPoisoned=false;
-				System.out.println(playerMons[playerMonActive].name+" cured itself from poison!");
-				wair(s, 2);
-			}
-		}if(playerMons[playerMonActive].isParalized && plyCanFreeFromAilment[2]){
-			if(rng.nextInt(10)>5){
-				playerMons[playerMonActive].isParalized=false;
-				System.out.println(playerMons[playerMonActive].name+" freed from paralysis!");
-				wair(s, 2);
-			}
-		}
-		// cpu
-		if(cpuMons[cpuMonActive].isBurning && cpuCanFreeFromAilment[0]){
+		// try to free from status ailment
+		if((cpuMons[cpuMonActive].isBurning && !cpuMons[cpuMonActive].permaBurn) && cpuCanFreeFromAilment[0]){
 			if(rng.nextInt(10)>7){
 				cpuMons[cpuMonActive].isBurning=false;
 				System.out.println(cpuMons[cpuMonActive].name+" freed from burn!");
-				wair(s, 2);
+				wair(s,2);
 			}
 		}if(cpuMons[cpuMonActive].isPoisoned && cpuCanFreeFromAilment[1]){
 			if(rng.nextInt(10)>7){
 				cpuMons[cpuMonActive].isPoisoned=false;
 				System.out.println(cpuMons[cpuMonActive].name+" cured itself from poison!");
-				wair(s, 2);
+				wair(s,2);
 			}
 		}if(cpuMons[cpuMonActive].isParalized && cpuCanFreeFromAilment[2]){
 			if(rng.nextInt(10)>6){
@@ -2566,7 +2609,6 @@ public class PokemonBattleSim{
 			}
 			
 			if(op==2){
-				tcl.nextLine();
 				Pokemon custm=PokemonMaker3000.makeCustomMon();
 				if(custm!=null){
 					saveMonInCPUTeam2(custm);
@@ -2678,20 +2720,20 @@ public class PokemonBattleSim{
 		String arrLeft=" "; String arrRight=" ";
 		switch(page){
 			case 1:
-			from=0;
-			to=35;
+				from=0;
+				to=35;
 			break;
 			case 2:
-			from=36;
-			to=71;
+				from=36;
+				to=71;
 			break;
 			case 3:
-			from=72;
-			to=namesVector.length-1; //MODIFY!!
+				from=72;
+				to=107;
 			break;
 			default:
-			from=0;
-			to=35;
+				from=0;
+				to=35;
 			break;
 		}
 
@@ -2720,8 +2762,7 @@ public class PokemonBattleSim{
 				for(int j=0;j<=12-(namesVector[i].length());j++){
 					space+=" ";
 				}
-				System.out.print(space);
-				System.out.print("|");
+				System.out.print(space+"|");
 				coumter++;
 			} else{
 				coumter=0;
@@ -2734,7 +2775,7 @@ public class PokemonBattleSim{
 
 	private static void printHelpMMScreen()throws IOException, InterruptedException{
 		clear();
-		System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4]"+Clr.R);
+		System.out.println(Clr.GREEN_B+"[Pokemon Battle Sim beta4]"+Clr.R);
 		System.out.println("");
 		System.out.println("Totally super cool commands for the Main Menu:");
 		System.out.println("");
@@ -3807,6 +3848,11 @@ class Pokemon{
 		String movetype=this.moveset[1][moveIndex];
 		
 		switch(movename){
+			//priority move
+			case "Quick Attack": return "+priority";
+			case "Vacuum Wave": return "+priority";
+
+
 			//heal half of dmg dealt, -33% ATK
 			case "Draining Kiss": return "lifedrain";
 			case "Life Leech": return "lifedrain";
@@ -3861,6 +3907,7 @@ class Pokemon{
 			case "Psycho Cut": return "highcritrate";
 			case "Stone Edge": return "highcritrate";
 			case "Shadow Claw": return "highcritrate";
+			case "Stone Axe": return "highcritrate";
 			
 			//x1.8 atk, debuff self atk twice after use
 			case "Overheat": return "overclock";
@@ -3883,6 +3930,7 @@ class Pokemon{
 			//debuff enemy atk
 			case "Mystical Fire": return "debuffatk";
 			case "Skitter Smack": return "debuffatk";
+			case "Lunge": return "debuffatk";
 			
 			//use enemy def as atk value
 			case "Psyshock": return "defisatk";
@@ -4095,7 +4143,7 @@ class Pokemon{
 				moveset = new String[][]{{"Hyper Beam","Dragon Rush","Wing Attack","Dragon Dance"},{"","","",""}};
 			break;
 			case "Absol":
-				baseHP=270;
+				baseHP=250;
 				baseATK=140;
 				baseDEF=30;
 				baseSPEED=115;
@@ -4890,6 +4938,14 @@ class Pokemon{
 				type="Bug";
 				moveset = new String[][]{{"Skitter Smack","Dual Wingbeat","Facade","Extreme Speed"},{"","","",""}};
 			break;
+			case "Kleavor":
+				baseHP=285;
+				baseATK=135;
+				baseDEF=85;
+				baseSPEED=85;
+				type="Bug";
+				moveset = new String[][]{{"Lunge","Stone Axe","Vacuum Wave","Sword Dance"},{"","","",""}};
+			break;
 		}
 		
 		setTypesWnR();
@@ -5237,13 +5293,13 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		String[] moveTableAtkElectric = new String[]{"Thunder","Thunder Fang","Electroweb","Overdrive","Plasma Fists","Zap Cannon","Thunder Cage"};
 		String[] moveTableAtkGrass = new String[]{"Vine Whip","Giga Drain","Flower Trick","Trailblaze","Razor Leaf","Grass Knot","Wood Hammer","Leaf Blade","Solar Beam","Energy Ball","Powerful Bloom"};
 		String[] moveTableAtkIce = new String[]{"Ice Beam","Ice Fang","Freeze Dry","Blizzard","Ice Slash","Aurora Beam","Triple Axel","Avalanche"};
-		String[] moveTableAtkFighting = new String[]{"Aura Sphere","Close Combat","Rock Smash","Body Slam","Double Kick","Hammer Arm","Drain Punch","HJ Kick","Superpower","Flying Press","Focus Blast","Body Press","Sacred Sword"};
+		String[] moveTableAtkFighting = new String[]{"Aura Sphere","Close Combat","Rock Smash","Body Slam","Double Kick","Hammer Arm","Drain Punch","HJ Kick","Superpower","Flying Press","Focus Blast","Body Press","Sacred Sword","Vacuum Wave"};
 		String[] moveTableAtkPoison = new String[]{"Poison Leech","Toxic Spikes","Venoshock","Poison Sting","Sludge Bomb"};
 		String[] moveTableAtkGround = new String[]{"Earthquake","Mud Slap","Earth Power","X","Excite","Magnitude"};
 		String[] moveTableAtkFlying = new String[]{"Wing Attack","Gust","Aerial Ace","Dual Wingbeat","Air Slash","Brave Bird","Cyclone"};
 		String[] moveTableAtkPsychic = new String[]{"Psystrike","Psychic","Dream Eater","Psybeam","Psycho Cut","Psyshock"};
-		String[] moveTableAtkBug = new String[]{"Bug Bite","Life Leech","Bug Buzz","Attack Order","Pin Missile","X-Scissor","Skitter Smack"};
-		String[] moveTableAtkRock = new String[]{"Rock Throw","Head Smash","Stone Edge","Meteor Beam","Diamond Storm"};
+		String[] moveTableAtkBug = new String[]{"Bug Bite","Life Leech","Bug Buzz","Attack Order","Pin Missile","X-Scissor","Skitter Smack","Lunge"};
+		String[] moveTableAtkRock = new String[]{"Rock Throw","Head Smash","Stone Edge","Meteor Beam","Diamond Storm","Stone Axe"};
 		String[] moveTableAtkGhost = new String[]{"Shadow Ball","Hex","Shadow Sneak","Shadow Claw","Lick"};
 		String[] moveTableAtkDragon = new String[]{"Dragon Breath","Dragon Rush","Dragon Pulse","Dragon Tail","Draco Meteor"};
 		String[] moveTableAtkDark = new String[]{"Pursuit","Bite","Sucker Punch","Crunch","Night Slash","Assurance","Ruination"};
@@ -5319,6 +5375,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 
 					try{
 						yayornay=tcl.nextInt();
+						tcl.nextLine();
 					}catch(InputMismatchException e){
 						yayornay=69;
 						tcl.nextLine();
@@ -5337,12 +5394,10 @@ class PokemonMaker3000 extends PokemonBattleSim{
 						printCustomMonSlots(true);
 						System.out.println("[0]: Cancel");
 						try{
-							selectedMon=tcl.nextInt();
-						}catch(InputMismatchException e){
+							selectedMon=Integer.parseInt(tcl.nextLine());
+						}catch(InputMismatchException | NumberFormatException e){
 							selectedMon=69;
-							tcl.nextLine();
 						}if(selectedMon==0){
-							tcl.nextLine();
 							return null;
 						}
 					}while(selectedMon!=1 && selectedMon!=2 && selectedMon!=3 && selectedMon!=4);
@@ -5768,6 +5823,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		System.out.println("Pokemon created!!");
 		System.out.println(customMon.name+" is ready for battle!");
 		System.out.println("Press Enter to continue");
+		tcl.nextLine();
 
 		return customMon;
 	}
@@ -5982,7 +6038,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 			System.out.println(" MOVESET:");
 			printSelectedMoves(moveset);
 			System.out.println(" Select move for slot ["+(k+1)+"]:"+"\n");
-			System.out.println("Type the name to select it (CASE SENSITIVE!)");
+			System.out.println("Type the name to select it "+Clr.RED_B+"(CASE SENSITIVE!)"+Clr.R);
 			System.out.println("or type cancel to go back"+"\n");
 
 			int coumter=0;
@@ -6005,7 +6061,8 @@ class PokemonMaker3000 extends PokemonBattleSim{
 			input=tcl.nextLine();
 
 			for(int i=0;i<moves.length;i++){
-				if(input.equals(moves[i])){
+				if((moves[i].contains(input) && input.length()>3) || input.equals(moves[i])){
+					input=moves[i];
 					ret=input;
 					break;
 				}
