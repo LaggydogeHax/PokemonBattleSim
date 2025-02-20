@@ -50,7 +50,7 @@ public class PokemonBattleSim{
 			clear();
 			selecshon="";
 			
-			System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4 snapshot1]"+Clr.R);
+			System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4 snapshot2]"+Clr.R);
 			System.out.println("Choose a Pokemon!!");
 			System.out.println("Type its name to select it");
 			System.out.println("Type a number to view that page");
@@ -1205,13 +1205,18 @@ public class PokemonBattleSim{
 					atk1-=atk1/3;
 				}
 			break;
-		}
-
-		if(movename.equals("Flower Trick")){
-			//too op
-			atk1-=atk1/5;
-		}if(movename.equals("Facade") && pkmn1.hasStatusAilment()){
-			atk1*=2; // DOUBLE ATK WOOOOO
+			case "osmash":
+				atk1-=atk1/3;
+			break;
+			case "guaranteedCrit":
+				atk1-=atk1/5;
+			break;
+			case "facade":
+				atk1-=atk1/5;
+				if(pkmn1.hasStatusAilment()){
+					atk1*=2; // DOUBLE ATK WOOOOO
+				}
+			break;
 		}
 
 		if(pkmn1.hasSTAB(movename)){
@@ -1249,6 +1254,9 @@ public class PokemonBattleSim{
 
 		if(pkmn1.isSpecialMove(moveInteger)=="cuthp"){
 			totalDmgTaken=pkmn2.currentHP/2;
+			if(isMoveEffective(moveInteger, pkmn1, pkmn2)==2){
+				totalDmgTaken/=2;
+			}
 		}
 
 		//record highest dmg
@@ -1933,6 +1941,11 @@ public class PokemonBattleSim{
 					wair(s,1);
 				}
 			break;
+			case "osmash":
+				playerMons[playerMonActive].raiseStat("ATK");
+				playerMons[playerMonActive].raiseStat("ATK");
+				System.out.println(playerMons[playerMonActive].name+"'s ATK rose greatly!");
+			break;
 		}
 	}
 
@@ -2079,6 +2092,11 @@ public class PokemonBattleSim{
 					System.out.println(cpuMons[cpuMonActive].name+"'s DEF rose!");
 					wair(s,1);
 				}
+			break;
+			case "osmash":
+				cpuMons[cpuMonActive].raiseStat("ATK");
+				cpuMons[cpuMonActive].raiseStat("ATK");
+				System.out.println(cpuMons[cpuMonActive].name+"'s ATK rose greatly!");
 			break;
 		}
 	}
@@ -2718,7 +2736,8 @@ public class PokemonBattleSim{
 
 	//-------------PRINT METHODS-----------//
 	
-	private static void printPkmnNamesPage(String[] namesVector, int page, int lastPage){
+	private static void printPkmnNamesPage(String[] namesVector, int page, int lastPage)throws IOException{
+		BufferedWriter cout = new BufferedWriter(new OutputStreamWriter(System.out));
 		int coumter=0;
 		int from=0, to=0;//0-35, 36-71, 72-107
 		boolean toLeft=false, toRight=false;
@@ -2759,23 +2778,25 @@ public class PokemonBattleSim{
 			arrRight=">";
 		}
 
-		System.out.println("                 "+arrLeft+" Page "+page+" "+arrRight);
+		cout.write("                 "+arrLeft+" Page "+page+" "+arrRight+"\n");
 		for(int i=from; i<=to;i++){
 			String space="";
 			if(coumter<3){
-				System.out.print(" "+namesVector[i]);
+				cout.write(" "+namesVector[i]);
 				for(int j=0;j<=12-(namesVector[i].length());j++){
 					space+=" ";
 				}
-				System.out.print(space+"|");
+				cout.write(space+"|");
 				coumter++;
 			} else{
 				coumter=0;
-				System.out.println("");
+				cout.write("\n");
 				i--;
 			}
 		}
-		System.out.println("");
+		cout.write("\n");
+		cout.flush();
+		//cout.close(); <-- DO NOT
 	}
 
 	private static void printHelpMMScreen()throws IOException, InterruptedException{
@@ -2998,101 +3019,169 @@ public class PokemonBattleSim{
 		System.out.println("________________________________________________");
 		System.out.println(playerMons[playerMonActive].moveset[0][selec]+":");
 		System.out.println(playerMons[playerMonActive].moveset[1][selec]+" move \n");
-		switch(playerMons[playerMonActive].isSpecialMove(selec)){
-			default:
-				System.out.println("Deals damage!");
-			break;
-			case "+priority":
-				System.out.println("This move has priority, making it go first!");
-			break;
-			case "lifedrain":
-				System.out.println("-33% ATK");
-				System.out.println("Half of damage dealt -> HP recovery");
-			break;
-			case "rngBurn":
-				System.out.println("20% chance to inflict "+Clr.RED_B+"burn"+Clr.R+" after using the move.");
-			break;
-			case "rngPoison":
-				System.out.println("20% chance to inflict "+Clr.MAGENTA_B+"poison"+Clr.R+" after using the move.");
-			break;
-			case "rngParalysis":
-				System.out.println("20% chance to inflict "+Clr.YELLOW_B+"paralysis"+Clr.R+" after using the move.");
-			break;
-			case "rngDebuffSpeed":
-				System.out.println("40% chance to decrease the enemy's SPEED.");
-			break;
-			case "rngDebuffDef":
-				System.out.println("20% chance to decrease the enemy's DEF.");
-			break;
-			case "rngDebuffAtk":
-				System.out.println("20% chance to decrease the enemy's ATK.");
-			break;
-			case "buffspeed":
-				System.out.println("Increases self SPEED after using the move.");
-			break;
-			case "doublehit":
-				System.out.println("-33% ATK");
-				System.out.println("This move will be used twice in a row in the same turn. \n"+"Crit chance is calculated individually.");
-			break;
-			case "highcritrate":
-				System.out.println("Crit chance is higher for this move.");
-			break;
-			case "overclock":
-				System.out.println("+80% ATK");
-				System.out.println("-50% ATK after using the move.");
-			break;
-			case "ignoredef":
-				System.out.println("-25% ATK");
-				System.out.println("This move ignores the enemy Pokemon's DEF");
-			break;
-			case "powerboost":
-				System.out.println("+50% ATK from current ATK");
-				System.out.println("Decreases self SPEED after using the move.");
-			break;
-			case "debuffatk":
-				System.out.println("Debuffs the enemy's ATK after using this move.");
-			break;
-			case "defisatk":
-				System.out.println("Uses the enemy Pokemon's DEF stat as ATK");
-			break;
-			case "recoil":
-				System.out.println("+33% ATK from current ATK");
-				System.out.println("Recieve 1/3 of damage dealt as recoil damage.");
-			break;
-			case "rngMultihit":
-				System.out.println("-66% ATK");
-				System.out.println("STAB reduced by 87.5%");
-				System.out.println("Adds a random number of Hits to the move (from +0 to +6)");
-			break;
-			case "supEffective":
-				System.out.println("-33% ATK");
-				System.out.println("This move will always be super effective.");
-			break;
-			case "plus2hit":
-				System.out.println("-75% ATK");
-				System.out.println("STAB reduced by 50%");
-				System.out.println("+2 Hits");
-			break;
-			case "adversity":
-				System.out.println("50% of missing HP -> ATK for this move");
-				if(playerMons[playerMonActive].moveset[0][selec].equals("X")){
+		if(moveIsAnAttack(playerMons[playerMonActive].moveset[1][selec])){
+			switch(playerMons[playerMonActive].isSpecialMove(selec)){
+				default:
+					System.out.println("Deals damage!");
+				break;
+				case "+priority":
+					System.out.println("This move has priority, making it go first!");
+				break;
+				case "lifedrain":
 					System.out.println("-33% ATK");
-					System.out.println("+1 Hit");
-				}if(playerMons[playerMonActive].moveset[0][selec].equals("Ascension")){
-					System.out.println("Adds Healing Over Time effect after using the move.");
-				}
-				System.out.println("Adds 5% of missing HP to current ATK after using the move.");
-			break;
-			case "adversity2":
-				System.out.println("-66% ATK");
-				System.out.println("50% of missing HP -> ATK for this move.");
-			break;
-			case "groupB":
-				System.out.println("Combines 25% of all of your Pokemon's ATK that haven't fainted.");
-				System.out.println("(7.14% if the Pokemon team size is 6)");
-				System.out.println("Adds +1 Hit for every alive Pokemon in your full team, excluding the one using this move.");
-			break;
+					System.out.println("Half of damage dealt -> HP recovery");
+				break;
+				case "rngBurn":
+					System.out.println("20% chance to inflict "+Clr.RED_B+"burn"+Clr.R+" after using the move.");
+				break;
+				case "rngPoison":
+					System.out.println("20% chance to inflict "+Clr.MAGENTA_B+"poison"+Clr.R+" after using the move.");
+				break;
+				case "rngParalysis":
+					System.out.println("20% chance to inflict "+Clr.YELLOW_B+"paralysis"+Clr.R+" after using the move.");
+				break;
+				case "rngDebuffSpeed":
+					System.out.println("40% chance to decrease the enemy's SPEED.");
+				break;
+				case "rngDebuffDef":
+					System.out.println("20% chance to decrease the enemy's DEF.");
+				break;
+				case "rngDebuffAtk":
+					System.out.println("20% chance to decrease the enemy's ATK.");
+				break;
+				case "buffspeed":
+					System.out.println("Increases self SPEED after using the move.");
+				break;
+				case "doublehit":
+					System.out.println("-33% ATK");
+					System.out.println("This move will be used twice in a row in the same turn. \n"+"Crit chance is calculated individually.");
+				break;
+				case "highcritrate":
+					System.out.println("Crit chance is higher for this move.");
+				break;
+				case "overclock":
+					System.out.println("ATK x 1.8");
+					System.out.println("-50% ATK after using the move.");
+				break;
+				case "ignoredef":
+					System.out.println("-25% ATK");
+					System.out.println("This move ignores the enemy Pokemon's DEF");
+				break;
+				case "powerboost":
+					System.out.println("ATK x 1.5");
+					System.out.println("Decreases self SPEED after using the move.");
+				break;
+				case "debuffatk":
+					System.out.println("Debuffs the enemy's ATK after using this move.");
+				break;
+				case "defisatk":
+					System.out.println("Uses the enemy Pokemon's DEF stat as ATK");
+				break;
+				case "recoil":
+					System.out.println("ATK x 1.3");
+					System.out.println("Recieve 1/3 of damage dealt as recoil damage.");
+				break;
+				case "rngMultihit":
+					System.out.println("-66% ATK");
+					System.out.println("STAB reduced by 87.5%");
+					System.out.println("Adds a random number of Hits to the move (from +0 to +6)");
+				break;
+				case "supEffective":
+					System.out.println("-33% ATK");
+					System.out.println("This move will always be super effective.");
+				break;
+				case "plus2hit":
+					System.out.println("-75% ATK");
+					System.out.println("STAB reduced by 50%");
+					System.out.println("+2 Hits");
+				break;
+				case "adversity":
+					System.out.println("50% of missing HP -> ATK for this move");
+					if(playerMons[playerMonActive].moveset[0][selec].equals("X")){
+						System.out.println("-33% ATK");
+						System.out.println("+1 Hit");
+					}if(playerMons[playerMonActive].moveset[0][selec].equals("Ascension")){
+						System.out.println("Adds Healing Over Time effect after using the move.");
+					}
+					System.out.println("Adds 5% of missing HP to current ATK after using the move.");
+				break;
+				case "adversity2":
+					System.out.println("-66% ATK");
+					System.out.println("50% of missing HP -> ATK for this move.");
+				break;
+				case "groupB":
+					int value=0; int value2=0;
+					if(playerMons.length>3){
+						value=7;}else{value=25;
+					}
+					System.out.println("Combines "+value+"% of all of your Pokemon's ATK that haven't fainted.");
+					System.out.println("Adds +1 Hit for every alive Pokemon in your full team,\n excluding the one using this move.");
+				break;
+				case "reverseGroupB":
+					value=0; value2=0;
+					if(playerMons.length>3){
+						value=80;value2=20;}else{value=66;value2=33;
+					}
+					System.out.println("-"+value+"% ATK");
+					System.out.println("Adds +"+value2+"% ATK for every alive Pokemon in the enemy team.");
+				break;
+				case "MegaEvolutionHater":
+					System.out.println("Doubles ATK for this move if the enemy Pokemon is Mega-Evolved");
+				break;
+				case "avenger":
+					value=0; value2=0;
+					if(playerMons.length>3){
+						value=25;}else{value=50;
+					}
+					System.out.println("-25% ATK");
+					System.out.println("Adds +"+value+"% ATK for every fallen ally");
+					System.out.println("If this Pokemon is the last one standing:");
+					System.out.println(" +1 Hit for this move.");
+				break;
+				case "debuffIfBoosted":
+					System.out.println("If the ATK, DEF or SPEED of the enemy Pokemon are buffed:");
+					System.out.println(" Debuffs the enemy's ATK, DEF or SPEED at random.");
+				break;
+				case "kamikaze":
+					System.out.println("Adds +50% ATK, then ATK x 4");
+					System.out.println("The user faints after using this move");
+				break;
+				case "thundercage":
+					System.out.println("Adds 1/8 of the enemy Pokemon's HP as ATK for this move.");
+				break;
+				case "magnitude":
+					System.out.println("-66% ATK");
+					System.out.println("Multiplies ATK by a random amount (upto x7)");
+				break;
+				case "rngBuffDef":
+					System.out.println("50% chance to buff self DEF after using the move");
+				break;
+				case "buffPowerIfDebuffed":
+					System.out.println("If this Pokemon's ATK, DEF or SPEED are debuffed:");
+					System.out.println(" +50% ATK");
+					System.out.println("If not:");
+					System.out.println(" -33% ATK");
+				break;
+				case "cuthp":
+					System.out.println("This move cuts the enemy Pokemon's HP in half.");
+					System.out.println("This move ignores type weaknesses");
+					System.out.println("This move cannot Crit");
+				break;
+				case "osmash":
+					System.out.println("-33% ATK");
+					System.out.println("Buffs self ATK by 50% after using the move.");
+				break;
+				case "facade":
+					System.out.println("-20% ATK");
+					System.out.println("Doubles ATK if the user is Poisoned, Paralayzed or Burning");
+				break;
+				case "guaranteedCrit":
+					System.out.println("-20% ATK");
+					System.out.println("This move always results in a Critical hit");
+				break;
+			}
 		}
+		
 
 		System.out.println("\n"+"Press Enter to go back");
 		tcl.nextLine();
@@ -3158,7 +3247,9 @@ public class PokemonBattleSim{
 		*/
 	}
 
-	private static void printBattleHUDThing(){
+	private static void printBattleHUDThing()throws IOException{
+		//BufferedWriter is fast as heck
+		BufferedWriter cout = new BufferedWriter(new OutputStreamWriter(System.out));
 		//THESE VARIALES ARE TOO LONG WTH
 		//"playerPokemonTeam[playerPokemonActive].name"
 		int plyAliveMon= countAliveMonInTeam(playerMons);
@@ -3217,36 +3308,37 @@ public class PokemonBattleSim{
 
 		//i hate this
 		//there's 50 spaces frfrfrfrfr <-- there's actually 48
-		System.out.println(al1+alSpaces+al2);
-		System.out.print(Clr.WHITE_B+"Your Pokemon:");
+		cout.write(al1+alSpaces+al2+"\n");
+		cout.write(Clr.WHITE_B+"Your Pokemon:");
 		for(int i=0;i<35-cpuName.length()-11;i++){
 			spaces+=" ";
 		}
-		System.out.print(spaces); spaces="";
-		System.out.println(cpuName+"'s Pokemon:"+Clr.R);
-		System.out.print(" "+pk1Name);
+		cout.write(spaces); spaces="";
+		cout.write(cpuName+"'s Pokemon:"+Clr.R+"\n");
+		cout.write(" "+pk1Name);
 		for(int i=0;i<46-pk2Name.length()-(pk1Name.length());i++){
 			spaces+=" ";
 		}
-		System.out.print(spaces); spaces="";
+		cout.write(spaces); spaces="";
 
-		System.out.println(pk2Name);
+		cout.write(pk2Name+"\n");
 
-		System.out.print(" HP: "+pk1HP);
+		cout.write(" HP: "+pk1HP);
 		for(int i=0;i<38-(pk1HP+"").length()-((pk2HP+"").length());i++){
 			spaces+=" ";
 		}
-		System.out.print(spaces); spaces="";
+		cout.write(spaces); spaces="";
 
-		System.out.println("HP: "+pk2HP);
+		cout.write("HP: "+pk2HP+"\n");
 
-		System.out.print(pk1Conditions);
+		cout.write(pk1Conditions);
 		for(int i=0;i<47-(cond1Length)-(cond2Length);i++){
 			spaces+=" ";
 		}
-		System.out.print(spaces); spaces="";
-		System.out.println(pk2Conditions);
-		System.out.println("");
+		cout.write(spaces); spaces="";
+		cout.write(pk2Conditions+"\n");
+		cout.write("\n");
+		cout.flush();
 
 	  //it's gotta look like this
 	  //                    <----------------------48---------------------->
@@ -3677,7 +3769,7 @@ class Pokemon{
 			"Absol","Lopunny","Venusaur","Charizard","Blastoise","Ninetales","Mewtwo",
 			"Aggron","Blaziken","Gengar","Lucario", "Cinccino", "Audino","Alakazam","Pidgeot", "Heracross",
 			"Gardevoir","Mawile","Sceptile","Eevee","Citrus","Gyarados","Garchomp","Zamazenta","Zacian","Gallade",
-			"Diance","Yanmega"
+			"Diance","Yanmega","Lapras","Togekiss"
 		};
 
 		for(int i=0;i<list.length;i++){
@@ -3873,6 +3965,19 @@ class Pokemon{
 				addAtk=50;
 				addDef=10;
 				addSpeed=10;
+			break;
+			case "Lapras":
+				addHP=10;
+				addAtk=30;
+				addDef=5;
+				addSpeed=10;
+			break;
+			case "Togekiss":
+				addHP=30;
+				addDef=-20;
+				addAtk=25;
+				addSpeed=10;
+				this.moveset[0][0]="OverdriveSmash";
 			break;
 			case "Eevee": //eevee must go last in the switch statement o.o
 				String listVee[] = new String[]{"Vaporeon","Jolteon","Flareon","Espeon","Umbreon","Leafeon","Glaceon","Sylveon"};
@@ -4137,6 +4242,13 @@ class Pokemon{
 
 			//cut hp in half
 			case "Ruination": return "cuthp";
+
+			//-33% atk, adds sword dance effect after use
+			case "OverdriveSmash": return "osmash";
+
+			case "Facade": return "facade";
+
+			case "Flower Trick": return "guaranteedCrit";
 		}
 		
 		//----type only----//
@@ -5438,7 +5550,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		String[] moveTableAtkDragon = new String[]{"Dragon Breath","Dragon Rush","Dragon Pulse","Dragon Tail","Draco Meteor"};
 		String[] moveTableAtkDark = new String[]{"Pursuit","Bite","Sucker Punch","Crunch","Night Slash","Assurance","Ruination"};
 		String[] moveTableAtkSteel = new String[]{"Metal Claw","Iron Tail","Iron Head","Flash Cannon","Iron Hammer","Bullet Punch","Steel Wing","Make it Rain","Behemoth Blade","Behemoth Bash","Gigaton Hammer"};
-		String[] moveTableAtkFairy = new String[]{"Moonblast","Play Rough","Draining Kiss","Halo","Fleur Cannon","MistyExplosion","Alluring Voice"};
+		String[] moveTableAtkFairy = new String[]{"Moonblast","Play Rough","Draining Kiss","Halo","Fleur Cannon","MistyExplosion","Alluring Voice","OverdriveSmash"};
 
 		switch (typ) {
 			case "status":table=moveTableStatus;break;
