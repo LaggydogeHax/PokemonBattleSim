@@ -50,7 +50,7 @@ public class PokemonBattleSim{
 			clear();
 			selecshon="";
 			
-			System.out.println(Clr.GREEN_B+"[Pokemon Battle Sim beta4]"+Clr.R);
+			System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4 snapshot1]"+Clr.R);
 			System.out.println("Choose a Pokemon!!");
 			System.out.println("Type its name to select it");
 			System.out.println("Type a number to view that page");
@@ -1001,6 +1001,11 @@ public class PokemonBattleSim{
 		if(mon.isParalized){
 			mon.currentSPEED/=2;
 		}
+
+		if(mon.moveset[0][movselec].equals("Ruination")){
+			return false;
+		}
+
 		if((mon.currentSPEED)>rng.nextInt(806)//RANDOM CRIT MWAHAHAHAHAHA
 			|| (mon.moveset[0][movselec].equals("Flower Trick"))){//Flower trick guaranteed crit
 				return true;
@@ -2885,6 +2890,7 @@ public class PokemonBattleSim{
 		System.out.println("________________________________________________");
 		System.out.println("[1] Your Mon ("+playerMons[playerMonActive].name+")");
 		System.out.println("[2] "+cpuName+"'s Mon ("+cpuMons[cpuMonActive].name+")");
+		System.out.println("[3] Your Pokemon moveset");
 		do{
 			try{
 				input=tcl.nextInt();
@@ -2892,7 +2898,13 @@ public class PokemonBattleSim{
 				input=69;
 				tcl.nextLine();
 			}
-		}while(input!=1 && input!=2);
+		}while(input!=1 && input!=2 && input!=3);
+
+		if(input==3){
+			tcl.nextLine();
+			printMoveInfo();
+			return;
+		}
 		clear();
 		if(input==1){
 			tempPkmn=playerMons[playerMonActive];
@@ -2962,6 +2974,128 @@ public class PokemonBattleSim{
 		System.out.println("Press Enter to go back");
 		tcl.nextLine();
 		tcl.nextLine(); //java shenanigans
+	}
+
+	private static void printMoveInfo()throws IOException, InterruptedException{
+		int selec=69;
+		clear();
+		printBattleHUDThing();
+		System.out.println("Select a move to see its info.");
+		System.out.println("________________________________________________");
+		printPlayerActivePkmnMoveset(false);
+
+		do{
+			try{
+				selec=Integer.parseInt(tcl.nextLine());
+			}catch(Exception e){
+				selec=69;
+			}
+		}while(selec<1 || selec>4);
+		selec--;
+
+		clear();
+		printBattleHUDThing();
+		System.out.println("________________________________________________");
+		System.out.println(playerMons[playerMonActive].moveset[0][selec]+":");
+		System.out.println(playerMons[playerMonActive].moveset[1][selec]+" move \n");
+		switch(playerMons[playerMonActive].isSpecialMove(selec)){
+			default:
+				System.out.println("Deals damage!");
+			break;
+			case "+priority":
+				System.out.println("This move has priority, making it go first!");
+			break;
+			case "lifedrain":
+				System.out.println("-33% ATK");
+				System.out.println("Half of damage dealt -> HP recovery");
+			break;
+			case "rngBurn":
+				System.out.println("20% chance to inflict "+Clr.RED_B+"burn"+Clr.R+" after using the move.");
+			break;
+			case "rngPoison":
+				System.out.println("20% chance to inflict "+Clr.MAGENTA_B+"poison"+Clr.R+" after using the move.");
+			break;
+			case "rngParalysis":
+				System.out.println("20% chance to inflict "+Clr.YELLOW_B+"paralysis"+Clr.R+" after using the move.");
+			break;
+			case "rngDebuffSpeed":
+				System.out.println("40% chance to decrease the enemy's SPEED.");
+			break;
+			case "rngDebuffDef":
+				System.out.println("20% chance to decrease the enemy's DEF.");
+			break;
+			case "rngDebuffAtk":
+				System.out.println("20% chance to decrease the enemy's ATK.");
+			break;
+			case "buffspeed":
+				System.out.println("Increases self SPEED after using the move.");
+			break;
+			case "doublehit":
+				System.out.println("-33% ATK");
+				System.out.println("This move will be used twice in a row in the same turn. \n"+"Crit chance is calculated individually.");
+			break;
+			case "highcritrate":
+				System.out.println("Crit chance is higher for this move.");
+			break;
+			case "overclock":
+				System.out.println("+80% ATK");
+				System.out.println("-50% ATK after using the move.");
+			break;
+			case "ignoredef":
+				System.out.println("-25% ATK");
+				System.out.println("This move ignores the enemy Pokemon's DEF");
+			break;
+			case "powerboost":
+				System.out.println("+50% ATK from current ATK");
+				System.out.println("Decreases self SPEED after using the move.");
+			break;
+			case "debuffatk":
+				System.out.println("Debuffs the enemy's ATK after using this move.");
+			break;
+			case "defisatk":
+				System.out.println("Uses the enemy Pokemon's DEF stat as ATK");
+			break;
+			case "recoil":
+				System.out.println("+33% ATK from current ATK");
+				System.out.println("Recieve 1/3 of damage dealt as recoil damage.");
+			break;
+			case "rngMultihit":
+				System.out.println("-66% ATK");
+				System.out.println("STAB reduced by 87.5%");
+				System.out.println("Adds a random number of Hits to the move (from +0 to +6)");
+			break;
+			case "supEffective":
+				System.out.println("-33% ATK");
+				System.out.println("This move will always be super effective.");
+			break;
+			case "plus2hit":
+				System.out.println("-75% ATK");
+				System.out.println("STAB reduced by 50%");
+				System.out.println("+2 Hits");
+			break;
+			case "adversity":
+				System.out.println("50% of missing HP -> ATK for this move");
+				if(playerMons[playerMonActive].moveset[0][selec].equals("X")){
+					System.out.println("-33% ATK");
+					System.out.println("+1 Hit");
+				}if(playerMons[playerMonActive].moveset[0][selec].equals("Ascension")){
+					System.out.println("Adds Healing Over Time effect after using the move.");
+				}
+				System.out.println("Adds 5% of missing HP to current ATK after using the move.");
+			break;
+			case "adversity2":
+				System.out.println("-66% ATK");
+				System.out.println("50% of missing HP -> ATK for this move.");
+			break;
+			case "groupB":
+				System.out.println("Combines 25% of all of your Pokemon's ATK that haven't fainted.");
+				System.out.println("(7.14% if the Pokemon team size is 6)");
+				System.out.println("Adds +1 Hit for every alive Pokemon in your full team, excluding the one using this move.");
+			break;
+		}
+
+		System.out.println("\n"+"Press Enter to go back");
+		tcl.nextLine();
 	}
 
 	private static int printSelectBattleItem()throws IOException, InterruptedException{
