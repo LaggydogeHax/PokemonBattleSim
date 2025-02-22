@@ -50,7 +50,7 @@ public class PokemonBattleSim{
 			clear();
 			selecshon="";
 			
-			System.out.println(Clr.YELLOW_B+"[Pokemon Battle Sim beta4 snapshot2]"+Clr.R);
+			System.out.println(Clr.GREEN_B+"[Pokemon Battle Sim beta4.1]"+Clr.R);
 			System.out.println("Choose a Pokemon!!");
 			System.out.println("Type its name to select it");
 			System.out.println("Type a number to view that page");
@@ -1066,6 +1066,7 @@ public class PokemonBattleSim{
 				atk1+=atk1/2;
 			break;
 			case "ignoredef":
+				atk1-=atk1/4;
 				def2=0;
 			break;
 			case "defisatk":
@@ -1215,6 +1216,26 @@ public class PokemonBattleSim{
 				atk1-=atk1/5;
 				if(pkmn1.hasStatusAilment()){
 					atk1*=2; // DOUBLE ATK WOOOOO
+				}
+			break;
+			case "brokenCardMove":
+				atk1-=atk1/3;
+			break;
+			case "scnails":
+				atk1/=2;
+				monactive=0;
+				if(turnOf==1){
+					monlist = new Pokemon[playerMons.length];
+					monlist=playerMons;
+					monactive=playerMonActive;
+				}else{
+					monlist = new Pokemon[cpuMons.length];
+					monlist=cpuMons;
+					monactive=cpuMonActive;
+				}
+
+				if(monlist[monactive].currentHP<=((monlist[monactive].baseHP/3)*2)){
+					atk1*=4;
 				}
 			break;
 		}
@@ -1945,6 +1966,15 @@ public class PokemonBattleSim{
 				playerMons[playerMonActive].raiseStat("ATK");
 				playerMons[playerMonActive].raiseStat("ATK");
 				System.out.println(playerMons[playerMonActive].name+"'s ATK rose greatly!");
+				wair(s,1);
+			break;
+			case "brokenCardMove":
+				for(int i=0;i<playerMons.length;i++){
+					playerMons[i].baseATK+=25;
+					playerMons[i].currentATK+=25;
+				}
+				System.out.println("Your entire team recieved a boost!!");
+				wair(s,1);
 			break;
 		}
 	}
@@ -2097,6 +2127,15 @@ public class PokemonBattleSim{
 				cpuMons[cpuMonActive].raiseStat("ATK");
 				cpuMons[cpuMonActive].raiseStat("ATK");
 				System.out.println(cpuMons[cpuMonActive].name+"'s ATK rose greatly!");
+				wair(s,1);
+			break;
+			case "brokenCardMove":
+				for(int i=0;i<cpuMons.length;i++){
+					cpuMons[i].baseATK+=25;
+					cpuMons[i].currentATK+=25;
+				}
+				System.out.println(cpuName+"'s entire team recieved a boost!!");
+				wair(s,1);
 			break;
 		}
 	}
@@ -2911,7 +2950,7 @@ public class PokemonBattleSim{
 		System.out.println("________________________________________________");
 		System.out.println("[1] Your Mon ("+playerMons[playerMonActive].name+")");
 		System.out.println("[2] "+cpuName+"'s Mon ("+cpuMons[cpuMonActive].name+")");
-		System.out.println("[3] Your Pokemon moveset");
+		System.out.println("\n"+"[3] Your Pokemon moveset");
 		do{
 			try{
 				input=tcl.nextInt();
@@ -3084,7 +3123,8 @@ public class PokemonBattleSim{
 				case "rngMultihit":
 					System.out.println("-66% ATK");
 					System.out.println("STAB reduced by 87.5%");
-					System.out.println("Adds a random number of Hits to the move (from +0 to +6)");
+					System.out.println("Adds a random number of Hits to the move");
+					System.out.println("from +0 to +6)");
 				break;
 				case "supEffective":
 					System.out.println("-33% ATK");
@@ -3103,7 +3143,7 @@ public class PokemonBattleSim{
 					}if(playerMons[playerMonActive].moveset[0][selec].equals("Ascension")){
 						System.out.println("Adds Healing Over Time effect after using the move.");
 					}
-					System.out.println("Adds 5% of missing HP to current ATK after using the move.");
+					System.out.println("Adds 5% of missing HP to ATK after using the move.");
 				break;
 				case "adversity2":
 					System.out.println("-66% ATK");
@@ -3115,7 +3155,7 @@ public class PokemonBattleSim{
 						value=7;}else{value=25;
 					}
 					System.out.println("Combines "+value+"% of all of your Pokemon's ATK that haven't fainted.");
-					System.out.println("Adds +1 Hit for every alive Pokemon in your full team,\n excluding the one using this move.");
+					System.out.println("Adds +1 Hit for every alive Pokemon in your team,\n excluding the one using this move.");
 				break;
 				case "reverseGroupB":
 					value=0; value2=0;
@@ -3147,7 +3187,8 @@ public class PokemonBattleSim{
 					System.out.println("The user faints after using this move");
 				break;
 				case "thundercage":
-					System.out.println("Adds 1/8 of the enemy Pokemon's HP as ATK for this move.");
+					System.out.println("Adds 1/8 of the enemy Pokemon's HP as ATK");
+					System.out.println("for this move.");
 				break;
 				case "magnitude":
 					System.out.println("-66% ATK");
@@ -3173,11 +3214,85 @@ public class PokemonBattleSim{
 				break;
 				case "facade":
 					System.out.println("-20% ATK");
-					System.out.println("Doubles ATK if the user is Poisoned, Paralayzed or Burning");
+					System.out.println("Doubles ATK if the user is Poisoned, Paralyzed");
+					System.out.println("or Burning");
 				break;
 				case "guaranteedCrit":
 					System.out.println("-20% ATK");
 					System.out.println("This move always results in a Critical hit");
+				break;
+				case "brokenCardMove":
+					System.out.println("-33% ATK");
+					System.out.println("After using this move, your entire team gets");
+					System.out.println("a permanent +25 base ATK bonus");
+				break;
+				case "scnails":
+					System.out.println("Halves ATK");
+					System.out.println("If the enemy Pokemon's HP is below 2/3 of");
+					System.out.println("its max HP:");
+					System.out.println(" ATK x 4");
+				break;
+			}
+		}else{
+			switch(statusMoveHandler(playerMons[playerMonActive].moveset[0][selec])){
+				case "buffatk&def":
+					System.out.println("Increases ATK and DEF by 25%");
+				break;
+				case "buffatk2":
+					System.out.println("Increases ATK by 50%");
+				break;
+				case "buffatk":
+					System.out.println("Increases ATK by 25%");
+				break;
+				case "debuffdef":
+					System.out.println("Decreases the enemy's DEF by 25%");
+				break;
+				case "debuffdef2":
+					System.out.println("Decreases the enemy's DEF by 50%");
+				break;
+				case "debuffatk":
+					System.out.println("Decreases the enemy's ATK by 25%");
+				break;
+				case "debuffatk2":
+					System.out.println("Decreases the enemy's ATK by 50%");
+				break;
+				case "buffspeed2":
+					System.out.println("Increases SPEED by 50%");
+				break;
+				case "debuffspeed2":
+					System.out.println("Decreases the enemy's DEF by 50%");
+				break;
+				case "buffdef":
+					System.out.println("Increases DEF by 25%");
+				break;
+				case "buffdef2":
+					System.out.println("Increases DEF by 50%");
+				break;
+				case "poison":
+					System.out.println("Inflicts "+Clr.MAGENTA_B+"Poison"+Clr.R+" on the enemy.");
+				break;
+				case "burn":
+					System.out.println("Inflicts "+Clr.RED_B+"Burn"+Clr.R+" on the enemy.");
+				break;
+				case "healhalf":
+					System.out.println("Recovers half of the Pokemon's max HP");
+					System.out.println("(will only recover 1/4 if the Pokemon is using an Energy Drink)");
+				break;
+				case "hot":
+					System.out.println("The Pokemon gets Healing Over Time effect.");
+				break;
+				case "paralyze":
+					System.out.println("Inflicts "+Clr.YELLOW_B+"Paralysis"+Clr.R+" on the enemy.");
+				break;
+				case "buffatk&speed":
+					System.out.println("Increases ATK & SPEED by 25%");
+				break;
+				case "lr":
+					System.out.println("Inflicts "+Clr.RED_B+"Burn"+Clr.R+" on self.");
+					System.out.println("Missing HP -> +ATK");
+					System.out.println("The Pokemon will lose some HP when using this");
+					System.out.println("move if it's close to Full HP.");
+
 				break;
 			}
 		}
@@ -3416,6 +3531,10 @@ public class PokemonBattleSim{
 			}
 		}
 		selecshon=autoCap1+autoCap3;
+
+		if(selecshon.contains("Adp ")){ // Arceus & Dialga & Palkia GX real!
+			selecshon="ADP GX";
+		}
 
 		if(selecshon.length()>3){
 			for(int i=0; i<pkmnNamesVector.length;i++){
@@ -3769,7 +3888,7 @@ class Pokemon{
 			"Absol","Lopunny","Venusaur","Charizard","Blastoise","Ninetales","Mewtwo",
 			"Aggron","Blaziken","Gengar","Lucario", "Cinccino", "Audino","Alakazam","Pidgeot", "Heracross",
 			"Gardevoir","Mawile","Sceptile","Eevee","Citrus","Gyarados","Garchomp","Zamazenta","Zacian","Gallade",
-			"Diance","Yanmega","Lapras","Togekiss"
+			"Diance","Yanmega","Lapras","Togekiss","Weavile"
 		};
 
 		for(int i=0;i<list.length;i++){
@@ -3784,7 +3903,7 @@ class Pokemon{
 		int addAtk=0,addDef=0,addSpeed=0,addHP=0;
 		switch(this.name){
 			case "Absol":
-				addHP=10;
+				addHP=0;
 				addAtk=50;
 				addDef=-10;
 				addSpeed=20;
@@ -3839,7 +3958,7 @@ class Pokemon{
 			break;
 			case "Blaziken":
 				addHP=0;
-				addAtk=45;
+				addAtk=65;
 				addDef=5;
 				addSpeed=-20;
 			break;
@@ -3978,6 +4097,13 @@ class Pokemon{
 				addAtk=25;
 				addSpeed=10;
 				this.moveset[0][0]="OverdriveSmash";
+			break;
+			case "Weavile":
+				addHP=10;
+				addAtk=35;
+				addDef=0;
+				addSpeed=10;
+				this.moveset[0][1]="ScratchingNails";
 			break;
 			case "Eevee": //eevee must go last in the switch statement o.o
 				String listVee[] = new String[]{"Vaporeon","Jolteon","Flareon","Espeon","Umbreon","Leafeon","Glaceon","Sylveon"};
@@ -4249,6 +4375,11 @@ class Pokemon{
 			case "Facade": return "facade";
 
 			case "Flower Trick": return "guaranteedCrit";
+
+			case "AlteredCreation": return "brokenCardMove";
+
+			//more power if enemy below full HP
+			case "ScratchingNails": return "scnails";
 		}
 		
 		//----type only----//
@@ -5192,6 +5323,14 @@ class Pokemon{
 				type="Bug";
 				moveset = new String[][]{{"Lunge","Stone Axe","Vacuum Wave","Sword Dance"},{"","","",""}};
 			break;
+			case "ADP GX":
+				baseHP=280;
+				baseATK=90;
+				baseDEF=120;
+				baseSPEED=95;
+				type="Dragon";
+				moveset = new String[][]{{"AlteredCreation","Draco Meteor","Behemoth Bash","Amnesia"},{"","","",""}};
+			break;
 		}
 		
 		setTypesWnR();
@@ -5547,8 +5686,8 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		String[] moveTableAtkBug = new String[]{"Bug Bite","Life Leech","Bug Buzz","Attack Order","Pin Missile","X-Scissor","Skitter Smack","Lunge"};
 		String[] moveTableAtkRock = new String[]{"Rock Throw","Head Smash","Stone Edge","Meteor Beam","Diamond Storm","Stone Axe"};
 		String[] moveTableAtkGhost = new String[]{"Shadow Ball","Hex","Shadow Sneak","Shadow Claw","Lick"};
-		String[] moveTableAtkDragon = new String[]{"Dragon Breath","Dragon Rush","Dragon Pulse","Dragon Tail","Draco Meteor"};
-		String[] moveTableAtkDark = new String[]{"Pursuit","Bite","Sucker Punch","Crunch","Night Slash","Assurance","Ruination"};
+		String[] moveTableAtkDragon = new String[]{"Dragon Breath","Dragon Rush","Dragon Pulse","Dragon Tail","Draco Meteor","AlteredCreation"};
+		String[] moveTableAtkDark = new String[]{"Pursuit","Bite","Sucker Punch","Crunch","Night Slash","Assurance","Ruination","ScratchingNails"};
 		String[] moveTableAtkSteel = new String[]{"Metal Claw","Iron Tail","Iron Head","Flash Cannon","Iron Hammer","Bullet Punch","Steel Wing","Make it Rain","Behemoth Blade","Behemoth Bash","Gigaton Hammer"};
 		String[] moveTableAtkFairy = new String[]{"Moonblast","Play Rough","Draining Kiss","Halo","Fleur Cannon","MistyExplosion","Alluring Voice","OverdriveSmash"};
 
@@ -6357,7 +6496,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 	}
 
 	public static String[] getSuperSecretMonList(){ //extremely secret ok? shhh
-		String[] secretMonList = new String[]{"Celebi ex","Regieleki"};
+		String[] secretMonList = new String[]{"Celebi ex","Regieleki","ADP GX"};
 
 		return secretMonList;
 	}
