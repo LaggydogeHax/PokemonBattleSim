@@ -50,7 +50,7 @@ public class PokemonBattleSim{
 			clear();
 			selecshon="";
 			
-			System.out.println(Clr.GREEN_B+"[Pokemon Battle Sim beta4.1]"+Clr.R);
+			System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim beta5 dev1]"+Clr.R);
 			System.out.println("Choose a Pokemon!!");
 			System.out.println("Type its name to select it");
 			System.out.println("Type a number to view that page");
@@ -207,7 +207,7 @@ public class PokemonBattleSim{
 		printCPUTeam();
 		System.out.println("");
 		wair(s,1);
-		System.out.println("Epic battle begins in:");
+		System.out.println(Clr.RED_B+"Epic battle begins in:"+Clr.R);
 		wair(s,1);
 		System.out.println("3");
 		wair(s,1);
@@ -576,12 +576,14 @@ public class PokemonBattleSim{
 			wair(s,1);
 			clear();
 			cpuMons[cpuMonActive].currentHP-=getSmackedBich;//applies dmg
-			printBattleHUDThing();
+
+			printBattleHUDSequence(2, Clr.YELLOW_BB, Clr.YELLOW,true, playerMons[playerMonActive].name+" used "+playerMons[playerMonActive].moveset[0][moveSelec]+"!"); //animation!!
+			
 			System.out.println(playerMons[playerMonActive].name+" used "+playerMons[playerMonActive].moveset[0][moveSelec]+"!");
 			if(playerMons[playerMonActive].isSpecialMove(moveSelec).equals("magnitude")){
 				System.out.println("Magnitude "+(playerMons[playerMonActive].extraDmg+4)+"!");
 			}
-			wair(s,1);
+			wair(m,500000);
 			
 			switch (isMoveEffective(moveSelec, playerMons[playerMonActive], cpuMons[cpuMonActive])){
 				case 1:
@@ -755,12 +757,14 @@ public class PokemonBattleSim{
 			wair(s,1);
 			clear();
 			playerMons[playerMonActive].currentHP-=getSmackedBich;//applies dmg
-			printBattleHUDThing();
+
+			printBattleHUDSequence(1, Clr.CYAN_BB, Clr.CYAN,false, cpuMons[cpuMonActive].name+" used "+cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]+"!");
+
 			System.out.println(cpuMons[cpuMonActive].name+" used "+cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]+"!");
 			if(cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec).equals("magnitude")){
 				System.out.println("Magnitude "+(cpuMons[cpuMonActive].extraDmg+4)+"!");
 			}
-			wair(s,1);
+			wair(m,500000);
 			
 			switch(isMoveEffective(cpuMoveSelec, cpuMons[cpuMonActive],playerMons[playerMonActive])){
 				case 0:
@@ -2840,7 +2844,7 @@ public class PokemonBattleSim{
 
 	private static void printHelpMMScreen()throws IOException, InterruptedException{
 		clear();
-		System.out.println(Clr.GREEN_B+"[Pokemon Battle Sim beta4]"+Clr.R);
+		System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim beta5 dev1]"+Clr.R);
 		System.out.println("");
 		System.out.println("Totally super cool commands for the Main Menu:");
 		System.out.println("");
@@ -2859,7 +2863,8 @@ public class PokemonBattleSim{
 		tcl.nextLine();
 	}
 
-	private static void printPlayerActivePkmnMoveset(boolean plyWillMegaEvolve){
+	private static void printPlayerActivePkmnMoveset(boolean plyWillMegaEvolve)throws IOException{
+		BufferedWriter cout = new BufferedWriter(new OutputStreamWriter(System.out));
 		Pokemon mon= null;
 		if(plyWillMegaEvolve && plyCanMegaEvolve){
 			if(playerMons[playerMonActive].name.equals("Eevee")){
@@ -2878,21 +2883,22 @@ public class PokemonBattleSim{
 		int coumter=0;
 		for(int i=0;i<4;i++){//they always got 4 moves frfr
 			if(coumter<2){
-				System.out.print("["+(i+1)+"] "+mon.moveset[0][i]);
+				cout.write("["+(i+1)+"] "+mon.moveset[0][i]);
 				for(int j=0;j<20-(mon.moveset[0][i].length());j++){
-					System.out.print(" ");
+					cout.write(" ");
 				}
 				coumter++;
 				if(coumter<2){
-					System.out.print("| ");
+					cout.write("| ");
 				}
 			}else{
 				coumter=0;
-				System.out.println("");
+				cout.write("\n");
 				i--;
 			}
 		}
-		System.out.println("");
+		cout.write("\n");
+		cout.flush();
 		/*Your active Pokemon:       CPU's Active Pokemon:
 		 * [1] move 1             | [2] move 2
 		 * [3] move 3             | [4] move 4
@@ -3362,22 +3368,44 @@ public class PokemonBattleSim{
 		*/
 	}
 
-	private static void printBattleHUDThing()throws IOException{
+	private static void printBattleHUDThing(int playerHit, Clr ANSIcolor,String msg)throws IOException{
+		//playerHit.. 1=ye, 2=cpu hit. other = do nothing
+		//ANSIcolor = get ANSI escape sequence from enum Clr
+
+		if(playerHit!=1 && playerHit!=2){
+			ANSIcolor=Clr.R;
+		}
+
 		//BufferedWriter is fast as heck
 		BufferedWriter cout = new BufferedWriter(new OutputStreamWriter(System.out));
 		//THESE VARIALES ARE TOO LONG WTH
 		//"playerPokemonTeam[playerPokemonActive].name"
 		int plyAliveMon= countAliveMonInTeam(playerMons);
 		int cpuAliveMon= countAliveMonInTeam(cpuMons);
+
 		String pk1Name=playerMons[playerMonActive].name;
 		String pk2Name=cpuMons[cpuMonActive].name;
 		int pk1HP=playerMons[playerMonActive].currentHP;
 		int pk2HP=cpuMons[cpuMonActive].currentHP;
+
 		String spaces="";
 		String par=Clr.YELLOW_B+"[PAR]"+Clr.R,
 			   psn=Clr.MAGENTA_B+"[PSN]"+Clr.R,
 			   brn=Clr.RED_B+"[BRN]"+Clr.R;
 		String pk1Conditions=" ",pk2Conditions=" ";
+
+		int ansiLength = ((ANSIcolor+"").length());
+		int resemtLength = ((Clr.R+"").length());
+
+		int truePk1NameLength = pk1Name.length();
+		int truePk2NameLength = pk2Name.length();
+		if(playerHit==1){// name string = ANSI.COLOR + name + ANSI.RESET
+			//truePk1NameLength= ansiLength+(pk1Name.length())+resemtLength;
+			pk1Name=ANSIcolor+pk1Name+Clr.R;
+		}if(playerHit==2){
+			pk2Name=ANSIcolor+pk2Name+Clr.R;
+		}
+
 		int cond1Length=1, cond2Length=1;
 
 		if(playerMons[playerMonActive].isParalized){
@@ -3401,6 +3429,7 @@ public class PokemonBattleSim{
 			pk2Conditions+=brn;
 			cond2Length+=5;
 		}
+
 		//get & print number of alive mons in both teams on hud
 		String al1="";
 		String al2="";
@@ -3421,23 +3450,30 @@ public class PokemonBattleSim{
 			alSpaces+=" ";
 		}
 
-		//i hate this
 		//there's 50 spaces frfrfrfrfr <-- there's actually 48
+
+		//----top line: displays number of alive mon in each team----//
 		cout.write(al1+alSpaces+al2+"\n");
+
+		//---second line: just displays "Your Pokemon:  CPU's Pokemon:"---//
 		cout.write(Clr.WHITE_B+"Your Pokemon:");
 		for(int i=0;i<35-cpuName.length()-11;i++){
 			spaces+=" ";
 		}
 		cout.write(spaces); spaces="";
 		cout.write(cpuName+"'s Pokemon:"+Clr.R+"\n");
+		
+
+		//----third line: displays the names of the active Pokemon----//
 		cout.write(" "+pk1Name);
-		for(int i=0;i<46-pk2Name.length()-(pk1Name.length());i++){
+		for(int i=0;i<46-truePk2NameLength-truePk1NameLength;i++){
 			spaces+=" ";
 		}
 		cout.write(spaces); spaces="";
 
 		cout.write(pk2Name+"\n");
 
+		//----fourth line: display HP count for both pokemon----//
 		cout.write(" HP: "+pk1HP);
 		for(int i=0;i<38-(pk1HP+"").length()-((pk2HP+"").length());i++){
 			spaces+=" ";
@@ -3446,6 +3482,7 @@ public class PokemonBattleSim{
 
 		cout.write("HP: "+pk2HP+"\n");
 
+		//----fifth line: display status ailments (if any) for both pokemon---//
 		cout.write(pk1Conditions);
 		for(int i=0;i<47-(cond1Length)-(cond2Length);i++){
 			spaces+=" ";
@@ -3453,6 +3490,9 @@ public class PokemonBattleSim{
 		cout.write(spaces); spaces="";
 		cout.write(pk2Conditions+"\n");
 		cout.write("\n");
+		if(!msg.equals("")){ //prints whatever string was passed
+			cout.write(msg+"\n");
+		}
 		cout.flush();
 
 	  //it's gotta look like this
@@ -3462,6 +3502,39 @@ public class PokemonBattleSim{
 	  //System.out.println(" HP:69                                    HP:69 ");
 	  //System.out.println(" [PAR][PSN][BRN]			    [PAR][PSN][BRN] ");
 	}
+
+	private static void printBattleHUDThing()throws IOException{
+		printBattleHUDThing(0,Clr.R,"");
+	}
+
+	private static void printBattleHUDSequence(int ply, Clr color1, Clr color2,boolean shake,String msg)throws IOException, InterruptedException{
+		//colored animation wip
+		//int ply = 1 player ; 2 = cpu
+		//print colored name with color1, then color2, then go back to normal
+		if(shake){
+			System.out.println(); //xd
+			printBattleHUDThing(ply, color1, msg);
+			wair(m,20000);
+			clear();
+			printBattleHUDThing(ply, color1, msg);
+			wair(m,20000);
+			clear();
+			System.out.println();
+			printBattleHUDThing(ply, color2, msg);
+			wair(m,10000);
+			clear();
+			printBattleHUDThing();
+		}else{
+			printBattleHUDThing(ply, color1, msg);
+			wair(m,20000);
+			clear();
+			printBattleHUDThing(ply, color2, msg);
+			wair(m,20000);
+			clear();
+			printBattleHUDThing();
+		}
+	}
+
 
 	static void printPlayerTeam(){
 		System.out.print("Your team: ");
@@ -6522,8 +6595,19 @@ enum Clr{
     BLUE_B("\033[0;94m"),      // BLUE
     MAGENTA_B("\033[0;95m"),   // MAGENTA
     CYAN_B("\033[0;96m"),      // CYAN
-    WHITE_B("\033[0;97m");     // WHITE
-	//ty stackoverflow for the ANSI codes :3
+    WHITE_B("\033[0;97m"),     // WHITE
+
+	//BOLD + BRIGHT
+	BLACK_BB("\033[1;90m"), // BLACK
+	RED_BB("\033[1;91m"),   // RED
+    GREEN_BB("\033[1;92m"), // GREEN
+    YELLOW_BB("\033[1;93m"),// YELLOW
+    BLUE_BB("\033[1;94m"),  // BLUE
+    MAGENTA_BB("\033[1;95m"),// PURPLE
+    CYAN_BB("\033[1;96m"),  // CYAN
+    WHITE_BB("\033[1;97m"); // WHITE
+
+	//ty stackoverflow https://stackoverflow.com/questions/5762491
 	
 	private final String code;
 
