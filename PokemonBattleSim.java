@@ -7,7 +7,7 @@ import java.util.concurrent.*;
 public class PokemonBattleSim{
 	static final String OsName = System.getProperty("os.name");
 	static char s='s', m='m';
-
+	
 	static Pokemon[] playerMons = new Pokemon[3];
 	static Pokemon[] cpuMons = new Pokemon[3];
 	//cpu >> ai  there's NO intelligence to be found here
@@ -50,7 +50,7 @@ public class PokemonBattleSim{
 			clear();
 			selecshon="";
 			
-			System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim beta5 dev1]"+Clr.R);
+			System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim beta5 dev2]"+Clr.R);
 			System.out.println("Choose a Pokemon!!");
 			System.out.println("Type its name to select it");
 			System.out.println("Type a number to view that page");
@@ -550,22 +550,37 @@ public class PokemonBattleSim{
 	private static void plyerTurn()throws IOException, InterruptedException{
 		playerMons[playerMonActive].extraDmg=rng.nextInt(7);
 		if(moveIsAnAttack(playerMons[playerMonActive].moveset[1][moveSelec])){//player mon attacks cpu mon
+		
 			int trueDmg=damageCalc(playerMons[playerMonActive], cpuMons[cpuMonActive], moveSelec,0);
 			int getSmackedBich=trueDmg;
-			boolean crit=false;
-			if(rollForCrit(playerMons[playerMonActive], moveSelec, cpuMons[cpuMonActive])){//Flower trick guaranteed crit
+			int effectiveness=0;
+			boolean crit=false, shakeScreen=false;
+			
+			switch (getMoveEffectiveness(moveSelec, playerMons[playerMonActive], cpuMons[cpuMonActive])){
+				case 1:
+					shakeScreen=true;
+					effectiveness=1;
+				break;
+				case 2:
+					effectiveness=2;
+				break;
+			}
+			
+			if(rollForCrit(playerMons[playerMonActive], moveSelec, cpuMons[cpuMonActive])){
 				crit=true;
 				trueDmg*=2;
 				getSmackedBich=trueDmg;
 				saveHighestDmg(playerMons[playerMonActive].name, trueDmg);
+				shakeScreen=true;
 			}
 			
-			totalPlayerDamage+=trueDmg;
+			totalPlayerDamage+=trueDmg; //save!
 
 			if(getSmackedBich>cpuMons[cpuMonActive].currentHP){
 				getSmackedBich=cpuMons[cpuMonActive].currentHP;
 			}
-
+			
+			//start printing... now!
 			clear();
 			printBattleHUDThing();
 			System.out.println(playerMons[playerMonActive].name+" used "+playerMons[playerMonActive].moveset[0][moveSelec]+"!");
@@ -576,8 +591,12 @@ public class PokemonBattleSim{
 			wair(s,1);
 			clear();
 			cpuMons[cpuMonActive].currentHP-=getSmackedBich;//applies dmg
-
-			printBattleHUDSequence(2, Clr.YELLOW_BB, Clr.YELLOW,true, playerMons[playerMonActive].name+" used "+playerMons[playerMonActive].moveset[0][moveSelec]+"!"); //animation!!
+			
+			//animation!!!
+			Clr color2 = getColorFromType(playerMons[playerMonActive],moveSelec);
+			Clr color1 = getBrightColorFromType(playerMons[playerMonActive],moveSelec);
+			
+			printBattleHUDSequence(2, color1, color2, shakeScreen, playerMons[playerMonActive].name+" used "+playerMons[playerMonActive].moveset[0][moveSelec]+"!"); //animation!!
 			
 			System.out.println(playerMons[playerMonActive].name+" used "+playerMons[playerMonActive].moveset[0][moveSelec]+"!");
 			if(playerMons[playerMonActive].isSpecialMove(moveSelec).equals("magnitude")){
@@ -585,10 +604,10 @@ public class PokemonBattleSim{
 			}
 			wair(m,500000);
 			
-			switch (isMoveEffective(moveSelec, playerMons[playerMonActive], cpuMons[cpuMonActive])){
+			switch (effectiveness){
 				case 1:
 					System.out.println("It's super effective!!");
-					wair(m,750000); //2/3 of a second
+					wair(m,750000); // 3/4 of a sec!
 				break;
 				case 2:
 					System.out.println("It's not very effective...");
@@ -731,14 +750,28 @@ public class PokemonBattleSim{
 	private static void cpuTurn()throws IOException, InterruptedException{
 		cpuMons[cpuMonActive].extraDmg=rng.nextInt(7);
 		if(moveIsAnAttack(cpuMons[cpuMonActive].moveset[1][cpuMoveSelec])){//cpu mon attacks player mon
+		
 			int trueDmg=damageCalc(cpuMons[cpuMonActive], playerMons[playerMonActive], cpuMoveSelec,1);
 			int getSmackedBich=trueDmg;
-			boolean crit=false;
+			int effectiveness=0;
+			boolean crit=false, shakeScreen=false;
+			
+			switch(getMoveEffectiveness(cpuMoveSelec, cpuMons[cpuMonActive],playerMons[playerMonActive])){
+				case 1:
+					effectiveness=1;
+					shakeScreen=true;
+				break;
+				case 2:
+					effectiveness=2;
+				break;
+			}
+			
 			if(rollForCrit(cpuMons[cpuMonActive], cpuMoveSelec, playerMons[playerMonActive])){//guranteedcrit
 				crit=true;
 				trueDmg*=2;
 				getSmackedBich=trueDmg;
 				saveHighestDmg(cpuMons[cpuMonActive].name, trueDmg);
+				shakeScreen=true;
 			}
 
 			totalCPUDamage+=trueDmg;
@@ -757,8 +790,12 @@ public class PokemonBattleSim{
 			wair(s,1);
 			clear();
 			playerMons[playerMonActive].currentHP-=getSmackedBich;//applies dmg
-
-			printBattleHUDSequence(1, Clr.CYAN_BB, Clr.CYAN,false, cpuMons[cpuMonActive].name+" used "+cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]+"!");
+			
+			//animation!!!
+			Clr color2 = getColorFromType(cpuMons[cpuMonActive],cpuMoveSelec);
+			Clr color1 = getBrightColorFromType(cpuMons[cpuMonActive],cpuMoveSelec);
+			
+			printBattleHUDSequence(1, color1, color2, shakeScreen, cpuMons[cpuMonActive].name+" used "+cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]+"!");
 
 			System.out.println(cpuMons[cpuMonActive].name+" used "+cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]+"!");
 			if(cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec).equals("magnitude")){
@@ -766,10 +803,7 @@ public class PokemonBattleSim{
 			}
 			wair(m,500000);
 			
-			switch(isMoveEffective(cpuMoveSelec, cpuMons[cpuMonActive],playerMons[playerMonActive])){
-				case 0:
-					//neutral ouo
-				break;
+			switch(getMoveEffectiveness(cpuMoveSelec, cpuMons[cpuMonActive],playerMons[playerMonActive])){
 				case 1:
 					System.out.println("It's super effective!!");
 					wair(m,750000);
@@ -894,7 +928,7 @@ public class PokemonBattleSim{
 		wair(s,2);
 	}
 
-	private static int isMoveEffective(int moveselec, Pokemon mon1, Pokemon mon2){
+	private static int getMoveEffectiveness(int moveselec, Pokemon mon1, Pokemon mon2){
 		//String mon2Type=mon2.type;
 		String movType=mon1.moveset[1][moveselec];
 		String movName=mon1.moveset[0][moveselec];
@@ -1038,16 +1072,13 @@ public class PokemonBattleSim{
 		int baseatk1=pkmn1.baseATK;
 		double doEmStab=baseatk1;
 		int def2=pkmn2.currentDEF;
-		//String movetype = pkmn1.moveset[1][moveInteger]; //gets type from selected move slot
 		String movename = pkmn1.moveset[0][moveInteger]; //gets move name blablabla
 		int totalDmgTaken;
-		//formula dmg dealt = (atk+STAB)-(def/2)*weakness or resistance (x2 if weakness, 1/2 if resists)
+		//formula dmg dealt = TotalATK - (enemyDEF/400 x TotalATK) x (Type Weakness Mult) + (rng nonesense) x (Number of Hits) x (Crit Damage Mult)
 		//(stab bonus= base atk*1.5);
-		//then add a bit of epic randomness by doin a bit or less dmg than normal
 		int hehehe = rng.nextInt(21);
-		hehehe-=10;
-
-		//time to test a new defense formula, using percentage dmg reduction
+		hehehe-=10; //<-- random nonesense
+		
 		//def range from 0 to 300, 400=100% reduction, 300=75% reduction...
 		
 		//--if move has special conditions--//
@@ -1242,13 +1273,15 @@ public class PokemonBattleSim{
 					atk1*=4;
 				}
 			break;
-		}
+		}//special move switch ends
 
+		// add Same Type Attack Bonus
 		if(pkmn1.hasSTAB(movename)){
 			doEmStab=doEmStab/2;
 			atk1+=(int)doEmStab;//adds +50% atk from base
 		}
 		
+		//reduce dmg by def%
 		float def22=def2;
 		def22=def22/400;//<--def/100%
 		float atk11=atk1;
@@ -1260,9 +1293,11 @@ public class PokemonBattleSim{
 			totalDmgTaken=atk1-totalDmgTaken;
 		}
 		
+		//clamp!!
 		if(totalDmgTaken<2){totalDmgTaken=2;}
 		
-		switch(isMoveEffective(moveInteger, pkmn1, pkmn2)){
+		//soup effective?
+		switch(getMoveEffectiveness(moveInteger, pkmn1, pkmn2)){
 			case 0:
 				//neutral ouo
 			break;
@@ -1275,11 +1310,11 @@ public class PokemonBattleSim{
 		}
 
 		totalDmgTaken+=hehehe; //adds the random nonsense
-		totalDmgTaken*=nHits; // auk
+		totalDmgTaken*=nHits; // multihit multiplier
 
 		if(pkmn1.isSpecialMove(moveInteger)=="cuthp"){
 			totalDmgTaken=pkmn2.currentHP/2;
-			if(isMoveEffective(moveInteger, pkmn1, pkmn2)==2){
+			if(getMoveEffectiveness(moveInteger, pkmn1, pkmn2)==2){
 				totalDmgTaken/=2;
 			}
 		}
@@ -1480,7 +1515,7 @@ public class PokemonBattleSim{
 			}
 		}
 		cpuJustSwitched=false;
-		if(isMoveEffective(rand,cpuMons[cpuMonActive],playerMons[playerMonActive])==1){
+		if(getMoveEffectiveness(rand,cpuMons[cpuMonActive],playerMons[playerMonActive])==1){
 			//if superefective, dont register as prev used move
 			prevCpuMove="";
 		}else{
@@ -3005,7 +3040,7 @@ public class PokemonBattleSim{
 			}
 		}
 
-		System.out.println("The Pokemon's stats are reset when switching out \n");//<-- C++ reference!??
+		System.out.println("The Pokemon's stats are reset when switching out \n");//<-- C++ reference!?? //<-- huh?
 		System.out.println("Name:    "+tempPkmn.name);
 		System.out.println("Type:    "+tempPkmn.type);
 		System.out.println("HP:      "+tempPkmn.currentHP+"/"+tempPkmn.baseHP);
@@ -3514,14 +3549,14 @@ public class PokemonBattleSim{
 		if(shake){
 			System.out.println(); //xd
 			printBattleHUDThing(ply, color1, msg);
-			wair(m,20000);
+			wair(m,5000);
 			clear();
 			printBattleHUDThing(ply, color1, msg);
-			wair(m,20000);
+			wair(m,5000);
 			clear();
 			System.out.println();
 			printBattleHUDThing(ply, color2, msg);
-			wair(m,10000);
+			wair(m,3000);
 			clear();
 			printBattleHUDThing();
 		}else{
@@ -3541,11 +3576,9 @@ public class PokemonBattleSim{
 		for(int i=0;i<playerMons.length;i++){
 			if(playerMons[i]!=null){
 				if(i==3){
-					if(playerMons.length>3){
-						if(playerMons[5]!=null){
-							System.out.println();
-							System.out.print("           ");
-						}
+					if(playerMons[5]!=null){
+						System.out.println();
+						System.out.print("           ");
 					}
 				}
 				System.out.print("["+playerMons[i].name+"] ");
@@ -3720,6 +3753,108 @@ public class PokemonBattleSim{
 			highestDamage=damag;
 			highestDamageName=name;
 		}
+	}
+	
+	static private Clr getColorFromType(Pokemon mon,int moveselec){
+		String montype = mon.moveset[1][moveselec];
+		String[] typesArray = PokemonMaker3000.getTypesVector();
+		
+		for(int i=0;i<typesArray.length;i++){
+			if(montype.contains(typesArray[i])){
+				montype = typesArray[i];
+				break;
+			}
+		}
+		
+		switch(montype){
+			case "Grass": return Clr.GREEN;
+			
+			case "Fire": return Clr.RED;
+			
+			case "Water": return Clr.BLUE;
+			
+			case "Psychic": return Clr.MAGENTA;
+			
+			case "Dark": return Clr.WHITE;
+			
+			case "Fighting": return Clr.RED;
+			
+			case "Electric": return Clr.YELLOW;
+			
+			case "Flying": return Clr.CYAN;
+			
+			case "Bug": return Clr.GREEN;
+			
+			case "Ground": return Clr.YELLOW;
+			
+			case "Rock": return Clr.YELLOW;
+			
+			case "Poison": return Clr.MAGENTA;
+			
+			case "Ghost": return Clr.MAGENTA;
+			
+			case "Steel": return Clr.WHITE;
+			
+			case "Dragon": return Clr.BLUE;
+			
+			case "Fairy": return Clr.MAGENTA;
+			
+			case "Normal": return Clr.WHITE;
+			
+			case "Ice": return Clr.CYAN;
+		}
+		return Clr.R;
+	}
+	
+	static private Clr getBrightColorFromType(Pokemon mon,int moveselec){
+		String montype = mon.moveset[1][moveselec];
+		String[] typesArray = PokemonMaker3000.getTypesVector();
+		
+		for(int i=0;i<typesArray.length;i++){
+			if(montype.contains(typesArray[i])){
+				montype = typesArray[i];
+				break;
+			}
+		}
+		
+		switch(montype){
+			case "Grass": return Clr.GREEN_BB;
+			
+			case "Fire": return Clr.RED_BB;
+			
+			case "Water": return Clr.BLUE_BB;
+			
+			case "Psychic": return Clr.MAGENTA_BB;
+			
+			case "Dark": return Clr.WHITE_BB;
+			
+			case "Fighting": return Clr.RED_BB;
+			
+			case "Electric": return Clr.YELLOW_BB;
+			
+			case "Flying": return Clr.CYAN_BB;
+			
+			case "Bug": return Clr.GREEN_BB;
+			
+			case "Ground": return Clr.YELLOW_BB;
+			
+			case "Rock": return Clr.YELLOW_BB;
+			
+			case "Poison": return Clr.MAGENTA_BB;
+			
+			case "Ghost": return Clr.MAGENTA_BB;
+			
+			case "Steel": return Clr.WHITE_BB;
+			
+			case "Dragon": return Clr.BLUE_BB;
+			
+			case "Fairy": return Clr.MAGENTA_BB;
+			
+			case "Normal": return Clr.WHITE_BB;
+			
+			case "Ice": return Clr.CYAN_BB;
+		}
+		return Clr.R;
 	}
 
 	static private String getNewCPUName(){
@@ -5733,7 +5868,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		System.out.println("");
 	}
 
-	private static String[] getTypesVector(){
+	public static String[] getTypesVector(){
 		String[] typesVector = {"Fire","Water","Grass","Normal","Fighting","Flying","Poison",
 		"Ground","Rock","Bug","Ghost","Steel","Electric","Psychic","Ice","Dragon","Dark","Fairy"};
 		return typesVector;
