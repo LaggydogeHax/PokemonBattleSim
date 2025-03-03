@@ -50,7 +50,7 @@ public class PokemonBattleSim{
 			clear();
 			selecshon="";
 			
-			System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim beta5 dev2]"+Clr.R);
+			System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim beta5 dev3]"+Clr.R);
 			System.out.println("Choose a Pokemon!!");
 			System.out.println("Type its name to select it");
 			System.out.println("Type a number to view that page");
@@ -547,16 +547,31 @@ public class PokemonBattleSim{
 		tcl.nextLine();
 	}
 
-	private static void plyerTurn()throws IOException, InterruptedException{
-		playerMons[playerMonActive].extraDmg=rng.nextInt(7);
-		if(moveIsAnAttack(playerMons[playerMonActive].moveset[1][moveSelec])){//player mon attacks cpu mon
+	private static void pokemonBattleSequence(int turnOf)throws IOException, InterruptedException{
+		Pokemon cloneMon;
+		Pokemon enemyMon;
+		int selectedMove;
 		
-			int trueDmg=damageCalc(playerMons[playerMonActive], cpuMons[cpuMonActive], moveSelec,0);
+		if(turnOf==1){
+			cloneMon = playerMons[playerMonActive];
+			enemyMon = cpuMons[cpuMonActive];
+			selectedMove=moveSelec;
+		}else{
+			cloneMon = cpuMons[cpuMonActive];
+			enemyMon = playerMons[playerMonActive];
+			selectedMove=cpuMoveSelec;
+		}
+		
+		cloneMon.extraDmg=rng.nextInt(7);
+		
+		if(moveIsAnAttack(cloneMon.moveset[1][selectedMove])){
+		
+			int trueDmg=damageCalc(cloneMon, enemyMon, selectedMove,0);
 			int getSmackedBich=trueDmg;
 			int effectiveness=0;
 			boolean crit=false, shakeScreen=false;
 			
-			switch (getMoveEffectiveness(moveSelec, playerMons[playerMonActive], cpuMons[cpuMonActive])){
+			switch (getMoveEffectiveness(selectedMove, cloneMon, enemyMon)){
 				case 1:
 					shakeScreen=true;
 					effectiveness=1;
@@ -566,41 +581,56 @@ public class PokemonBattleSim{
 				break;
 			}
 			
-			if(rollForCrit(playerMons[playerMonActive], moveSelec, cpuMons[cpuMonActive])){
+			if(rollForCrit(cloneMon, selectedMove, enemyMon)){
 				crit=true;
 				trueDmg*=2;
 				getSmackedBich=trueDmg;
-				saveHighestDmg(playerMons[playerMonActive].name, trueDmg);
+				saveHighestDmg(cloneMon.name, trueDmg);
 				shakeScreen=true;
 			}
 			
-			totalPlayerDamage+=trueDmg; //save!
-
-			if(getSmackedBich>cpuMons[cpuMonActive].currentHP){
-				getSmackedBich=cpuMons[cpuMonActive].currentHP;
+			if(turnOf==1){
+				totalPlayerDamage+=trueDmg;
+			}else{
+				totalCPUDamage+=trueDmg;
+			}
+			
+			if(getSmackedBich>enemyMon.currentHP){
+				getSmackedBich=enemyMon.currentHP;
 			}
 			
 			//start printing... now!
 			clear();
 			printBattleHUDThing();
-			System.out.println(playerMons[playerMonActive].name+" used "+playerMons[playerMonActive].moveset[0][moveSelec]+"!");
-			if(playerMons[playerMonActive].isSpecialMove(moveSelec).equals("magnitude")){
+			System.out.println(cloneMon.name+" used "+cloneMon.moveset[0][selectedMove]+"!");
+			if(cloneMon.isSpecialMove(selectedMove).equals("magnitude")){
 				wair(m,750000);
-				System.out.println("Magnitude "+(playerMons[playerMonActive].extraDmg+4)+"!");
+				System.out.println("Magnitude "+(cloneMon.extraDmg+4)+"!");
 			}
 			wair(s,1);
 			clear();
-			cpuMons[cpuMonActive].currentHP-=getSmackedBich;//applies dmg
+			enemyMon.currentHP-=getSmackedBich;//applies dmg
+			
+			// auhgfjdkgkdfd
+			if(turnOf==1){
+				playerMons[playerMonActive] = cloneMon;
+				cpuMons[cpuMonActive] = enemyMon;
+			}else{
+				cpuMons[cpuMonActive] = cloneMon;
+				playerMons[playerMonActive] = enemyMon;
+			}
 			
 			//animation!!!
-			Clr color2 = getColorFromType(playerMons[playerMonActive],moveSelec);
-			Clr color1 = getBrightColorFromType(playerMons[playerMonActive],moveSelec);
+			Clr color2 = getColorFromType(cloneMon,selectedMove);
+			Clr color1 = getBrightColorFromType(cloneMon,selectedMove);
+			int colorName;
+			if(turnOf==1){ colorName=2; }else{ colorName=1; }
 			
-			printBattleHUDSequence(2, color1, color2, shakeScreen, playerMons[playerMonActive].name+" used "+playerMons[playerMonActive].moveset[0][moveSelec]+"!"); //animation!!
+			printBattleHUDSequence(colorName, color1, color2, shakeScreen, cloneMon.name+" used "+cloneMon.moveset[0][selectedMove]+"!"); //animation!!
 			
-			System.out.println(playerMons[playerMonActive].name+" used "+playerMons[playerMonActive].moveset[0][moveSelec]+"!");
-			if(playerMons[playerMonActive].isSpecialMove(moveSelec).equals("magnitude")){
-				System.out.println("Magnitude "+(playerMons[playerMonActive].extraDmg+4)+"!");
+			System.out.println(cloneMon.name+" used "+cloneMon.moveset[0][selectedMove]+"!");
+			if(cloneMon.isSpecialMove(selectedMove).equals("magnitude")){
+				System.out.println("Magnitude "+(cloneMon.extraDmg+4)+"!");
 			}
 			wair(m,500000);
 			
@@ -622,10 +652,10 @@ public class PokemonBattleSim{
 			}
 			
 			//print dmg dealt
-			int numbHits=playerMons[playerMonActive].numberOfHits;
-			switch(playerMons[playerMonActive].isSpecialMove(moveSelec)){
+			int numbHits=cloneMon.numberOfHits;
+			switch(cloneMon.isSpecialMove(selectedMove)){
 				case "rngMultihit":
-					numbHits+=playerMons[playerMonActive].extraDmg;
+					numbHits+=cloneMon.extraDmg;
 				break;
 				case "plus2hit":
 					numbHits+=2;
@@ -634,24 +664,39 @@ public class PokemonBattleSim{
 					numbHits+=3;
 				break;
 				case "adversity":
-					if(playerMons[playerMonActive].moveset[0][moveSelec].equals("X")){
+					if(cloneMon.moveset[0][selectedMove].equals("X")){
 						numbHits++;
 					}
 				break;
 				case "groupB":
-					numbHits+=countAliveMonInTeam(playerMons);
+					if(turnOf==1){
+						numbHits+=countAliveMonInTeam(playerMons);
+					}else{
+						numbHits+=countAliveMonInTeam(cpuMons);
+					}
 					numbHits--;
 				break;
 				case "reverseGroupB":
-					numbHits+=countAliveMonInTeam(cpuMons);
+					if(turnOf==1){
+						numbHits+=countAliveMonInTeam(cpuMons);
+					}else{
+						numbHits+=countAliveMonInTeam(playerMons);
+					}
+					
 					numbHits--;
-					if(cpuMons[cpuMonActive].currentHP==0){
+					if(enemyMon.currentHP==0){
 						numbHits++;
 					}
 				break;
 				case "avenger":
-					if(countAliveMonInTeam(playerMons)==1){
+					if(turnOf==1){
+						if(countAliveMonInTeam(playerMons)==1){
+							numbHits++;
+						}
+					}else{
+						if(countAliveMonInTeam(cpuMons)==1){
 						numbHits++;
+						}
 					}
 				break;
 			}
@@ -663,9 +708,9 @@ public class PokemonBattleSim{
 			}
 			for(int i=0;i<numbHits;i++){
 				if(numbHits==1){
-					System.out.println("Damaged "+cpuMons[cpuMonActive].name+" for "+dmgToPrint+" points");
+					System.out.println("Damaged "+enemyMon.name+" for "+dmgToPrint+" points");
 				}else{
-					System.out.print("Damaged "+cpuMons[cpuMonActive].name+" for "+dmgVector[i]+" points");
+					System.out.print("Damaged "+enemyMon.name+" for "+dmgVector[i]+" points");
 					if(i==numbHits-1){
 						System.out.print(" ("+(trueDmg)+")!");
 					}
@@ -673,21 +718,44 @@ public class PokemonBattleSim{
 				}
 				wair(m,80000);
 			}
-			if(!playerMons[playerMonActive].energyDrink){
+			if(!cloneMon.energyDrink){
 				wair(s,1);
 			}
 			//if is special
-			specialMoveHandlerPlayerToCPU(moveSelec,getSmackedBich/numbHits);
-			wair(s,1);
-		} else {//move is a status effect
+			if(turnOf==1){
+				specialMoveHandlerPlayerToCPU(selectedMove,getSmackedBich/numbHits);
+				wair(s,1);
+			}else{
+				specialMoveHandlerCPUToPlayer(selectedMove,getSmackedBich/numbHits);
+				wair(s,1);
+			}
+			
+		} else { //move is a status effect
 			clear();
 			printBattleHUDThing();
-			System.out.println(playerMons[playerMonActive].name+" used "+playerMons[playerMonActive].moveset[0][moveSelec]+"!");
+			System.out.println(cloneMon.name+" used "+cloneMon.moveset[0][selectedMove]+"!");
 			wair(s,1);
-			//hands it over to a function mwahahah
-			statusPlayerHandler(playerMons[playerMonActive].moveset[0][moveSelec]);
+			
+			if(turnOf==1){
+				statusPlayerHandler(cloneMon.moveset[0][selectedMove]);
+			}else{
+				statusCPUHandler(cloneMon.moveset[0][selectedMove]);
+			}
 			wair(s,2);
 		}
+		
+		//if only java had c++ pointers frfr
+		if(turnOf==1){
+			playerMons[playerMonActive] = cloneMon;
+			cpuMons[cpuMonActive] = enemyMon;
+		}else{
+			cpuMons[cpuMonActive] = cloneMon;
+			playerMons[playerMonActive] = enemyMon;
+		}
+	}
+
+	private static void plyerTurn()throws IOException, InterruptedException{
+		pokemonBattleSequence(1);
 	}
 
 	private static void playerSwitchMon()throws IOException, InterruptedException{
@@ -748,144 +816,7 @@ public class PokemonBattleSim{
 	}
 
 	private static void cpuTurn()throws IOException, InterruptedException{
-		cpuMons[cpuMonActive].extraDmg=rng.nextInt(7);
-		if(moveIsAnAttack(cpuMons[cpuMonActive].moveset[1][cpuMoveSelec])){//cpu mon attacks player mon
-		
-			int trueDmg=damageCalc(cpuMons[cpuMonActive], playerMons[playerMonActive], cpuMoveSelec,1);
-			int getSmackedBich=trueDmg;
-			int effectiveness=0;
-			boolean crit=false, shakeScreen=false;
-			
-			switch(getMoveEffectiveness(cpuMoveSelec, cpuMons[cpuMonActive],playerMons[playerMonActive])){
-				case 1:
-					effectiveness=1;
-					shakeScreen=true;
-				break;
-				case 2:
-					effectiveness=2;
-				break;
-			}
-			
-			if(rollForCrit(cpuMons[cpuMonActive], cpuMoveSelec, playerMons[playerMonActive])){//guranteedcrit
-				crit=true;
-				trueDmg*=2;
-				getSmackedBich=trueDmg;
-				saveHighestDmg(cpuMons[cpuMonActive].name, trueDmg);
-				shakeScreen=true;
-			}
-
-			totalCPUDamage+=trueDmg;
-			
-			if(getSmackedBich>playerMons[playerMonActive].currentHP){
-				getSmackedBich=playerMons[playerMonActive].currentHP;
-			}
-
-			clear();
-			printBattleHUDThing();
-			System.out.println(cpuMons[cpuMonActive].name+" used "+cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]+"!");
-			if(cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec).equals("magnitude")){
-				wair(m,750000);
-				System.out.println("Magnitude "+(cpuMons[cpuMonActive].extraDmg+4)+"!");
-			}
-			wair(s,1);
-			clear();
-			playerMons[playerMonActive].currentHP-=getSmackedBich;//applies dmg
-			
-			//animation!!!
-			Clr color2 = getColorFromType(cpuMons[cpuMonActive],cpuMoveSelec);
-			Clr color1 = getBrightColorFromType(cpuMons[cpuMonActive],cpuMoveSelec);
-			
-			printBattleHUDSequence(1, color1, color2, shakeScreen, cpuMons[cpuMonActive].name+" used "+cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]+"!");
-
-			System.out.println(cpuMons[cpuMonActive].name+" used "+cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]+"!");
-			if(cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec).equals("magnitude")){
-				System.out.println("Magnitude "+(cpuMons[cpuMonActive].extraDmg+4)+"!");
-			}
-			wair(m,500000);
-			
-			switch(getMoveEffectiveness(cpuMoveSelec, cpuMons[cpuMonActive],playerMons[playerMonActive])){
-				case 1:
-					System.out.println("It's super effective!!");
-					wair(m,750000);
-				break;
-				case 2:
-					System.out.println("It's not very effective...");
-					wair(m,750000);
-				break;
-			}
-			
-			if(crit){
-				System.out.println(Clr.RED_B+"Critical Hit!!"+Clr.R);
-				crit=false;
-				wair(m,750000);
-			}
-			
-			//print dmg dealt
-			int numbHits=cpuMons[cpuMonActive].numberOfHits;
-			switch(cpuMons[cpuMonActive].isSpecialMove(cpuMoveSelec)){
-				case "rngMultihit":
-					numbHits+=cpuMons[cpuMonActive].extraDmg;
-				break;
-				case "plus2hit":
-					numbHits+=2;
-				break;
-				case "plus3hit":
-					numbHits+=3;
-				break;
-				case "adversity":
-					if(cpuMons[cpuMonActive].moveset[0][moveSelec].equals("X")){
-						numbHits++;
-					}
-				break;
-				case "groupB":
-					numbHits+=countAliveMonInTeam(cpuMons);
-					numbHits--;
-				break;
-				case "reverseGroupB":
-					numbHits+=countAliveMonInTeam(playerMons);
-					numbHits--;
-					if(playerMons[playerMonActive].currentHP==0){
-						numbHits++;
-					}
-				break;
-				case "avenger":
-					if(countAliveMonInTeam(cpuMons)==1){
-						numbHits++;
-					}
-				break;
-			}
-
-			int dmgToPrint=(trueDmg/numbHits);
-			int[] dmgVector=null;
-			if(numbHits>1){
-				dmgVector=randomizeMultihitValues(trueDmg,numbHits);
-			}
-			for(int i=0;i<numbHits;i++){
-				if(numbHits==1){
-					System.out.println("Damaged "+playerMons[playerMonActive].name+" for "+dmgToPrint+" points");
-				}else{
-					System.out.print("Damaged "+playerMons[playerMonActive].name+" for "+dmgVector[i]+" points");
-					if(i==numbHits-1){
-						System.out.print(" ("+(trueDmg)+")!");
-					}
-					System.out.println();
-				}
-				wair(m,80000);
-			}
-			wair(s,1);
-			//if is special
-			specialMoveHandlerCPUToPlayer(cpuMoveSelec,getSmackedBich);
-			wair(s,1);
-		} else {//move is a status effect
-			clear();
-			printBattleHUDThing();
-			System.out.println(cpuMons[cpuMonActive].name+" used "+cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]+"!");
-			wair(s,1);
-			//hands it over to a function mwahahah
-			statusCPUHandler(cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]);
-
-			wair(s,2);
-		}
+		pokemonBattleSequence(2);
 	}
 
 	private static void cpuSwitchMon()throws IOException, InterruptedException{
@@ -1106,6 +1037,7 @@ public class PokemonBattleSim{
 			break;
 			case "defisatk":
 				atk1=def2;
+				def2/=2;
 			break;
 			case "recoil":
 				atk1+=atk1/3;
@@ -1123,7 +1055,7 @@ public class PokemonBattleSim{
 				nHits+=2;
 			break;
 			case "plus3hit":
-				atk1-=atk1/1.65;
+				atk1-=atk1/1.85;
 				doEmStab/=3;
 				nHits+=3;
 			break;
@@ -1615,7 +1547,7 @@ public class PokemonBattleSim{
 		return ret;
 	}
 
-	private static void statusPlayerHandler(String movv){
+	private static void statusPlayerHandler(String movv)throws IOException, InterruptedException{
 		switch(statusMoveHandler(movv)){
 			case "buffatk&def":
 				playerMons[playerMonActive].raiseStat("ATK");
@@ -1712,10 +1644,36 @@ public class PokemonBattleSim{
 				wair(s,1);
 				System.out.println(playerMons[playerMonActive].name+" gained "+lostHP+" ATK!");
 			break;
+			case "assist":
+				String guh = playerMons[playerMonActive].moveset[0][moveSelec];
+				
+				String[] teamMatesMoves = new String[(playerMons.length-1)*4];
+				
+				int k=0;
+				for(int i=0;i<playerMons.length;i++){
+					if(i!=playerMonActive){
+						for(int j=0;j<4;j++){
+							teamMatesMoves[k]=playerMons[i].moveset[0][j];
+							k++;
+						}
+					}
+				}
+				
+				String randomMove = teamMatesMoves[rng.nextInt(teamMatesMoves.length)];
+				
+				playerMons[playerMonActive].moveset[0][moveSelec]=randomMove;
+				playerMons[playerMonActive].moveset[1][moveSelec]=playerMons[playerMonActive].defineMove(playerMons[playerMonActive].moveset[0][moveSelec]);
+				
+				plyerTurn();
+				
+				playerMons[playerMonActive].moveset[0][moveSelec]=guh; 
+				playerMons[playerMonActive].moveset[1][moveSelec]=playerMons[playerMonActive].defineMove(playerMons[playerMonActive].moveset[0][moveSelec]);
+				
+			break;
 		}
 	}
 
-	private static void statusCPUHandler(String movv){
+	private static void statusCPUHandler(String movv)throws IOException, InterruptedException{
 		switch(statusMoveHandler(movv)){
 			case "buffatk&def":
 				cpuMons[cpuMonActive].raiseStat("ATK");
@@ -1812,6 +1770,32 @@ public class PokemonBattleSim{
 				wair(s,1);
 				System.out.println(cpuMons[cpuMonActive].name+" gained "+lostHP+" ATK!");
 			break;
+			case "assist":
+				String guh = cpuMons[cpuMonActive].moveset[0][cpuMoveSelec];
+				
+				String[] teamMatesMoves = new String[(cpuMons.length-1)*4];
+				
+				int k=0;
+				for(int i=0;i<cpuMons.length;i++){
+					if(i!=cpuMonActive){
+						for(int j=0;j<4;j++){
+							teamMatesMoves[k]=cpuMons[i].moveset[0][j];
+							k++;
+						}
+					}
+				}
+				
+				String randomMove = teamMatesMoves[rng.nextInt(teamMatesMoves.length)];
+				
+				cpuMons[cpuMonActive].moveset[0][moveSelec]=randomMove;
+				cpuMons[cpuMonActive].moveset[1][moveSelec]=cpuMons[cpuMonActive].defineMove(cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]);
+				
+				cpuTurn();
+				
+				cpuMons[cpuMonActive].moveset[0][moveSelec]=guh; 
+				cpuMons[cpuMonActive].moveset[1][moveSelec]=cpuMons[cpuMonActive].defineMove(cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]);
+				
+			break;
 		}
 	}
 
@@ -1853,6 +1837,7 @@ public class PokemonBattleSim{
 			case "Lunar Plumage": ret="hot"; break;
 			case "Salt Cure": ret="hot"; break;
 			case "Rock Polish": ret="buffspeed2"; break;
+			case "Assist": ret="assist"; break;
 		}
 		return ret;
 	}
@@ -2945,12 +2930,24 @@ public class PokemonBattleSim{
 		System.out.println("Selected Pokemon: ");
 		
 		Pokemon tempPkmn = new Pokemon(selecshon);
-		System.out.println("Name:    "+tempPkmn.name);
-		System.out.println("Type:    "+tempPkmn.type);
-		System.out.println("HP:      "+tempPkmn.baseHP);
-		System.out.println("Attack:  "+tempPkmn.baseATK);
-		System.out.println("Defense: "+tempPkmn.baseDEF);
-		System.out.println("Speed:   "+tempPkmn.baseSPEED);
+		
+		if(tempPkmn.name.equals("Missing No")){
+			System.out.println("Name:    "+tempPkmn.name);
+			System.out.println("Type:    "+tempPkmn.type);
+			System.out.println("HP:      ???");
+			System.out.println("Attack:  ???");
+			System.out.println("Defense: ???");
+			System.out.println("Speed:   ???");
+		}else{
+			System.out.println("Name:    "+tempPkmn.name);
+			System.out.println("Type:    "+tempPkmn.type);
+			System.out.println("HP:      "+tempPkmn.baseHP);
+			System.out.println("Attack:  "+tempPkmn.baseATK);
+			System.out.println("Defense: "+tempPkmn.baseDEF);
+			System.out.println("Speed:   "+tempPkmn.baseSPEED);
+		}
+		
+		
 		System.out.print("Weak to: ");
 		
 		for(int i=0;i<tempPkmn.weakTo.length;i++){
@@ -3155,7 +3152,8 @@ public class PokemonBattleSim{
 					System.out.println("Debuffs the enemy's ATK after using this move.");
 				break;
 				case "defisatk":
-					System.out.println("Uses the enemy Pokemon's DEF stat as ATK");
+					System.out.println("Uses the enemy Pokemon's DEF stat as ATK.");
+					System.out.println("Acts as if their DEF was 50% lower");
 				break;
 				case "recoil":
 					System.out.println("ATK x 1.3");
@@ -3164,8 +3162,8 @@ public class PokemonBattleSim{
 				case "rngMultihit":
 					System.out.println("-66% ATK");
 					System.out.println("STAB reduced by 87.5%");
-					System.out.println("Adds a random number of Hits to the move");
-					System.out.println("from +0 to +6)");
+					System.out.println("Adds a random number of Hits to the move.");
+					System.out.println("(from +0 to +6)");
 				break;
 				case "supEffective":
 					System.out.println("-33% ATK");
@@ -3207,7 +3205,7 @@ public class PokemonBattleSim{
 					System.out.println("Adds +"+value2+"% ATK for every alive Pokemon in the enemy team.");
 				break;
 				case "MegaEvolutionHater":
-					System.out.println("Doubles ATK for this move if the enemy Pokemon is Mega-Evolved");
+					System.out.println("Doubles ATK for this move if the enemy Pokemon is Mega-Evolved.");
 				break;
 				case "avenger":
 					value=0; value2=0;
@@ -3609,7 +3607,7 @@ public class PokemonBattleSim{
 		wair(s,1);
 		System.out.println("Highest damage dealt: "+highestDamage+", by: "+highestDamageName);
 		wair(s,1);
-		System.out.println("Damage done by you: "+totalPlayerDamage);
+		System.out.println("Damage you dealt: "+totalPlayerDamage);
 		wair(s,1);
 		System.out.println("Damage done by "+cpuName+": "+totalCPUDamage);
 	}
@@ -3775,7 +3773,7 @@ public class PokemonBattleSim{
 			
 			case "Psychic": return Clr.MAGENTA;
 			
-			case "Dark": return Clr.WHITE;
+			case "Dark": return Clr.BLACK;
 			
 			case "Fighting": return Clr.RED;
 			
@@ -3793,13 +3791,13 @@ public class PokemonBattleSim{
 			
 			case "Ghost": return Clr.MAGENTA;
 			
-			case "Steel": return Clr.WHITE;
+			case "Steel": return Clr.BLACK;
 			
 			case "Dragon": return Clr.BLUE;
 			
 			case "Fairy": return Clr.MAGENTA;
 			
-			case "Normal": return Clr.WHITE;
+			case "Normal": return Clr.BLACK;
 			
 			case "Ice": return Clr.CYAN;
 		}
@@ -3870,7 +3868,7 @@ public class PokemonBattleSim{
 
 	static private String getRandomSwitchInQuote(String monName, boolean nameCpu){
 		String[] quote = new String[]{
-			monName+" enters the field!", "Go, "+monName+"!", "It's "+monName+"!!"
+			monName+" enters the field!", "Go! "+monName+"!", "It's "+monName+"!!", "Go for it, "+monName+"!"
 		};
 		
 		if(nameCpu){
@@ -3897,7 +3895,7 @@ public class PokemonBattleSim{
 	
 	static private String getRandomSwitchOutQuote(String monName){
 		String[] quote = new String[]{
-			monName+" retreated!", monName+" went back into its pokeball!" //ughh only 2 for now!???
+			monName+" retreated!", monName+" went back into its pokeball!", monName+", get back!"
 		};
 		return quote[rng.nextInt(quote.length)];
 	}
@@ -3931,7 +3929,7 @@ class Pokemon{
 	int currentHP,currentDEF,currentATK,currentSPEED;
 	int numberOfHits=1;
 	int extraDmg=0;
-	String name,type;
+	String name,type,ability;
 	boolean isPoisoned,isBurning,isParalized,healingOverTime,megaEvolved,strike,permaBurn,energyDrink;
 	String[] weakTo = new String[5]; //listing-weaknesses
 	String[] resists= new String[5]; //listing-resistances
@@ -5539,6 +5537,15 @@ class Pokemon{
 				type="Dragon";
 				moveset = new String[][]{{"AlteredCreation","Draco Meteor","Behemoth Bash","Amnesia"},{"","","",""}};
 			break;
+			case "Missing No":
+				Random rng = new Random();
+				baseHP=rng.nextInt(200)+100;
+				baseATK=rng.nextInt(250)+10;
+				baseDEF=rng.nextInt(250)+10;
+				baseSPEED=rng.nextInt(250)+10;
+				type="Normal";
+				moveset = new String[][]{{"Water Gun","Tackle","Sky Attack","Assist"},{"","","",""}};
+			break;
 		}
 		
 		setTypesWnR();
@@ -5879,17 +5886,17 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		String[] moveTableStatus = new String[]{"Poison Powder","Will-O-Wisp","Sword Dance","Roar","Hone Claws","Calm Mind",
 		"Iron Defense","Toxic","Dragon Dance","Growl","Charm","Bulk Up","Heal Pulse","Charge","Roost","Extreme Speed","Amnesia",
 		"Aqua Ring","Impulse","Jungle Healing","Fake Tears","Scary Face","Agility","Defend Order","Work Up","Thunder Wave","Last Resort",
-		"Shift Gear","String Shot","Acid Armor","Lunar Plumage","Metal Sound","Coil","Salt Cure","Rock Polish"};
-		String[] moveTableAtkNormal = new String[]{"Quick Attack","Hyper Beam","Giga Impact","Super Fang","Facade","Swift","Judgement","Ascension","Group Beating","Retaliate"};
+		"Shift Gear","String Shot","Acid Armor","Lunar Plumage","Metal Sound","Coil","Salt Cure","Rock Polish","Assist"};
+		String[] moveTableAtkNormal = new String[]{"Quick Attack","Hyper Beam","Giga Impact","Super Fang","Facade","Swift","Judgement","Ascension","Group Beating","Retaliate","Tackle"};
 		String[] moveTableAtkFire = new String[]{"Flamethrower","Flame Charge","Overheat","Fire Blast","Mystical Fire","Bitter Blade"};
-		String[] moveTableAtkWater = new String[]{"Hydro Pump","Hydro Cannon","Surf","Whirlpool","Scald","Water Shuriken","SurgingStrikes","Muddy Water"};
+		String[] moveTableAtkWater = new String[]{"Hydro Pump","Hydro Cannon","Surf","Whirlpool","Scald","Water Shuriken","SurgingStrikes","Muddy Water","Water Gun"};
 		String[] moveTableAtkElectric = new String[]{"Thunder","Thunder Fang","Electroweb","Overdrive","Plasma Fists","Zap Cannon","Thunder Cage"};
 		String[] moveTableAtkGrass = new String[]{"Vine Whip","Giga Drain","Flower Trick","Trailblaze","Razor Leaf","Grass Knot","Wood Hammer","Leaf Blade","Solar Beam","Energy Ball","Powerful Bloom"};
 		String[] moveTableAtkIce = new String[]{"Ice Beam","Ice Fang","Freeze Dry","Blizzard","Ice Slash","Aurora Beam","Triple Axel","Avalanche"};
 		String[] moveTableAtkFighting = new String[]{"Aura Sphere","Close Combat","Rock Smash","Body Slam","Double Kick","Hammer Arm","Drain Punch","HJ Kick","Superpower","Flying Press","Focus Blast","Body Press","Sacred Sword","Vacuum Wave"};
 		String[] moveTableAtkPoison = new String[]{"Poison Leech","Toxic Spikes","Venoshock","Poison Sting","Sludge Bomb"};
 		String[] moveTableAtkGround = new String[]{"Earthquake","Mud Slap","Earth Power","X","Excite","Magnitude"};
-		String[] moveTableAtkFlying = new String[]{"Wing Attack","Gust","Aerial Ace","Dual Wingbeat","Air Slash","Brave Bird","Cyclone"};
+		String[] moveTableAtkFlying = new String[]{"Wing Attack","Gust","Aerial Ace","Dual Wingbeat","Air Slash","Brave Bird","Cyclone","Sky Attack"};
 		String[] moveTableAtkPsychic = new String[]{"Psystrike","Psychic","Dream Eater","Psybeam","Psycho Cut","Psyshock"};
 		String[] moveTableAtkBug = new String[]{"Bug Bite","Life Leech","Bug Buzz","Attack Order","Pin Missile","X-Scissor","Skitter Smack","Lunge"};
 		String[] moveTableAtkRock = new String[]{"Rock Throw","Head Smash","Stone Edge","Meteor Beam","Diamond Storm","Stone Axe"};
@@ -6704,7 +6711,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 	}
 
 	public static String[] getSuperSecretMonList(){ //extremely secret ok? shhh
-		String[] secretMonList = new String[]{"Celebi ex","Regieleki","ADP GX"};
+		String[] secretMonList = new String[]{"Celebi ex","Regieleki","ADP GX","Missing No"};
 
 		return secretMonList;
 	}
