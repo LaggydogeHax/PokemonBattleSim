@@ -50,7 +50,7 @@ public class PokemonBattleSim{
 			clear();
 			selecshon="";
 			
-			System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim beta5 dev3]"+Clr.R);
+			System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim beta5 dev3.1]"+Clr.R);
 			System.out.println("Choose a Pokemon!!");
 			System.out.println("Type its name to select it");
 			System.out.println("Type a number to view that page");
@@ -1205,6 +1205,9 @@ public class PokemonBattleSim{
 					atk1*=4;
 				}
 			break;
+			case "rngPoisonBurnPara":
+				atk1-=atk1/5;
+			break;
 		}//special move switch ends
 
 		// add Same Type Attack Bonus
@@ -2000,6 +2003,29 @@ public class PokemonBattleSim{
 				System.out.println("Your entire team recieved a boost!!");
 				wair(s,1);
 			break;
+			case "rngPoisonBurnPara":
+				if(rng.nextInt(2)==0){
+					int crippling = rng.nextInt(3);
+					switch(crippling){
+						case 0:
+							cpuMons[cpuMonActive].isBurning=true;
+							System.out.println(cpuMons[cpuMonActive].name+" is on fire!");
+							cpuCanFreeFromAilment[0]=false;
+						break;
+						case 1:
+							cpuMons[cpuMonActive].isPoisoned=true;
+							System.out.println(cpuMons[cpuMonActive].name+" is badly poisoned!");
+							cpuCanFreeFromAilment[1]=false;
+						break;
+						case 2:
+							cpuMons[cpuMonActive].isParalized=true;
+							System.out.println(cpuMons[cpuMonActive].name+" is paralyzed! it may not move!");
+							cpuCanFreeFromAilment[2]=false;
+						break;
+					}
+					wair(s,1);
+				}
+			break;
 		}
 	}
 
@@ -2160,6 +2186,29 @@ public class PokemonBattleSim{
 				}
 				System.out.println(cpuName+"'s entire team recieved a boost!!");
 				wair(s,1);
+			break;
+			case "rngPoisonBurnPara":
+				if(rng.nextInt(2)==0){
+					int crippling = rng.nextInt(3);
+					switch(crippling){
+						case 0:
+							playerMons[playerMonActive].isBurning=true;
+							System.out.println(playerMons[playerMonActive].name+" is on fire!");
+							plyCanFreeFromAilment[0]=false;
+						break;
+						case 1:
+							playerMons[playerMonActive].isPoisoned=true;
+							System.out.println(playerMons[playerMonActive].name+" is badly poisoned!");
+							plyCanFreeFromAilment[1]=false;
+						break;
+						case 2:
+							playerMons[playerMonActive].isParalized=true;
+							System.out.println(playerMons[playerMonActive].name+" is paralyzed! it may not move!");
+							plyCanFreeFromAilment[2]=false;
+						break;
+					}
+					wair(s,1);
+				}
 			break;
 		}
 	}
@@ -3271,6 +3320,11 @@ public class PokemonBattleSim{
 					System.out.println("its max HP:");
 					System.out.println(" ATK x 4");
 				break;
+				case "rngPoisonBurnPara":
+					System.out.println("-20% ATK");
+					System.out.println("50% chance to inflict Paralysis,");
+					System.out.println("Burn or Poison on the enemy.");
+				break;
 			}
 		}else{
 			switch(statusMoveHandler(playerMons[playerMonActive].moveset[0][selec])){
@@ -3315,7 +3369,8 @@ public class PokemonBattleSim{
 				break;
 				case "healhalf":
 					System.out.println("Recovers half of the Pokemon's max HP");
-					System.out.println("(will only recover 1/4 if the Pokemon is using an Energy Drink)");
+					System.out.println("(will only recover 1/4 if the Pokemon");
+					System.out.println("is using an Energy Drink)");
 				break;
 				case "hot":
 					System.out.println("The Pokemon gets Healing Over Time effect.");
@@ -3328,10 +3383,13 @@ public class PokemonBattleSim{
 				break;
 				case "lr":
 					System.out.println("Inflicts "+Clr.RED_B+"Burn"+Clr.R+" on self.");
-					System.out.println("Missing HP -> +ATK");
+					System.out.println("adds missing HP to ATK");
 					System.out.println("The Pokemon will lose some HP when using this");
 					System.out.println("move if it's close to Full HP.");
-
+				break;
+				case "assist":
+					System.out.println("Uses a random move from one of your");
+					System.out.println("team members");
 				break;
 			}
 		}
@@ -3529,11 +3587,14 @@ public class PokemonBattleSim{
 		cout.flush();
 
 	  //it's gotta look like this
-	  //                    <----------------------48---------------------->
-	  //System.out.println("Your Pokemon:                     CPU's Pokemon:");
-	  //System.out.println(" name1                                    name2 ");
-	  //System.out.println(" HP:69                                    HP:69 ");
-	  //System.out.println(" [PAR][PSN][BRN]			    [PAR][PSN][BRN] ");
+	  //<----------------------48---------------------->
+	  //[o][o][x][x][x][x]            [x][x][o][o][o][o]
+	  //Your Pokemon:                     CPU's Pokemon:
+	  // name1                                    name2 
+	  // HP:69                                    HP:69 
+	  // [PAR][PSN][BRN]			    [PAR][PSN][BRN] 
+	  //
+	  // name1 used Quick Attack!
 	}
 
 	private static void printBattleHUDThing()throws IOException{
@@ -3547,22 +3608,22 @@ public class PokemonBattleSim{
 		if(shake){
 			System.out.println(); //xd
 			printBattleHUDThing(ply, color1, msg);
-			wair(m,5000);
+			wair(m,80000);
 			clear();
 			printBattleHUDThing(ply, color1, msg);
-			wair(m,5000);
+			wair(m,80000);
 			clear();
 			System.out.println();
 			printBattleHUDThing(ply, color2, msg);
-			wair(m,3000);
+			wair(m,80000);
 			clear();
 			printBattleHUDThing();
 		}else{
 			printBattleHUDThing(ply, color1, msg);
-			wair(m,20000);
+			wair(m,80000);
 			clear();
 			printBattleHUDThing(ply, color2, msg);
-			wair(m,20000);
+			wair(m,80000);
 			clear();
 			printBattleHUDThing();
 		}
@@ -4578,14 +4639,20 @@ class Pokemon{
 			//-33% atk, adds sword dance effect after use
 			case "OverdriveSmash": return "osmash";
 
+			//double atk if has status ailment
 			case "Facade": return "facade";
-
+			
+			//guaranteed crit!
 			case "Flower Trick": return "guaranteedCrit";
-
+			
+			//arceus dialga palkia gx augh
 			case "AlteredCreation": return "brokenCardMove";
 
 			//more power if enemy below full HP
 			case "ScratchingNails": return "scnails";
+			
+			//50% chance for paralyze,poison or paralysis
+			case "Dire Claw": return "rngPoisonBurnPara";
 		}
 		
 		//----type only----//
@@ -4846,12 +4913,12 @@ class Pokemon{
 				moveset = new String[][]{{"Poison Leech","Shadow Ball","Scald","Toxic"},{"","","",""}};
 			break;
 			case "Sneasler":
-				baseHP=280;
-				baseATK=95;
+				baseHP=250;
+				baseATK=125;
 				baseDEF=40;
-				baseSPEED=120;
+				baseSPEED=110;
 				type="Poison";
-				moveset = new String[][]{{"Hyper Beam","Shadow Ball","Toxic Spikes","Sword Dance"},{"","","",""}};
+				moveset = new String[][]{{"Dire Claw","Shadow Ball","Close Combat","Sword Dance"},{"","","",""}};
 			break;
 			case "Pidgeot":
 				baseHP=310;
@@ -5894,7 +5961,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		String[] moveTableAtkGrass = new String[]{"Vine Whip","Giga Drain","Flower Trick","Trailblaze","Razor Leaf","Grass Knot","Wood Hammer","Leaf Blade","Solar Beam","Energy Ball","Powerful Bloom"};
 		String[] moveTableAtkIce = new String[]{"Ice Beam","Ice Fang","Freeze Dry","Blizzard","Ice Slash","Aurora Beam","Triple Axel","Avalanche"};
 		String[] moveTableAtkFighting = new String[]{"Aura Sphere","Close Combat","Rock Smash","Body Slam","Double Kick","Hammer Arm","Drain Punch","HJ Kick","Superpower","Flying Press","Focus Blast","Body Press","Sacred Sword","Vacuum Wave"};
-		String[] moveTableAtkPoison = new String[]{"Poison Leech","Toxic Spikes","Venoshock","Poison Sting","Sludge Bomb"};
+		String[] moveTableAtkPoison = new String[]{"Poison Leech","Toxic Spikes","Venoshock","Poison Sting","Sludge Bomb","Dire Claw"};
 		String[] moveTableAtkGround = new String[]{"Earthquake","Mud Slap","Earth Power","X","Excite","Magnitude"};
 		String[] moveTableAtkFlying = new String[]{"Wing Attack","Gust","Aerial Ace","Dual Wingbeat","Air Slash","Brave Bird","Cyclone","Sky Attack"};
 		String[] moveTableAtkPsychic = new String[]{"Psystrike","Psychic","Dream Eater","Psybeam","Psycho Cut","Psyshock"};
