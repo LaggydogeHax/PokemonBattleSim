@@ -8,6 +8,8 @@ public class PokemonBattleSim{
 	static final String OsName = System.getProperty("os.name");
 	static char s='s', m='m';
 	
+	static boolean battleAnimations=true;
+	
 	static Pokemon[] playerMons = new Pokemon[3];
 	static Pokemon[] cpuMons = new Pokemon[3];
 	//cpu >> ai  there's NO intelligence to be found here
@@ -39,6 +41,23 @@ public class PokemonBattleSim{
 		return pkmnNamesVector;
 	}
 
+	static private void setUpConfigs()throws IOException, InterruptedException{
+		PBSFileReader fr = new PBSFileReader();
+		if(fr.noErrors){
+			int[] list = fr.configList;
+			
+			playerMons = new Pokemon[list[0]];
+			cpuMons = new Pokemon[list[0]];
+			
+			if(list[1]==1){
+				battleAnimations=true;
+			}else{
+				battleAnimations=false;
+			}
+			
+		}
+	}
+
 	public static void main(String[] args)throws IOException, InterruptedException{
 		String selecshon="";
 		boolean correctName=false;
@@ -46,11 +65,13 @@ public class PokemonBattleSim{
 		int page=1,lastPage=3;
 		String[] pkmnNamesVector = getPkmnNamesVector();
 		
+		setUpConfigs();
+		
 		do{
 			clear();
 			selecshon="";
 			
-			System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim beta5 dev3.1]"+Clr.R);
+			System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim beta5 dev4]"+Clr.R);
 			System.out.println("Choose a Pokemon!!");
 			System.out.println("Type its name to select it");
 			System.out.println("Type a number to view that page");
@@ -78,7 +99,8 @@ public class PokemonBattleSim{
 				}if(selecshon.equals("Custom")){
 					correctName=true;
 				}if(selecshon.equals("Help") || selecshon.equals("6mon") || selecshon.equals("3mon")
-					|| selecshon.equals("Cpu") || selecshon.equals("Reset")){
+					|| selecshon.equals("Cpu") || selecshon.equals("Reset") || selecshon.equals("Anims Off")
+					|| selecshon.equals("Anims On")){
 					errBypass=true;
 				}
 				
@@ -109,48 +131,93 @@ public class PokemonBattleSim{
 			if(!correctName && !errBypass){
 				System.out.println("Invalid option, please try again");
 				wair(s,1);
-			}if(!correctName && errBypass){
-				if(selecshon.equals("Help")){
-					printHelpMMScreen();
-				}if(selecshon.equals("6mon")){
-					Pokemon[] mon1 = new Pokemon[6];
-					Pokemon[] mon2 = new Pokemon[6];
-					for(int i=0;i<playerMons.length;i++){
-						mon1[i]=playerMons[i];
-						mon2[i]=cpuMons[i];
+			}
+			
+			if(!correctName && errBypass){
+				
+				switch(selecshon){ // commands!
+					case "Help":
+						printHelpMMScreen();
+					break;
+					case "6mon":{
+						Pokemon[] mon1 = new Pokemon[6];
+						Pokemon[] mon2 = new Pokemon[6];
+						for(int i=0;i<playerMons.length;i++){
+							mon1[i]=playerMons[i];
+							mon2[i]=cpuMons[i];
+						}
+						playerMons = new Pokemon[6];
+						cpuMons = new Pokemon[6];
+						for(int i=0;i<playerMons.length;i++){
+							playerMons[i]=mon1[i];
+							cpuMons[i]=mon2[i];
+						}
+						
+						PBSFileReader fr = new PBSFileReader();
+						int anims=1;
+						if(!battleAnimations){anims=0;}
+						fr.saveSettingsToFile(6,anims);
+						
+						System.out.println("Team size changed to 6 Pokemon");
+						wair(s,2);
 					}
-					playerMons = new Pokemon[6];
-					cpuMons = new Pokemon[6];
-					for(int i=0;i<playerMons.length;i++){
-						playerMons[i]=mon1[i];
-						cpuMons[i]=mon2[i];
+					break;
+					case "3mon":{
+						Pokemon[] mon1 = new Pokemon[3];
+						Pokemon[] mon2 = new Pokemon[3];
+						for(int i=0;i<2;i++){
+							mon1[i]=playerMons[i];
+							mon2[i]=cpuMons[i];
+						}
+						playerMons = new Pokemon[3];
+						cpuMons = new Pokemon[3];
+						for(int i=0;i<2;i++){
+							playerMons[i]=mon1[i];
+							cpuMons[i]=mon2[i];
+						}
+						
+						PBSFileReader fr = new PBSFileReader();
+						int anims=1;
+						if(!battleAnimations){anims=0;}
+						fr.saveSettingsToFile(3,anims);
+						
+						System.out.println("Team size changed to 3 Pokemon");
+						wair(s,2);
 					}
-					System.out.println("Team size changed to 6 Pokemon");
-					wair(s,2);
-				}if(selecshon.equals("3mon")){
-					Pokemon[] mon1 = new Pokemon[3];
-					Pokemon[] mon2 = new Pokemon[3];
-					for(int i=0;i<2;i++){
-						mon1[i]=playerMons[i];
-						mon2[i]=cpuMons[i];
+					break;
+					case "Cpu":
+						cpuTeamManager(lastPage);
+					break;
+					case "Reset":
+						playerMons= new Pokemon[playerMons.length];
+						System.out.println("Player Team has been reset.");
+						wair(s,2);
+					break;
+					case "Anims On":{
+						battleAnimations=true;
+						
+						PBSFileReader fr = new PBSFileReader();
+						fr.saveSettingsToFile(playerMons.length,1);
+						
+						System.out.println("Battle Animations are now ON");
+						wair(s,2);
 					}
-					playerMons = new Pokemon[3];
-					cpuMons = new Pokemon[3];
-					for(int i=0;i<2;i++){
-						playerMons[i]=mon1[i];
-						cpuMons[i]=mon2[i];
+					break;
+					case "Anims Off":{
+						battleAnimations=false;
+						
+						PBSFileReader fr = new PBSFileReader();
+						fr.saveSettingsToFile(playerMons.length,0);
+						
+						System.out.println("Battle Animations are now OFF");
+						wair(s,2);
 					}
-					System.out.println("Team size changed to 3 Pokemon");
-					wair(s,2);
-				}if(selecshon.equals("Cpu")){
-					cpuTeamManager(lastPage);
-				}if(selecshon.equals("Reset")){
-					playerMons= new Pokemon[playerMons.length];
-					System.out.println("Player Team has been reset.");
-					wair(s,2);
+					break;
 				}
+				
 				errBypass=false;
 			}
+			
 			if(correctName){
 				switch(selecshon){
 					case "Rng":
@@ -626,9 +693,14 @@ public class PokemonBattleSim{
 			int colorName;
 			if(turnOf==1){ colorName=2; }else{ colorName=1; }
 			
-			printBattleHUDSequence(colorName, color1, color2, shakeScreen, cloneMon.name+" used "+cloneMon.moveset[0][selectedMove]+"!"); //animation!!
+			if(battleAnimations){
+				printBattleHUDSequence(colorName, color1, color2, shakeScreen, cloneMon.name+" used "+cloneMon.moveset[0][selectedMove]+"!"); //animation!!
+				System.out.println(cloneMon.name+" used "+cloneMon.moveset[0][selectedMove]+"!");
+			}else{
+				printBattleHUDThing(0,Clr.R,cloneMon.name+" used "+cloneMon.moveset[0][selectedMove]+"!");
+				wair(s,1);
+			}
 			
-			System.out.println(cloneMon.name+" used "+cloneMon.moveset[0][selectedMove]+"!");
 			if(cloneMon.isSpecialMove(selectedMove).equals("magnitude")){
 				System.out.println("Magnitude "+(cloneMon.extraDmg+4)+"!");
 			}
@@ -1031,6 +1103,9 @@ public class PokemonBattleSim{
 			case "powerboost"://hyperbeam and some others
 				atk1+=atk1/2;
 			break;
+			case "debuffselfdef":
+				atk1*=1.2;
+			break;
 			case "ignoredef":
 				atk1-=atk1/4;
 				def2=0;
@@ -1038,6 +1113,9 @@ public class PokemonBattleSim{
 			case "defisatk":
 				atk1=def2;
 				def2/=2;
+			break;
+			case "selfdefisatk":
+				atk1=pkmn1.currentDEF;
 			break;
 			case "recoil":
 				atk1+=atk1/3;
@@ -1049,8 +1127,7 @@ public class PokemonBattleSim{
 				nHits+=extraD;
 			break;
 			case "plus2hit":
-				atk1-=atk1/2;
-				atk1-=atk1/5;
+				atk1*=0.25;
 				doEmStab/=2;
 				nHits+=2;
 			break;
@@ -2026,6 +2103,11 @@ public class PokemonBattleSim{
 					wair(s,1);
 				}
 			break;
+			case "debuffselfdef":
+				playerMons[playerMonActive].decreaseStat("DEF");
+				System.out.println(playerMons[playerMonActive].name+"'s DEF fell!");
+				wair(s,1);
+			break;
 		}
 	}
 
@@ -2209,6 +2291,11 @@ public class PokemonBattleSim{
 					}
 					wair(s,1);
 				}
+			break;
+			case "debuffselfdef":
+				cpuMons[cpuMonActive].decreaseStat("DEF");
+				System.out.println(cpuMons[cpuMonActive].name+"'s DEF fell!");
+				wair(s,1);
 			break;
 		}
 	}
@@ -2913,8 +3000,7 @@ public class PokemonBattleSim{
 
 	private static void printHelpMMScreen()throws IOException, InterruptedException{
 		clear();
-		System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim beta5 dev1]"+Clr.R);
-		System.out.println("");
+		System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim beta5 dev4]"+Clr.R);
 		System.out.println("Totally super cool commands for the Main Menu:");
 		System.out.println("");
 		System.out.println("CUSTOM: allows you to create or manage a\n customized Pokemon. it can be saved to a txt file.\n");
@@ -2925,6 +3011,7 @@ public class PokemonBattleSim{
 		System.out.println("CPU: Enter the CPU Manager menu. \n");
 		System.out.println("6mon: Changes the Pokemon Team size to 6 Pokemon. \n");
 		System.out.println("3mon: Changes the Pokemon Team size to 3 Pokemon. \n");
+		System.out.println("Anims ON/OFF: Turns ON or OFF the battle animations, \n turn OFF if you experience slowdown or flickering.\n");
 		System.out.println("HELP: brings up this very cool looking screen.");
 
 		System.out.println("");
@@ -3180,7 +3267,7 @@ public class PokemonBattleSim{
 				break;
 				case "doublehit":
 					System.out.println("-33% ATK");
-					System.out.println("This move will be used twice in a row in the same turn. \n"+"Crit chance is calculated individually.");
+					System.out.println("This move will be used twice in a row in the same turn.");
 				break;
 				case "highcritrate":
 					System.out.println("Crit chance is higher for this move.");
@@ -3316,14 +3403,18 @@ public class PokemonBattleSim{
 				break;
 				case "scnails":
 					System.out.println("Halves ATK");
-					System.out.println("If the enemy Pokemon's HP is below 2/3 of");
-					System.out.println("its max HP:");
-					System.out.println(" ATK x 4");
+					System.out.println("Quadruples ATK if the enemy Pokemon's HP");
+					System.out.println("is below 2/3 of its max HP:");
 				break;
 				case "rngPoisonBurnPara":
 					System.out.println("-20% ATK");
 					System.out.println("50% chance to inflict Paralysis,");
 					System.out.println("Burn or Poison on the enemy.");
+				break;
+				case "debuffselfdef":
+					System.out.println("+20% ATK");
+					System.out.println("decreases self DEF after using");
+					System.out.println("the move.");
 				break;
 			}
 		}else{
@@ -3605,6 +3696,7 @@ public class PokemonBattleSim{
 		//colored animation wip
 		//int ply = 1 player ; 2 = cpu
 		//print colored name with color1, then color2, then go back to normal
+		
 		if(shake){
 			System.out.println(); //xd
 			printBattleHUDThing(ply, color1, msg);
@@ -3813,6 +3905,7 @@ public class PokemonBattleSim{
 			highestDamageName=name;
 		}
 	}
+	
 	
 	static private Clr getColorFromType(Pokemon mon,int moveselec){
 		String montype = mon.moveset[1][moveselec];
@@ -4484,7 +4577,6 @@ class Pokemon{
 			case "Quick Attack": return "+priority";
 			case "Vacuum Wave": return "+priority";
 
-
 			//heal half of dmg dealt, -33% ATK
 			case "Draining Kiss": return "lifedrain";
 			case "Life Leech": return "lifedrain";
@@ -4503,6 +4595,7 @@ class Pokemon{
 			case "Mud Slap": return "rngDebuffSpeed";
 			case "Electroweb": return "rngDebuffSpeed";
 			case "Muddy Water": return "rngDebuffSpeed";
+			case "Iron Head": return "rngDebuffSpeed";
 			
 			//debuff enemy def at random
 			case "Crunch": return "rngDebuffDef";
@@ -4517,6 +4610,7 @@ class Pokemon{
 			//debuff enemy atk at random
 			case "Play Rough": return "rngDebuffAtk";
 			case "Aurora Beam": return "rngDebuffAtk";
+			case "Moonblast": return "rngDebuffAtk";
 			
 			//buff self speed
 			case "Flame Charge": return "buffspeed";
@@ -4549,6 +4643,9 @@ class Pokemon{
 			case "Fleur Cannon": return "overclock";
 			case "Gigaton Hammer": return "overclock";
 			
+			//1.2x atk, debuff self def after use
+			case "Close Combat": return "debuffselfdef";
+			
 			//act as if enemy def is 1
 			case "Super Fang": return "ignoredef";
 			case "Sacred Sword": return "ignoredef";
@@ -4558,6 +4655,7 @@ class Pokemon{
 			case "Plasma Fists": return "powerboost";
 			case "Giga Impact": return "powerboost";
 			case "Meteor Beam": return "powerboost";
+			case "Thunder": return "powerboost";
 			
 			//debuff enemy atk
 			case "Mystical Fire": return "debuffatk";
@@ -4567,6 +4665,9 @@ class Pokemon{
 			//use enemy def as atk value
 			case "Psyshock": return "defisatk";
 			case "Body Slam": return "defisatk";
+			
+			//use self def as atk
+			case "Body Press": return "selfdefisatk";
 			
 			//more power but recieve a bit of dmg dealt as recoil
 			case "Brave Bird": return "recoil";
@@ -4975,9 +5076,7 @@ class Pokemon{
 				baseSPEED=85;
 				type="Fairy";
 				moveset = new String[][]{{"Play Rough","Gigaton Hammer","Dream Eater","Sword Dance"},{"","","",""}};
-			break;
-			//--I THOUGHT I HAD 36 MONS BEFORE WAVE 2 ALREADY BUT I WAS MISSING 3 ALL THIS TIME--//
-			//STEEL, DARK AND DRAGON o_o
+			break; // :3
 			case "Zarude":
 				baseHP=310;
 				baseATK=95;
@@ -5351,7 +5450,7 @@ class Pokemon{
 			case "Corviknight":
 				baseHP=410;
 				baseATK=90;
-				baseDEF=105;
+				baseDEF=115;
 				baseSPEED=80;
 				type="Flying";
 				moveset = new String[][]{{"Brave Bird","Steel Wing","Body Press","Bulk Up"},{"","","",""}};
@@ -5474,7 +5573,7 @@ class Pokemon{
 				baseDEF=115;
 				baseSPEED=110;
 				type="Fighting";									//behemoth bash
-				moveset = new String[][]{{"Close Combat","Solar Beam","Iron Head","Iron Defense"},{"","","",""}};
+				moveset = new String[][]{{"Body Press","Solar Beam","Iron Head","Iron Defense"},{"","","",""}};
 			break;
 			case "Zacian":
 				baseHP=280;
@@ -5882,6 +5981,357 @@ class Pokemon{
 		return returnar; //will return "" if failed to define the move
 	}
 }//class Pokemon ends
+
+class Ability{
+	String triggerTime="";
+	String name="";
+	
+	public Ability(String nam){ //ENORMOUS SWITCH STATEMENT!!!!!!!!!!!!!!!
+		switch(nam){
+			case "Custom":
+				//augh
+			break;
+			case "Venusaur":
+				
+			break;
+			case "Charizard":
+				
+			break;
+			case "Blastoise":
+				
+			break;
+			case "Meowscarada":
+				
+			break;
+			case "Ninetales":
+				
+			break;
+			case "Empoleon":
+				
+			break;
+			case "Raichu":
+				
+			break;
+			case "Mewtwo":
+				
+			break;
+			case "Gengar":
+				
+			break;
+			case "Dragonite":
+				
+			break;
+			case "Absol":
+				
+			break;
+			case "Gardevoir":
+				
+			break;
+			case "Glaceon":
+				
+			break;
+			case "Luxray":
+				
+			break;
+			case "Lucario":
+				
+			break;
+			case "Duraludon":
+				
+			break;
+			case "Mismagius":
+				
+			break;
+			case "Golisopod":
+				
+			break;
+			case "Heracross":
+				
+			break;
+			case "Rampardos":
+				
+			break;
+			case "Lycanroc":
+				
+			break;
+			case "Aurorus":
+				
+			case "Dugtrio":
+				
+			break;
+			case "Sandlash":
+				
+			break;
+			case "Arbok":
+				
+			break;
+			case "Sneasler":
+				
+			break;
+			case "Pidgeot":
+				
+			break;
+			case "Lugia":
+				
+			break;
+			case "Urshifu":
+				
+			break;
+			case "Audino":
+				
+			break;
+			case "Tauros":
+				
+			break;
+			case "Sylveon":
+				
+			break;
+			case "Tinkaton":
+				
+			break;
+			case "Zarude":
+				
+			break;
+			case "Dragapult":
+				
+			break;
+			case "Mawile":
+				
+			break;
+			//--------wave 2 of pokemen--------//
+			case "Blaziken":
+				
+			break;
+			case "Vaporeon":
+				
+			break;
+			case "Ursaluna":
+				
+			break;
+			case "Decidueye":
+				
+			break;
+			case "Flareon":
+				
+			break;
+			case "Lapras":
+				
+			break;
+			case "Tsareena":
+				
+			break;
+			case "Braviary":
+				
+			break;
+			case "Toxtricity":
+				
+			break;
+			case "Krookodile":
+				
+			break;
+			case "Toucannon":
+				
+			break;
+			case "Zeraora":
+				
+			break;
+			case "Weezing":
+				
+			break;
+			case "Drapion":
+				
+			break;
+			case "Walking Wake":
+				
+			break;
+			case "Roaring Moon":
+				
+			break;
+			case "Togekiss":
+				
+			break;
+			case "Florges":
+				
+			break;
+			case "Lopunny":
+				
+			break;
+			case "Cinccino":
+				
+			break;
+			case "Hawlucha":
+				
+			break;
+			case "Flutter Mane":
+				
+			break;
+			case "Trevenant":
+				
+			break;
+			case "Volcarona":
+				
+			break;
+			case "Vespiquen":
+				
+			break;
+			case "Pangoro":
+				
+			break;
+			case "Aggron":
+				
+			break;
+			case "Scizor":
+				
+			break;
+			case "Mew":
+				
+			break;
+			case "Alakazam":
+				
+			break;
+			case "Froslass":
+				
+			break;
+			case "Baxcalibur":
+				
+			break;
+			case "Hydreigon":
+				
+			break;
+			case "Zoroark":
+				
+			break;
+			case "Solrock":
+				
+			break;
+			case "Lunatone":
+				
+			break;
+			//-------- wave 3 ---------//
+			case "Delphox":
+				
+			break;
+			case "Gyarados":
+				
+			break;
+			case "Sceptile":
+				
+			break;
+			case "Typhlosion":
+				
+			break;
+			case "Greninja":
+				
+			break;
+			case "Leafeon":
+				
+			break;
+			case "Donphan":
+				
+			break;
+			case "Corviknight":
+				
+			break;
+			case "Umbreon":
+				
+			break;
+			case "Jolteon":
+				
+			break;
+			case "Espeon":
+				
+			break;
+			case "Eevee":
+				
+			break;
+			case "Arceus":
+				
+			break;
+			case "Citrus":
+				
+			break;
+			case "Toxicroak":
+				
+			break;
+			case "Cyclizar":
+				
+			break;
+			case "Garchomp":
+				
+			break;
+			case "Gholdengo":
+				
+			break;
+			case "Galvantula":
+				
+			break;
+			case "Ceruledge":
+				
+			break;
+			case "Chandelure":
+				
+			break;
+			case "Flamigo":
+				
+			break;
+			case "Zamazenta":
+				
+			break;
+			case "Zacian":
+				
+			break;
+			case "Magearna":
+				
+			break;
+			case "Celebi ex":
+				
+			break;
+			case "Cresselia":
+				
+			break;
+			case "Kingambit":
+				
+			break;
+			case "Azumarill":
+				
+			break;
+			case "Gallade":
+				
+			break;
+			case "Regieleki":
+				
+			break;
+			case "Seviper":
+				
+			break;
+			case "Garganacl":
+				
+			break;
+			case "Diance":
+				
+			break;
+			case "Weavile":
+				
+			break;
+			case "Chien-Pao":
+				
+			break;
+			case "Yanmega":
+				
+			break;
+			case "Kleavor":
+				
+			break;
+			case "ADP GX":
+				
+			break;
+			case "Missing No":
+				
+			break;
+		}
+	}
+}
+
 
 class PokemonMaker3000 extends PokemonBattleSim{
 	//funny class name
@@ -6783,7 +7233,126 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		return secretMonList;
 	}
 
-}// pokimonmaker3000 class ends frfr
+}
+
+class PBSFileReader{
+	private String path = System.getProperty("user.home")+"\\"+"PBS_Config.txt";
+	boolean noErrors = true;
+	
+	public int[] configList = new int[2];
+	
+	File saveFile = new File(this.path);
+	
+	public PBSFileReader(){
+		//Scanner sc = new Scanner(saveFile);
+		
+		if(checkFile()){
+			configList=readConfigs();
+			if(configList==null){
+				noErrors=false;
+			}
+		}else{
+			if(!makeFile()){
+				noErrors=false;
+			}else{
+				configList=readConfigs();
+				if(configList==null){
+					noErrors=false;
+				}
+			}
+		}
+	}
+	
+	public boolean checkFile(){
+		if(saveFile.exists()){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	private boolean makeFile(){
+		try{
+			FileWriter fw = new FileWriter(saveFile,true);
+
+			fw.write("// PokemonBattleSim config save file //"+"\n");
+			fw.write("// dont add or remove lines if you dont wanna break this :p //"+"\n");
+			fw.write("//"+"\n");
+			fw.write("Team size: 3"+"\n");
+			fw.write("Battle Animations: 1"+"\n");
+
+			fw.close();
+			return true;
+		}catch(Exception e){
+			return false;
+		}
+	}
+	
+	private int[] readConfigs(){
+		String[] lines = new String[2];
+		Scanner sc = null;
+		try{
+			sc = new Scanner(saveFile);
+			int j=0;
+			for(int i=0;i<5;i++){
+				if(sc.hasNextLine()){
+					lines[j]=sc.nextLine();
+					if(lines[j].contains("//")==false){
+						j++;
+					}
+				}else{
+					throw new NullPointerException("AUGH!!!");
+				}
+			}
+			
+			//grabs the numbah
+			int teemSice = Integer.parseInt(lines[0].substring(11,12)); //Team size: 3
+			int animations = Integer.parseInt(lines[1].substring(19,20)); //Battle Animations: 1
+			
+			if(!(teemSice==3 || teemSice==6)){
+				return null;
+			}if(!(animations==1 || animations==0)){
+				return null;
+			}
+			
+			
+			int[] config = new int[]{teemSice,animations};
+			
+			return config;
+			
+		}catch(Exception e){
+			if(sc!=null){
+				sc.close();
+			} 
+			return null;
+		}finally{
+			if(sc!=null){
+				sc.close();
+			}
+		}
+	}
+	
+	public void saveSettingsToFile(int teemSice,int animations){
+		try{
+			if(checkFile()){
+				this.saveFile.delete();
+			}
+			
+			FileWriter fw = new FileWriter(saveFile,true);
+
+			fw.write("// PokemonBattleSim config save file //"+"\n");
+			fw.write("// dont add or remove lines if you dont wanna break this :p //"+"\n");
+			fw.write("//"+"\n");
+			fw.write("Team size: "+teemSice+"\n");
+			fw.write("Battle Animations: "+animations+"\n");
+
+			fw.close();
+		}catch(Exception e){
+			
+		}
+	}
+	
+}
 
 enum Clr{
 	R("\033[0m"),//RESET
