@@ -6,6 +6,7 @@ import java.util.concurrent.*;
 
 public class PokemonBattleSim{
 	static final String OsName = System.getProperty("os.name");
+	static String version = "beta5 dev5";
 	static char s='s', m='m';
 	
 	static boolean battleAnimations=true;
@@ -42,7 +43,42 @@ public class PokemonBattleSim{
 	}
 
 	static private void setUpConfigs()throws IOException, InterruptedException{
+		
+		BufferedWriter cout = new BufferedWriter(new OutputStreamWriter(System.out));
+		
+		clear();
+		System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim "+version+"]"+Clr.R);
+		cout.write("                                      :~~~~     \n");
+		cout.write("^^^^:                               :^~~~~~     \n");
+		cout.write("!!~~~::                             ~~~~~!!     \n");
+		cout.write("..^!~~~J5~                       .5Y~~~!~..     \n");
+		cout.write("  .:^PP@@#!777.    ^777777777777!G@@PP!..       \n");
+		cout.write("    .##@@@@@@@5:^^^&@@@@@@@@@@@@@@@@@@7         \n");
+		cout.write("       G&&&&@@@@@@@&&@@@@@@@@@@@@@@@&&7..       \n");
+		cout.write("           .@@@@@@@  1@@@@@@@@@@@@@@  P@#       \n");
+		cout.write("         ~@@@@@@@@@@&@@@@@@@@//@@@@@@&@@@@@.    \n");
+		cout.write("         7@@@@B    @@@@@  B@&  &@B  @@B   :.    \n");
+		cout.write("GGGGGGGGGJ^!@@5    &@@@@GP   @@   @@@@5   ~     \n");
+		cout.write("@@@@@@@@@&??JJPBBBB@@@@@@@@@@@@@@@@@@@&B5.:     \n");
+		cout.write("GP&@@@@@@@@@  !BGGGPP#@@@@@@@@@@@&PPGGGBY       \n");
+		cout.write("  ?&&@@@@@@@^:     ..J@@@@@@@@@@@G..            \n");
+		cout.write("    .&&@@@@@@@!    B@@@@@@@@@@@@@@@@            \n");
+		cout.write("       &@@@@.    ~~!!G@@@@@@@@@@@@@@.           \n");
+		cout.write("    .&&@@G..    .@@@@@@@@@@@@@@@@@@@&&&&G       \n");
+		cout.write("     ^^?Y7::  .:^JJ@@@@@@@@@@@@@@@@@@@@@&       \n");
+		cout.write("        ....::Y#BBB@@@@@@@@@@@@@@@@@@@G!~       \n");
+		cout.write("            ..G@@@@@@@@@@@@@@@@@@@@@@@!         \n");
+		cout.write("            ^^B@@@@@@@@@@@@@@@@@@@@@@@5^:       \n");
+		cout.write("          .^@@@@@@@&&&&&&&&&&&&@@@@@@@@@&       \n");
+		cout.write("         !@@@@@@@@@:           #@@@@@@@@#       \n");
+		cout.flush();
+		
+		System.out.println("Loading configuration file...");
+		System.out.println("Located at: "+System.getProperty("user.home")+"\\"+"PBS_Config.txt"+"\n");
+		
+		wair(m,500000);
 		PBSFileReader fr = new PBSFileReader();
+		
 		if(fr.noErrors){
 			int[] list = fr.configList;
 			
@@ -55,6 +91,14 @@ public class PokemonBattleSim{
 				battleAnimations=false;
 			}
 			
+			System.out.println("File loaded successfully!!");
+			System.out.println("Starting up in 3 secs...");
+			wair(s,3);
+			
+		}else{
+			System.out.println("An error ocurred! check your permissions");
+			System.out.println("Starting up normally in 3 secs...");
+			wair(s,3);
 		}
 	}
 
@@ -71,7 +115,7 @@ public class PokemonBattleSim{
 			clear();
 			selecshon="";
 			
-			System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim beta5 dev4]"+Clr.R);
+			System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim "+version+"]"+Clr.R);
 			System.out.println("Choose a Pokemon!!");
 			System.out.println("Type its name to select it");
 			System.out.println("Type a number to view that page");
@@ -524,6 +568,8 @@ public class PokemonBattleSim{
 			}
 
 			statusAilmentsHandler(); //burn, poison, HoT, paralysis statuses
+			pokemonAbiliyHandler(1,false);
+			pokemonAbiliyHandler(2,false);
 
 			//----------------------CPU------------------//
 			if(cpuMons[cpuMonActive].currentHP==0){//if mon ded-- i mean fainted
@@ -619,6 +665,8 @@ public class PokemonBattleSim{
 		Pokemon enemyMon;
 		int selectedMove;
 		
+		pokemonAbiliyHandler(turnOf,true);
+		
 		if(turnOf==1){
 			cloneMon = playerMons[playerMonActive];
 			enemyMon = cpuMons[cpuMonActive];
@@ -631,7 +679,7 @@ public class PokemonBattleSim{
 		
 		cloneMon.extraDmg=rng.nextInt(7);
 		
-		if(moveIsAnAttack(cloneMon.moveset[1][selectedMove])){
+		if(cloneMon.moveIsAnAttack(selectedMove)){
 		
 			int trueDmg=damageCalc(cloneMon, enemyMon, selectedMove,0);
 			int getSmackedBich=trueDmg;
@@ -698,7 +746,7 @@ public class PokemonBattleSim{
 				System.out.println(cloneMon.name+" used "+cloneMon.moveset[0][selectedMove]+"!");
 			}else{
 				printBattleHUDThing(0,Clr.R,cloneMon.name+" used "+cloneMon.moveset[0][selectedMove]+"!");
-				wair(s,1);
+				wair(m,500000);
 			}
 			
 			if(cloneMon.isSpecialMove(selectedMove).equals("magnitude")){
@@ -1066,6 +1114,61 @@ public class PokemonBattleSim{
 		return false;
 	}
 
+	private static void pokemonAbiliyHandler(int turnOf, boolean beforeTurn){
+		if(turnOf==1){ //player
+			if(playerMons[playerMonActive].ability.triggerTime.equals("before move")){
+				if(beforeTurn){
+					switch(playerMons[playerMonActive].ability.name){
+						case "Pixilate":
+							for(int i=0;i<4;i++){
+								if(playerMons[playerMonActive].moveset[1][i].equals("Normal Attack")){
+									playerMons[playerMonActive].moveset[1][i] = "Fairy Attack";
+								}
+							}
+						break;
+						case "Super Luck":
+							playerMons[playerMonActive].currentSPEED*=2;
+						break;
+						case "Protean":
+							String typeToUse = "";
+							
+							if(playerMons[playerMonActive].moveIsAnAttack(moveSelec)){
+								for(int i=0;i<playerMons[playerMonActive].moveset[1][moveSelec].length();i++){
+									
+									if(playerMons[playerMonActive].moveset[1][moveSelec].charAt(i)!=' '){
+										typeToUse+=playerMons[playerMonActive].moveset[1][moveSelec].charAt(i);
+									}else{
+										break;
+									}
+								}
+								
+								playerMons[playerMonActive].type=typeToUse;
+								
+								playerMons[playerMonActive].setTypesWnR();
+								if(playerMons[playerMonActive].energyDrink){
+									playerMons[playerMonActive].resists= new String[]{"Nothing!"};
+								}
+							}
+							
+						break;
+					}
+				}else{
+					switch(playerMons[playerMonActive].ability.name){
+						case "Pixilate":
+							for(int i=0;i<4;i++){
+								playerMons[playerMonActive].moveset[1][i]=playerMons[playerMonActive].defineMove(playerMons[playerMonActive].moveset[0][i]);
+							}//maybe i should rewrite defineMove()
+						break;
+						case "Super Luck":
+							playerMons[playerMonActive].currentSPEED/=2;
+						break;
+					}
+				}
+				
+			}
+		}
+	}
+
 	private static int damageCalc(Pokemon pkmn1, Pokemon pkmn2, int moveInteger, int turnOf){
 		//only call this method if the specified move is not a status move
 		//turnOf 0 = player, 1 = cpu
@@ -1383,16 +1486,6 @@ public class PokemonBattleSim{
 		return sHALLNOTPASS;
 	}
 	
-	//this should be a method inside the pokemon class tbh frfr
-	private static boolean moveIsAnAttack(String move){
-		// move = Pokemon.moveset[1][int] <--gets type of move
-		if(move.contains("Attack")){
-			return true;
-		}else{
-			return false;
-		}
-	}
-
 	static String prevCpuMove=""; //SECRET STATIC VARIABLE!!!
 	
 	private static int cpuAIHandler(){//still!! no intelligence!!
@@ -1545,7 +1638,7 @@ public class PokemonBattleSim{
 		if(nu[num]){
 			ret=true;
 		}
-		if(!moveIsAnAttack(cpuMons[cpuMonActive].moveset[1][num])){
+		if(!cpuMons[cpuMonActive].moveIsAnAttack(num)){
 			//tells the cpu if it should use these status moves depending on da situation
 			switch(statusMoveHandler(cpuMons[cpuMonActive].moveset[0][num])){
 				case "hot":
@@ -3000,7 +3093,7 @@ public class PokemonBattleSim{
 
 	private static void printHelpMMScreen()throws IOException, InterruptedException{
 		clear();
-		System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim beta5 dev4]"+Clr.R);
+		System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim "+version+"]"+Clr.R);
 		System.out.println("Totally super cool commands for the Main Menu:");
 		System.out.println("");
 		System.out.println("CUSTOM: allows you to create or manage a\n customized Pokemon. it can be saved to a txt file.\n");
@@ -3077,6 +3170,7 @@ public class PokemonBattleSim{
 		}else{
 			System.out.println("Name:    "+tempPkmn.name);
 			System.out.println("Type:    "+tempPkmn.type);
+			System.out.println("Ability: "+tempPkmn.ability.name);
 			System.out.println("HP:      "+tempPkmn.baseHP);
 			System.out.println("Attack:  "+tempPkmn.baseATK);
 			System.out.println("Defense: "+tempPkmn.baseDEF);
@@ -3176,6 +3270,7 @@ public class PokemonBattleSim{
 		System.out.println("The Pokemon's stats are reset when switching out \n");//<-- C++ reference!?? //<-- huh?
 		System.out.println("Name:    "+tempPkmn.name);
 		System.out.println("Type:    "+tempPkmn.type);
+		System.out.println("Ability: "+tempPkmn.ability.name);
 		System.out.println("HP:      "+tempPkmn.currentHP+"/"+tempPkmn.baseHP);
 		System.out.println("Attack:  "+tempPkmn.currentATK+"/"+tempPkmn.baseATK);
 		System.out.println("Defense: "+tempPkmn.currentDEF+"/"+tempPkmn.baseDEF+" ("+perc+"% reduction)");
@@ -3232,7 +3327,7 @@ public class PokemonBattleSim{
 		System.out.println("________________________________________________");
 		System.out.println(playerMons[playerMonActive].moveset[0][selec]+":");
 		System.out.println(playerMons[playerMonActive].moveset[1][selec]+" move \n");
-		if(moveIsAnAttack(playerMons[playerMonActive].moveset[1][selec])){
+		if(playerMons[playerMonActive].moveIsAnAttack(selec)){
 			switch(playerMons[playerMonActive].isSpecialMove(selec)){
 				default:
 					System.out.println("Deals damage!");
@@ -4083,8 +4178,9 @@ class Pokemon{
 	int currentHP,currentDEF,currentATK,currentSPEED;
 	int numberOfHits=1;
 	int extraDmg=0;
-	String name,type,ability;
+	String name,type;
 	boolean isPoisoned,isBurning,isParalized,healingOverTime,megaEvolved,strike,permaBurn,energyDrink;
+	Ability ability=null;
 	String[] weakTo = new String[5]; //listing-weaknesses
 	String[] resists= new String[5]; //listing-resistances
 	String[][] moveset = new String[2][4]; //[0=Name; 1=Type][Slot]
@@ -4120,9 +4216,19 @@ class Pokemon{
 			return false;
 		}
 	}
+	
+	protected boolean moveIsAnAttack(int selec){
+		if(this.moveset[1][selec].contains("Attack")){
+			return true;
+		}else{
+			return false;
+		}
+	}
 
 	protected void resetStats(){
-		this.deMegaEvolve();
+		if(this.currentHP<=0){
+			this.deMegaEvolve();
+		}
 		this.currentATK=this.baseATK;
 		this.currentDEF=this.baseDEF;
 		this.currentSPEED=this.baseSPEED;
@@ -4510,10 +4616,8 @@ class Pokemon{
 		this.currentSPEED+=addSpeed;
 		this.currentHP+=addHP;
 		this.setTypesWnR();
-		this.moveset[1][0]=defineMove(this.moveset[0][0]);
-		this.moveset[1][1]=defineMove(this.moveset[0][1]);
-		this.moveset[1][2]=defineMove(this.moveset[0][2]);
-		this.moveset[1][3]=defineMove(this.moveset[0][3]);
+		this.defineAllMoves();
+		this.megaEvolved=true;
 		this.name="Mega-"+this.name; // xd
 		
 		if(this.currentATK<50){
@@ -5732,6 +5836,8 @@ class Pokemon{
 		moveset[1][1]=defineMove(moveset[0][1]);
 		moveset[1][2]=defineMove(moveset[0][2]);
 		moveset[1][3]=defineMove(moveset[0][3]);
+		
+		ability = new Ability(this.name);
 
 		items= new String[]{"Potion","X-Attack","X-Defense","X-Speed","","Dash Earring","Strike Earrings","Energy Drink"};
 		if(this.canMegaEvolve()){
@@ -5817,6 +5923,13 @@ class Pokemon{
 		}
 	}
 
+	public void defineAllMoves(){
+		this.moveset[1][0]=defineMove(this.moveset[0][0]);
+		this.moveset[1][1]=defineMove(this.moveset[0][1]);
+		this.moveset[1][2]=defineMove(this.moveset[0][2]);
+		this.moveset[1][3]=defineMove(this.moveset[0][3]);
+	} 
+
 	protected String defineMove(String move){
 		String[] moveTableStatus = PokemonMaker3000.getMoveTable("status");
 		String[] moveTableAtkNormal = PokemonMaker3000.getMoveTable("normal");
@@ -5850,133 +5963,115 @@ class Pokemon{
 		// ------------move is an attack---------- //
 		
 		// NORMAL
-		if(returnar.equals("")){// these if("") are unnecessary now but im too lazy to remove them
-			for(int i=0;i<moveTableAtkNormal.length;i++){
-				if(move.equals(moveTableAtkNormal[i])){
-					return "Normal Attack";}}}
-		
+		for(int i=0;i<moveTableAtkNormal.length;i++){
+			if(move.equals(moveTableAtkNormal[i])){
+				return "Normal Attack";
+			}
+		}
 		// GRASS
-		if(returnar.equals("")){
 		for(int i=0;i<moveTableAtkGrass.length;i++){
 			if(move.equals(moveTableAtkGrass[i])){
 				return "Grass Attack";
 			}
-		}}
-		
+		}
 		// FIRE
-		if(returnar.equals("")){
 		for(int i=0;i<moveTableAtkFire.length;i++){
 			if(move.equals(moveTableAtkFire[i])){
 				return "Fire Attack";
 			}
-		}}
+		}
 		// WATER
-		if(returnar.equals("")){
 		for(int i=0;i<moveTableAtkWater.length;i++){
 			if(move.equals(moveTableAtkWater[i])){
 				return "Water Attack";
 			}
-		}}
+		}
 		// ELECTRIC
-		if(returnar.equals("")){
-			for(int i=0;i<moveTableAtkElectric.length;i++){
-				if(move.equals(moveTableAtkElectric[i])){
-					return "Electric Attack";
-				}
-		}}
-		// FIGHTING
-		if(returnar.equals("")){
-			for(int i=0;i<moveTableAtkFighting.length;i++){
-				if(move.equals(moveTableAtkFighting[i])){
-					return "Fighting Attack";
-				}
-		}}
-		// POISON
-		if(returnar.equals("")){
-			for(int i=0;i<moveTableAtkPoison.length;i++){
-				if(move.equals(moveTableAtkPoison[i])){
-					return "Poison Attack";
-				}
-		}}
-		// FLYING
-		if(returnar.equals("")){
-			for(int i=0;i<moveTableAtkFlying.length;i++){
-				if(move.equals(moveTableAtkFlying[i])){
-					return "Flying Attack";
+		for(int i=0;i<moveTableAtkElectric.length;i++){
+			if(move.equals(moveTableAtkElectric[i])){
+				return "Electric Attack";
 			}
-		}}
+		}
+		// FIGHTING
+		for(int i=0;i<moveTableAtkFighting.length;i++){
+			if(move.equals(moveTableAtkFighting[i])){
+				return "Fighting Attack";
+			}
+		}
+		// POISON
+		for(int i=0;i<moveTableAtkPoison.length;i++){
+			if(move.equals(moveTableAtkPoison[i])){
+				return "Poison Attack";
+			}
+		}
+		// FLYING
+		for(int i=0;i<moveTableAtkFlying.length;i++){
+			if(move.equals(moveTableAtkFlying[i])){
+				return "Flying Attack";
+			}
+		}
 		// GROUND
-		if(returnar.equals("")){
 		for(int i=0;i<moveTableAtkGround.length;i++){
 			if(move.equals(moveTableAtkGround[i])){
 				return "Ground Attack";
 			}
-		}}
+		}
 		// BUG
-		if(returnar.equals("")){
-			for(int i=0;i<moveTableAtkBug.length;i++){
-				if(move.equals(moveTableAtkBug[i])){
-					return "Bug Attack";
+		for(int i=0;i<moveTableAtkBug.length;i++){
+			if(move.equals(moveTableAtkBug[i])){
+				return "Bug Attack";
 			}
-		}}
+		}
 		// ROCK
-		if(returnar.equals("")){
-			for(int i=0;i<moveTableAtkRock.length;i++){
-				if(move.equals(moveTableAtkRock[i])){
-					return "Rock Attack";
-				}
-		}}
+		for(int i=0;i<moveTableAtkRock.length;i++){
+			if(move.equals(moveTableAtkRock[i])){
+				return "Rock Attack";
+			}
+		}
 		// DRAGON
-		if(returnar.equals("")){
 		for(int i=0;i<moveTableAtkDragon.length;i++){
 			if(move.equals(moveTableAtkDragon[i])){
 				return "Dragon Attack";
 			}
-		}}
+		}
 		
 		// STEEL
-		if(returnar.equals("")){
 		for(int i=0;i<moveTableAtkSteel.length;i++){
 			if(move.equals(moveTableAtkSteel[i])){
 				return "Steel Attack";
 			}
-		}}
+		}
 		// ICE
-		if(returnar.equals("")){
 		for(int i=0;i<moveTableAtkIce.length;i++){
 			if(move.equals(moveTableAtkIce[i])){
 				return "Ice Attack";
 			}
-		}}
+		}
 		
 		// PSYCHIC
-		if(returnar.equals("")){
 		for(int i=0;i<moveTableAtkPsychic.length;i++){
 			if(move.equals(moveTableAtkPsychic[i])){
 				return "Psychic Attack";
 			}
-		}}
+		}
 		// DARK
-		if(returnar.equals("")){
-			for(int i=0;i<moveTableAtkDark.length;i++){
-				if(move.equals(moveTableAtkDark[i])){
-					return "Dark Attack";
+		for(int i=0;i<moveTableAtkDark.length;i++){
+			if(move.equals(moveTableAtkDark[i])){
+				return "Dark Attack";
 			}
-		}}
+		}
 		// GHOST
-		if(returnar.equals("")){
-			for(int i=0;i<moveTableAtkGhost.length;i++){
-				if(move.equals(moveTableAtkGhost[i])){
-					return "Ghost Attack";
-				}
-		}}
+		for(int i=0;i<moveTableAtkGhost.length;i++){
+			if(move.equals(moveTableAtkGhost[i])){
+				return "Ghost Attack";
+			}
+		}
 		// FAIRY
-		if(returnar.equals("")){
-			for(int i=0;i<moveTableAtkFairy.length;i++){
-				if(move.equals(moveTableAtkFairy[i])){
-					return "Fairy Attack";
-				}
-		}}
+		for(int i=0;i<moveTableAtkFairy.length;i++){
+			if(move.equals(moveTableAtkFairy[i])){
+				return "Fairy Attack";
+			}
+		}
 		
 		return returnar; //will return "" if failed to define the move
 	}
@@ -5989,7 +6084,7 @@ class Ability{
 	public Ability(String nam){ //ENORMOUS SWITCH STATEMENT!!!!!!!!!!!!!!!
 		switch(nam){
 			case "Custom":
-				//augh
+				//this.name="";
 			break;
 			case "Venusaur":
 				
@@ -6022,7 +6117,7 @@ class Ability{
 				
 			break;
 			case "Absol":
-				
+				this.name="Super Luck";
 			break;
 			case "Gardevoir":
 				
@@ -6056,6 +6151,7 @@ class Ability{
 			break;
 			case "Aurorus":
 				
+			break;
 			case "Dugtrio":
 				
 			break;
@@ -6084,7 +6180,7 @@ class Ability{
 				
 			break;
 			case "Sylveon":
-				
+				this.name = "Pixilate";
 			break;
 			case "Tinkaton":
 				
@@ -6221,7 +6317,7 @@ class Ability{
 				
 			break;
 			case "Greninja":
-				
+				this.name="Protean";
 			break;
 			case "Leafeon":
 				
@@ -6329,7 +6425,27 @@ class Ability{
 				
 			break;
 		}
+		
+		defineTriggerTime();
 	}
+	
+	private void defineTriggerTime(){
+		
+		String[] abilityTableBeforeMove = new String[]{"Pixilate","Super Luck","Protean"};
+		String[] abilityTableAfterGettingHit = new String[]{};
+		String[] abilityTableBeforeGettingHit = new String[] {"Magic Bounce"};
+		String[] abilityTableAtEndOfTurn = new String[]{};
+		
+		for(int i=0;i<abilityTableBeforeMove.length;i++){
+			if(name.equals(abilityTableBeforeMove[i])){
+				this.triggerTime="before move";
+				return;
+			}
+		}
+		
+		this.triggerTime="None";
+	}
+	
 }
 
 
