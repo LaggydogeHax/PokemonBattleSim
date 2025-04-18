@@ -6,7 +6,7 @@ import java.util.concurrent.*;
 
 public class PokemonBattleSim{
 	static final String OsName = System.getProperty("os.name");
-	static String version = "beta5 dev5";
+	static String version = "beta5 dev6";
 	static char s='s', m='m';
 	
 	static boolean battleAnimations=true;
@@ -21,6 +21,8 @@ public class PokemonBattleSim{
 	static Random rng = new Random();
 	static Scanner tcl = new Scanner(System.in); //STATIC SCANNER, LES GOOOO
 	static String cpuName = getNewCPUName(); // random cpu name
+	
+	static String[] typeList = PokemonMaker3000.getTypesVector();
 	
 	private static String[] getPkmnNamesVector(){
 		String[] pkmnNamesVector = new String[]{
@@ -663,6 +665,7 @@ public class PokemonBattleSim{
 	private static void pokemonBattleSequence(int turnOf)throws IOException, InterruptedException{
 		Pokemon cloneMon;
 		Pokemon enemyMon;
+		
 		int selectedMove;
 		
 		pokemonAbiliyHandler(turnOf,true);
@@ -691,7 +694,14 @@ public class PokemonBattleSim{
 					shakeScreen=true;
 					effectiveness=1;
 				break;
+				case 11:
+					shakeScreen=true;
+					effectiveness=1;
+				break;
 				case 2:
+					effectiveness=2;
+				break;
+				case 22:
 					effectiveness=2;
 				break;
 			}
@@ -984,23 +994,50 @@ public class PokemonBattleSim{
 		String movType=mon1.moveset[1][moveselec];
 		String movName=mon1.moveset[0][moveselec];
 		
-		if(mon2.resistsType(movType)){
-			if(movName.equals("Freeze Dry") && mon2.type.equals("Water")
-			|| (movName.equals("Flying Press") && mon2.isWeakToType("Flying"))
-			|| mon1.isSpecialMove(moveselec).equals("supEffective")){
-				//freeze dry is super effective agaisnt water
-				//Flying Press doubles as a Flying type move
-				//judgement is almighty!!!!!
-				return 1; // SUPER EFFECTIVE!
-			}else{
-				return 2; // NOT VERY EFFECTIVE!
+		// 1=x2 ;   11=x4  ;   2=/2  ;  22=/4 ;  0=x1
+		
+		//special conditions:
+		if(movName.equals("Freeze Dry") && mon2.isOfType("Water")){
+			
+			if(mon2.getWRValue("Ice")==0){
+				return 1;
+			}if(mon2.getWRValue("Ice")>=1){
+				return 11;
 			}
-		}if(mon2.isWeakToType(movType)
-			|| (movName.equals("Flying Press") && mon2.isWeakToType("Flying"))
-			|| mon1.isSpecialMove(moveselec).equals("supEffective")){
-			return 1; //SUPER EFFECTIVE!!!
+			
+			return 0;
 		}
-	
+		
+		if(movName.equals("Flying Press")){
+			if(mon2.isWeakToType("Flying") || mon2.isWeakToType("Fighting")){
+				if(mon2.getWRValue("Flying")>=mon2.getWRValue("Fighting")){
+					return mon2.getWRValue("Flying");
+				}else{
+					return mon2.getWRValue("Fighting");
+				}
+			}
+		}
+		
+		if(mon1.isSpecialMove(moveselec).equals("supEffective")){
+			return 1;
+		}
+		
+		if(mon2.resistsType(movType)){
+			if(mon2.getWRValue(movType)==-1){
+				return 2;
+			}if(mon2.getWRValue(movType)==-2){
+				return 22;
+			}
+		}
+		
+		if(mon2.isWeakToType(movType)){
+			if(mon2.getWRValue(movType)==1){
+				return 1;
+			}if(mon2.getWRValue(movType)==2){
+				return 11;
+			}
+		}
+		
 		return 0; // NEUTRAL!!
 	}
 
@@ -1422,6 +1459,12 @@ public class PokemonBattleSim{
 			case 2:
 				totalDmgTaken/=2;
 			break;
+			case 11: // x4 weakness
+				totalDmgTaken*=4;
+			break;
+			case 22: // 1/4 resistance
+				totalDmgTaken/=4;
+			break;
 		}
 
 		totalDmgTaken+=hehehe; //adds the random nonsense
@@ -1429,7 +1472,7 @@ public class PokemonBattleSim{
 
 		if(pkmn1.isSpecialMove(moveInteger)=="cuthp"){
 			totalDmgTaken=pkmn2.currentHP/2;
-			if(getMoveEffectiveness(moveInteger, pkmn1, pkmn2)==2){
+			if(getMoveEffectiveness(moveInteger, pkmn1, pkmn2)==2 || getMoveEffectiveness(moveInteger, pkmn1,pkmn2)==22){
 				totalDmgTaken/=2;
 			}
 		}
@@ -1620,7 +1663,8 @@ public class PokemonBattleSim{
 			}
 		}
 		cpuJustSwitched=false;
-		if(getMoveEffectiveness(rand,cpuMons[cpuMonActive],playerMons[playerMonActive])==1){
+		if(getMoveEffectiveness(rand,cpuMons[cpuMonActive],playerMons[playerMonActive])==1
+			|| getMoveEffectiveness(rand,cpuMons[cpuMonActive],playerMons[playerMonActive])==11){
 			//if superefective, dont register as prev used move
 			prevCpuMove="";
 		}else{
@@ -2676,19 +2720,17 @@ public class PokemonBattleSim{
 				playerMons[playerMonActive].energyDrink=true;
 				playerMons[playerMonActive].decreaseStat("ATK");
 				playerMons[playerMonActive].baseATK/=2;
-				String[]res=playerMons[playerMonActive].resists;
-				String[]wek=playerMons[playerMonActive].weakTo;
-				String[]newWeakto=new String[(res.length)+(wek.length)];
-				for(int i=0;i<wek.length;i++){
-					newWeakto[i]=wek[i];
-				}
-				int j=0;
-				for(int i=wek.length;i<newWeakto.length;i++){
-					newWeakto[i]=res[j];
-					j++;
-				}
-				playerMons[playerMonActive].weakTo=newWeakto;
+				
 				playerMons[playerMonActive].resists= new String[]{"Nothing!"};
+				
+				for(int i=0;i<playerMons[playerMonActive].weakToMults.length;i++){
+					
+					if(playerMons[playerMonActive].weakToMults[i]<0){
+						playerMons[playerMonActive].weakToMults[i]=0;
+					}
+					
+				}
+				
 				System.out.println(playerMons[playerMonActive].name+"'s ATK fell!");
 				wair(s,1);
 				System.out.println(playerMons[playerMonActive].name+"'s resistances were removed!");
@@ -3168,8 +3210,13 @@ public class PokemonBattleSim{
 			System.out.println("Defense: ???");
 			System.out.println("Speed:   ???");
 		}else{
+			String typ2="";
+			if(tempPkmn.type2.equals("")==false){
+				typ2="/"+tempPkmn.type2;
+			}
+			
 			System.out.println("Name:    "+tempPkmn.name);
-			System.out.println("Type:    "+tempPkmn.type);
+			System.out.println("Type:    "+tempPkmn.type+typ2);
 			System.out.println("Ability: "+tempPkmn.ability.name);
 			System.out.println("HP:      "+tempPkmn.baseHP);
 			System.out.println("Attack:  "+tempPkmn.baseATK);
@@ -3266,10 +3313,15 @@ public class PokemonBattleSim{
 				break;
 			}
 		}
-
+	
+		String typ2="";
+		if(tempPkmn.type2.equals("")==false){
+			typ2="/"+tempPkmn.type2;
+		}
+	
 		System.out.println("The Pokemon's stats are reset when switching out \n");//<-- C++ reference!?? //<-- huh?
 		System.out.println("Name:    "+tempPkmn.name);
-		System.out.println("Type:    "+tempPkmn.type);
+		System.out.println("Type:    "+tempPkmn.type+typ2);
 		System.out.println("Ability: "+tempPkmn.ability.name);
 		System.out.println("HP:      "+tempPkmn.currentHP+"/"+tempPkmn.baseHP);
 		System.out.println("Attack:  "+tempPkmn.currentATK+"/"+tempPkmn.baseATK);
@@ -4178,34 +4230,130 @@ class Pokemon{
 	int currentHP,currentDEF,currentATK,currentSPEED;
 	int numberOfHits=1;
 	int extraDmg=0;
-	String name,type;
+	String name,type="";
+	String type2="";
 	boolean isPoisoned,isBurning,isParalized,healingOverTime,megaEvolved,strike,permaBurn,energyDrink;
 	Ability ability=null;
-	String[] weakTo = new String[5]; //listing-weaknesses
+	String[] weakTo = new String[5];	//listing-weaknesses
+	int[] weakToMults = new int[18]; //multis!!!!!!!!!!!!!!!
 	String[] resists= new String[5]; //listing-resistances
 	String[][] moveset = new String[2][4]; //[0=Name; 1=Type][Slot]
 	String[] items = null;
 
-	protected boolean resistsType(String pkmnType){
-		boolean yayornay=false;
+	/* epic typing list:
+		"Fire"=0,     "Water"=1,    "Grass"=2,
+		"Normal"=3,   "Fighting"=4, "Flying"=5,
+		"Poison"=6,   "Ground"=7,   "Rock"=8,
+		"Bug"=9,      "Ghost"=10,   "Steel"=11,
+		"Electric"=12,"Psychic"=13, "Ice"=14,
+		"Dragon"=15,  "Dark"=16,    "Fairy"=17
+	*/
+
+
+	protected boolean resistsType(String typ){
+		String[] vec = PokemonMaker3000.getTypesVector();
+		
+		for (int i=0;i<vec.length;i++){
+			if(typ.contains(vec[i])){
+				if(this.weakToMults[i]<0){
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	protected boolean resistsType1(String pkmnType){
 		for(int i=0;i<this.resists.length;i++){
 			if(pkmnType.contains(this.resists[i])){
-				yayornay=true;
-				break;
+				return true;
 			}
 		}
-		return yayornay;
+		return false;
+	}
+	
+	protected boolean resistsType2(String pkmnType){
+		try{//second type
+			String[] rest2 = getListOfWnR(this.type2,1);
+			
+			for(int i=0;i<rest2.length;i++){
+				if(pkmnType.contains(rest2[i])){
+					return true;
+				}
+			}
+			
+		}catch(Exception e){
+			return false;
+		}
+		return false;
 	}
 
-	protected boolean isWeakToType(String pkmnType){
-		boolean yayornay=false;
-		for(int i=0;i<this.weakTo.length;i++){
-			if(pkmnType.contains(this.weakTo[i])){
-				yayornay=true;
-				break;
+	protected boolean isWeakToType(String typ){
+		String[] vec = PokemonMaker3000.getTypesVector();
+		
+		for (int i=0;i<vec.length;i++){
+			if(typ.contains(vec[i])){
+				if(this.weakToMults[i]>0){
+					return true;
+				}
 			}
 		}
-		return yayornay;
+		
+		return false;
+	}
+
+	protected boolean isWeakToType1(String pkmnType){
+		for(int i=0;i<this.weakTo.length;i++){
+			if(pkmnType.contains(this.weakTo[i])){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	protected boolean isWeakToType2(String pkmnType){
+		try{//second type
+			String[] weak2 = getListOfWnR(this.type2,0);
+			
+			for(int i=0;i<weak2.length;i++){
+				if(pkmnType.contains(weak2[i])){
+					return true;
+				}
+			}
+			
+		}catch(Exception e){
+			return false;
+		}
+		return false;
+	}
+	
+	protected int getWRValue(String typ){
+		String[] vec = PokemonMaker3000.getTypesVector();
+		
+		for(int i=0;i<vec.length;i++){
+			if(typ.contains(vec[i])){
+				return this.weakToMults[i];
+			}
+		}
+		
+		return 0;
+	}
+
+	protected boolean isOfType(String typ){
+		if(this.type.equals(typ)){
+			return true;
+		}
+		
+		try{
+			if(this.type2.equals(typ)){
+				return true;
+			}
+		}catch(Exception e){
+			return false;
+		}
+		
+		return false;
 	}
 
 	protected boolean hasStatusAilment(){
@@ -4340,12 +4488,11 @@ class Pokemon{
 	}
 
 	protected boolean hasSTAB(String moveName){
-		boolean yayornay=false;
 		String getType=defineMove(moveName);
-		if((this.type+" Attack").equals(getType)){
-			yayornay=true;
+		if((this.type+" Attack").equals(getType) || (this.type2+" Attack").equals(getType)){
+			return true;
 		}
-		return yayornay;
+		return false;
 	}
 
 	protected boolean canMegaEvolve(){
@@ -4395,7 +4542,7 @@ class Pokemon{
 				addAtk=20;
 				addDef=20;
 				addSpeed=-20;
-				this.type="Dragon";
+				this.type2="Dragon";
 				this.moveset[0][1]="Draco Meteor";
 			break;
 			case "Venusaur":
@@ -4479,7 +4626,6 @@ class Pokemon{
 				addAtk=30;
 				addDef=30;
 				addSpeed=-10;
-				this.type="Fairy";
 			break;
 			case "Mawile":
 				addHP=10;
@@ -4520,7 +4666,7 @@ class Pokemon{
 				addAtk=15;
 				addDef=40;
 				addSpeed=-10;
-				this.type="Steel";
+				this.type2="Steel";
 				this.moveset[0][2]="Behemoth Bash";
 			break;
 			case "Zacian":
@@ -4528,7 +4674,7 @@ class Pokemon{
 				addAtk=35;
 				addDef=-40;
 				addSpeed=10;
-				this.type="Steel";
+				this.type2="Steel";
 				this.moveset[0][2]="Behemoth Blade";
 			break;
 			case "Gallade":
@@ -4657,6 +4803,7 @@ class Pokemon{
 			this.baseDEF=ref.baseDEF;
 			this.baseSPEED=ref.baseSPEED;
 			this.type=ref.type;
+			this.type2=ref.type2;
 			this.moveset=ref.moveset;
 			this.moveset[1][0]=defineMove(this.moveset[0][0]);
 			this.moveset[1][1]=defineMove(this.moveset[0][1]);
@@ -4905,6 +5052,7 @@ class Pokemon{
 				baseDEF=;
 				baseSPEED=;
 				type="";
+				type2="";
 				moveset = new String[][]{{"","","",""},{"","","",""}};
 			break;
 			*/
@@ -4914,6 +5062,7 @@ class Pokemon{
 				baseDEF=0;
 				baseSPEED=0;
 				type="";//all of these stats are overwritten by PokemonMaker3000 when loading them in
+				type2="";
 				moveset = new String[][]{{"","","",""},{"","","",""}};
 				//moveset array cannot contain null spaces or it'll fail to define the moves
 			break;
@@ -4923,6 +5072,7 @@ class Pokemon{
 				baseDEF=80;
 				baseSPEED=75;
 				type="Grass";
+				type2="Poison";
 				moveset = new String[][]{{"Poison Powder","Vine Whip","Giga Drain","Earthquake"},{"","","",""}};
 			break;
 			case "Charizard":
@@ -4931,6 +5081,7 @@ class Pokemon{
 				baseDEF=70;
 				baseSPEED=90;
 				type="Fire";
+				type2="Flying";
 				moveset = new String[][]{{"Will-O-Wisp","Dragon Breath","Flamethrower","Metal Claw"},{"","","",""}};
 			break;
 			case "Blastoise":
@@ -4947,6 +5098,7 @@ class Pokemon{
 				baseDEF=60;
 				baseSPEED=120;
 				type="Grass";
+				type2="Dark";
 				moveset = new String[][]{{"Flower Trick","Bite","Play Rough","Hone Claws"},{"","","",""}};
 			break;
 			case "Ninetales":
@@ -4963,6 +5115,7 @@ class Pokemon{
 				baseDEF=70;
 				baseSPEED=80;
 				type="Water";
+				type2="Steel";
 				moveset = new String[][]{{"Whirlpool","Crunch","Mud Slap","Iron Defense"},{"","","",""}};
 			break;
 			case "Raichu":
@@ -4995,6 +5148,7 @@ class Pokemon{
 				baseDEF=50;
 				baseSPEED=60;
 				type="Dragon";
+				type2="Flying";
 				moveset = new String[][]{{"Hyper Beam","Dragon Rush","Wing Attack","Dragon Dance"},{"","","",""}};
 			break;
 			case "Absol":
@@ -5011,6 +5165,7 @@ class Pokemon{
 				baseDEF=65;
 				baseSPEED=80;
 				type="Psychic";
+				type2="Fairy";
 				moveset = new String[][]{{"Moonblast","Dream Eater","Calm Mind","Growl"},{"","","",""}};
 			break;
 			case "Glaceon":
@@ -5035,6 +5190,7 @@ class Pokemon{
 				baseDEF=70;
 				baseSPEED=90;
 				type="Fighting";
+				type2="Steel";
 				moveset = new String[][]{{"Aura Sphere","Quick Attack","Dragon Pulse","Sword Dance"},{"","","",""}};
 			break;
 			case "Duraludon":
@@ -5043,6 +5199,7 @@ class Pokemon{
 				baseDEF=81;
 				baseSPEED=78;
 				type="Steel";
+				type2="Dragon";
 				moveset = new String[][]{{"Hyper Beam","Flash Cannon","Iron Defense","Dragon Tail"},{"","","",""}};
 			break;
 			case "Mismagius":
@@ -5059,6 +5216,7 @@ class Pokemon{
 				baseDEF=100;
 				baseSPEED=45;
 				type="Bug";
+				type2="Water";
 				moveset = new String[][]{{"Bug Bite","Scald","Sword Dance","Iron Defense"},{"","","",""}};
 			break;
 			case "Heracross":
@@ -5067,6 +5225,7 @@ class Pokemon{
 				baseDEF=67;
 				baseSPEED=75;
 				type="Bug";
+				type2="Fighting";
 				moveset = new String[][]{{"Bug Bite","Close Combat","Sword Dance","Iron Defense"},{"","","",""}};
 			break;
 			case "Rampardos":
@@ -5091,6 +5250,7 @@ class Pokemon{
 				baseDEF=90;
 				baseSPEED=65;
 				type="Ice";
+				type2="Rock";
 				moveset = new String[][]{{"Hyper Beam","Ice Beam","Iron Head","Calm Mind"},{"","","",""}};
 			break;
 			case "Dugtrio":
@@ -5123,6 +5283,7 @@ class Pokemon{
 				baseDEF=40;
 				baseSPEED=110;
 				type="Poison";
+				type2="Fighting";
 				moveset = new String[][]{{"Dire Claw","Shadow Ball","Close Combat","Sword Dance"},{"","","",""}};
 			break;
 			case "Pidgeot":
@@ -5139,6 +5300,7 @@ class Pokemon{
 				baseDEF=100;
 				baseSPEED=50;
 				type="Flying";
+				type2="Psychic";
 				moveset = new String[][]{{"Aerial Ace","Psychic","Dragon Breath","Sword Dance"},{"","","",""}};
 			break;
 			case "Urshifu":
@@ -5179,6 +5341,7 @@ class Pokemon{
 				baseDEF=80;
 				baseSPEED=85;
 				type="Fairy";
+				type2="Steel";
 				moveset = new String[][]{{"Play Rough","Gigaton Hammer","Dream Eater","Sword Dance"},{"","","",""}};
 			break; // :3
 			case "Zarude":
@@ -5187,6 +5350,7 @@ class Pokemon{
 				baseDEF=90;
 				baseSPEED=62;
 				type="Dark";
+				type2="Grass";
 				moveset = new String[][]{{"Giga Drain","Crunch","Drain Punch","Jungle Healing"},{"","","",""}};
 			break;
 			case "Dragapult":
@@ -5195,6 +5359,7 @@ class Pokemon{
 				baseDEF=65;
 				baseSPEED=138;
 				type="Dragon";
+				type2="Ghost";
 				moveset = new String[][]{{"Dragon Rush","Hex","Will-O-Wisp","Dragon Dance"},{"","","",""}};
 			break;
 			case "Mawile":
@@ -5203,6 +5368,7 @@ class Pokemon{
 				baseDEF=98;
 				baseSPEED=78;
 				type="Steel";
+				type2="Fairy";
 				moveset = new String[][]{{"Play Rough","Iron Head","Crunch","Fake Tears"},{"","","",""}};
 			break;
 			//--------wave 2 of pokemen--------//
@@ -5846,8 +6012,10 @@ class Pokemon{
 		
 	}//class Pokemon constructor ends
 	
-	protected void setTypesWnR(){//had to put this in a fuction thanks to the custom mons lol
-		switch(type){ //sets weaknesses and resistances
+	protected String[] getListOfWnR(String typ, int returntype){
+		String[] weakTo = new String[1];
+		String[] resists = new String[1];
+		switch(typ){ //sets weaknesses and resistances
 			case "Grass":
 				weakTo= new String[]{"Flying","Fire","Poison","Bug","Ice"};
 				resists= new String[]{"Ground","Water","Grass","Electric"};
@@ -5916,11 +6084,109 @@ class Pokemon{
 				weakTo= new String[]{"Fighting"};
 				resists= new String[]{"Ghost"};
 			break;
-			case "Ice": //I FORGOT ICE LMAOOOOOOOOO
+			case "Ice":
 				weakTo= new String[]{"Fighting","Rock","Steel","Fire"};
 				resists= new String[]{"Ice"};//truly best defensive type
 			break;
 		}
+		if(returntype==0){
+			return weakTo;
+		}else{
+			return resists;
+		}
+	}
+	
+	/* types list index from PokemonMaker3000
+		"Fire"=0,     "Water"=1,    "Grass"=2,
+		"Normal"=3,   "Fighting"=4, "Flying"=5,
+		"Poison"=6,   "Ground"=7,   "Rock"=8,
+		"Bug"=9,      "Ghost"=10,   "Steel"=11,
+		"Electric"=12,"Psychic"=13, "Ice"=14,
+		"Dragon"=15,  "Dark"=16,    "Fairy"=17
+	*/
+	
+	
+	protected void setTypesWnR(){
+		this.weakTo = getListOfWnR(this.type,0);
+		this.resists = getListOfWnR(this.type,1);
+		
+		String[] typesVector = PokemonMaker3000.getTypesVector();
+		
+		for(int i=0;i<weakToMults.length;i++){
+			weakToMults[i]=0; //set all to zero (neutral)
+		}
+		
+		for(int i=0;i<weakToMults.length;i++){
+			
+			if(this.isWeakToType1(typesVector[i])){
+				weakToMults[i]+=1;
+			}
+			
+			if(this.resistsType1(typesVector[i])){
+				weakToMults[i]-=1;
+			}
+		}
+		
+		if(!this.type2.equals("")){
+			
+			for(int i=0;i<weakToMults.length;i++){
+			
+				if(this.isWeakToType2(typesVector[i])){
+					weakToMults[i]+=1;
+				}
+				
+				if(this.resistsType2(typesVector[i])){
+					weakToMults[i]-=1;
+				}
+				
+			}
+			
+		}
+		
+		this.finallizeWnR();
+		
+	}
+	
+	private void finallizeWnR(){
+		String[] typesVector = PokemonMaker3000.getTypesVector();
+		String[] newWeakto = new String[18];
+		String[] newRes = new String[18];
+		int counterWea=0;
+		int counterRes=0;
+		
+		for(int i=0;i<18;i++){
+			
+			if(weakToMults[i]>0){
+				counterWea++;
+				newWeakto[i]=typesVector[i];
+			}
+			
+			if(weakToMults[i]<0){
+				counterRes++;
+				newRes[i]=typesVector[i];
+			}
+		}
+		
+		int j=0;
+		int k=0;
+		
+		this.weakTo = new String[counterWea];
+		this.resists = new String[counterRes];
+		
+		for(int i=0;i<18;i++){
+			
+			if(newWeakto[i]!=null){
+				this.weakTo[j]=newWeakto[i]; //trim
+				j++;
+			}
+			
+			if(newRes[i]!=null){
+				this.resists[k]=newRes[i];
+				k++;
+			}
+			
+		}
+		
 	}
 
 	public void defineAllMoves(){
@@ -5928,7 +6194,7 @@ class Pokemon{
 		this.moveset[1][1]=defineMove(this.moveset[0][1]);
 		this.moveset[1][2]=defineMove(this.moveset[0][2]);
 		this.moveset[1][3]=defineMove(this.moveset[0][3]);
-	} 
+	}
 
 	protected String defineMove(String move){
 		String[] moveTableStatus = PokemonMaker3000.getMoveTable("status");
@@ -6434,7 +6700,7 @@ class Ability{
 		String[] abilityTableBeforeMove = new String[]{"Pixilate","Super Luck","Protean"};
 		String[] abilityTableAfterGettingHit = new String[]{};
 		String[] abilityTableBeforeGettingHit = new String[] {"Magic Bounce"};
-		String[] abilityTableAtEndOfTurn = new String[]{};
+		String[] abilityTableAtEndOfTurn = new String[]{};
 		
 		for(int i=0;i<abilityTableBeforeMove.length;i++){
 			if(name.equals(abilityTableBeforeMove[i])){
