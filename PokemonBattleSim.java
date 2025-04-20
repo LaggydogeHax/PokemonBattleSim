@@ -6,7 +6,7 @@ import java.util.concurrent.*;
 
 public class PokemonBattleSim{
 	static final String OsName = System.getProperty("os.name");
-	static String version = "beta5 dev6";
+	static String version = "beta5 dev7";
 	static char s='s', m='m';
 	
 	static boolean battleAnimations=true;
@@ -316,17 +316,17 @@ public class PokemonBattleSim{
 		clear();
 		System.out.println("");
 		printPlayerTeam();
-		System.out.println("                 VS");
+		System.out.println(Clr.YELLOW_B+"                     V.S."+Clr.R);
 		printCPUTeam();
 		System.out.println("");
 		wair(s,1);
-		System.out.println(Clr.RED_B+"Epic battle begins in:"+Clr.R);
+		System.out.println(Clr.RED_B+"            EPIC BATTLE BEGINS IN:"+Clr.R);
 		wair(s,1);
-		System.out.println("3");
+		System.out.println("                    3...");
 		wair(s,1);
-		System.out.println("2");
+		System.out.println("                      2...");
 		wair(s,1);
-		System.out.println("1");
+		System.out.println("                        1..!");
 		wair(s,1);
 
 		doTheBattling();//<-- battle loop
@@ -691,18 +691,17 @@ public class PokemonBattleSim{
 			
 			switch (getMoveEffectiveness(selectedMove, cloneMon, enemyMon)){
 				case 1:
-					shakeScreen=true;
 					effectiveness=1;
 				break;
 				case 11:
 					shakeScreen=true;
-					effectiveness=1;
+					effectiveness=11;
 				break;
 				case 2:
 					effectiveness=2;
 				break;
 				case 22:
-					effectiveness=2;
+					effectiveness=22;
 				break;
 			}
 			
@@ -767,10 +766,18 @@ public class PokemonBattleSim{
 			switch (effectiveness){
 				case 1:
 					System.out.println("It's super effective!!");
-					wair(m,750000); // 3/4 of a sec!
+					wair(m,750000);
+				break;
+				case 11:
+					System.out.println(Clr.CYAN_B+"It's super effective!!"+Clr.R);
+					wair(m,750000);
 				break;
 				case 2:
 					System.out.println("It's not very effective...");
+					wair(m,750000);
+				break;
+				case 22:
+					System.out.println(Clr.YELLOW_B+"It's not very effective..."+Clr.R);
 					wair(m,750000);
 				break;
 			}
@@ -897,12 +904,16 @@ public class PokemonBattleSim{
 		System.out.println("________________________________________________");
 		for(int i=0;i<playerMons.length;i++){
 			if(i!=playerMonActive){
+				String typ2="";
+				if(playerMons[i].type2.equals("")==false){
+					typ2="/"+playerMons[i].type2;
+				}
 				String monHP= "HP: ["+playerMons[i].currentHP+" / "+playerMons[i].baseHP+"]";
 				System.out.print("["+(i+1)+"] "+playerMons[i].name);
 				for(int j=0;j<16-playerMons[i].name.length();j++){
 					System.out.print(" ");
 				}
-				System.out.println("| "+monHP+"["+playerMons[i].type+"]");
+				System.out.println("| "+monHP+"["+playerMons[i].type+typ2+"]");
 			}
 		}
 		System.out.println("");
@@ -4652,7 +4663,7 @@ class Pokemon{
 				addAtk=50;
 				addDef=50;
 				addSpeed=-50;
-				this.type="Dragon";
+				this.type2="Dragon";
 				this.moveset[0][1]="Draco Meteor";
 			break;
 			case "Garchomp":
@@ -4689,7 +4700,6 @@ class Pokemon{
 				addAtk=60;
 				addDef=-50;
 				addSpeed=40;
-				this.type="Fairy";
 			break;
 			case "Yanmega":
 				addHP=10;
@@ -4702,6 +4712,7 @@ class Pokemon{
 				addAtk=30;
 				addDef=5;
 				addSpeed=10;
+				type2="Steel";
 			break;
 			case "Togekiss":
 				addHP=30;
@@ -5309,6 +5320,7 @@ class Pokemon{
 				baseDEF=55;
 				baseSPEED=90;
 				type="Fighting";
+				type2="Dark";
 				moveset = new String[][]{{"Close Combat","Aerial Ace","SurgingStrikes","Bulk Up"},{"","","",""}};
 			break;
 			case "Audino":
@@ -5378,6 +5390,7 @@ class Pokemon{
 				baseDEF=65;
 				baseSPEED=90;
 				type="Fire";
+				type2="Fighting";
 				moveset = new String[][]{{"Flame Charge","Aerial Ace","Double Kick","Sword Dance"},{"","","",""}};
 			break;
 			case "Vaporeon": //hey guys
@@ -5394,6 +5407,7 @@ class Pokemon{
 				baseDEF=95;
 				baseSPEED=55;
 				type="Ground";
+				type2="Normal";
 				moveset = new String[][]{{"Hammer Arm","Play Rough","Earth Power","Sword Dance"},{"","","",""}};
 			break;
 			case "Decidueye":
@@ -5402,6 +5416,7 @@ class Pokemon{
 				baseDEF=70;
 				baseSPEED=100;
 				type="Grass";
+				type2="Dark";
 				moveset = new String[][]{{"Leaf Blade","Shadow Sneak","Air Slash","Sword Dance"},{"","","",""}};
 			break;
 			case "Flareon":
@@ -5418,6 +5433,7 @@ class Pokemon{
 				baseDEF=100;
 				baseSPEED=70;
 				type="Water";
+				type2="Ice";
 				moveset = new String[][]{{"Hydro Pump","Thunder","Ice Beam","Dragon Dance"},{"","","",""}};
 			break;
 			case "Tsareena":
@@ -5434,6 +5450,7 @@ class Pokemon{
 				baseDEF=70;
 				baseSPEED=85;
 				type="Flying";
+				type2="Normal";
 				moveset = new String[][]{{"Aerial Ace","Superpower","Iron Head","Hone Claws"},{"","","",""}};
 			break;
 			case "Toxtricity":
@@ -5442,6 +5459,7 @@ class Pokemon{
 				baseDEF=70;
 				baseSPEED=80;
 				type="Electric";
+				type2="Poison";
 				moveset = new String[][]{{"Overdrive","Toxic Spikes","Hex","Scary Face"},{"","","",""}};
 			break;
 			case "Krookodile":
@@ -5450,6 +5468,7 @@ class Pokemon{
 				baseDEF=70;
 				baseSPEED=95;
 				type="Ground";
+				type2="Dark";
 				moveset = new String[][]{{"Earthquake","Crunch","Close Combat","Bulk Up"},{"","","",""}};
 			break;
 			case "Toucannon":
@@ -5458,6 +5477,7 @@ class Pokemon{
 				baseDEF=60;
 				baseSPEED=75;
 				type="Flying";
+				type2="Normal";
 				moveset = new String[][]{{"Flash Cannon","Overheat","Dual Wingbeat","Roost"},{"","","",""}};
 			break;
 			case "Zeraora":
@@ -5482,6 +5502,7 @@ class Pokemon{
 				baseDEF=100;
 				baseSPEED=95;
 				type="Poison";
+				type2="Dark";
 				moveset = new String[][]{{"Crunch","Ice Fang","Toxic","Venoshock"},{"","","",""}};
 			break;
 			case "Walking Wake":
@@ -5490,6 +5511,7 @@ class Pokemon{
 				baseDEF=65;
 				baseSPEED=110;
 				type="Dragon";
+				type2="Water";
 				moveset = new String[][]{{"Hydro Pump","Draco Meteor","Hyper Beam","Dragon Dance"},{"","","",""}};
 			break;
 			case "Roaring Moon":
@@ -5498,6 +5520,7 @@ class Pokemon{
 				baseDEF=90;
 				baseSPEED=100;
 				type="Dragon";
+				type2="Dark";
 				moveset = new String[][]{{"Dragon Rush","Crunch","Flamethrower","Dragon Dance"},{"","","",""}};
 			break;
 			case "Togekiss":
@@ -5506,6 +5529,7 @@ class Pokemon{
 				baseDEF=105;
 				baseSPEED=70;
 				type="Fairy";
+				type2="Flying";
 				moveset = new String[][]{{"Moonblast","Air Slash","Aura Sphere","Charm"},{"","","",""}};
 			break;
 			case "Florges":
@@ -5538,6 +5562,7 @@ class Pokemon{
 				baseDEF=70;
 				baseSPEED=110;
 				type="Fighting";
+				type2="Flying";
 				moveset = new String[][]{{"Flying Press","Wing Attack","Stone Edge","Sword Dance"},{"","","",""}};
 			break;
 			case "Flutter Mane":
@@ -5546,6 +5571,7 @@ class Pokemon{
 				baseDEF=100;
 				baseSPEED=135;
 				type="Ghost";
+				type2="Fairy";
 				moveset = new String[][]{{"Moonblast","Calm Mind","Shadow Ball","Mystical Fire"},{"","","",""}};
 			break;
 			case "Trevenant":
@@ -5554,6 +5580,7 @@ class Pokemon{
 				baseDEF=82;
 				baseSPEED=80;
 				type="Ghost";
+				type2="Grass";
 				moveset = new String[][]{{"Wood Hammer","Hex","Toxic","Will-O-Wisp"},{"","","",""}};
 			break;
 			case "Volcarona":
@@ -5562,6 +5589,7 @@ class Pokemon{
 				baseDEF=60;
 				baseSPEED=90;
 				type="Bug";
+				type2="Fire";
 				moveset = new String[][]{{"Bug Buzz","Fire Blast","Giga Drain","Amnesia"},{"","","",""}};
 			break;
 			case "Vespiquen":
@@ -5570,6 +5598,7 @@ class Pokemon{
 				baseDEF=105;
 				baseSPEED=60;
 				type="Bug";
+				type2="Flying";
 				moveset = new String[][]{{"Attack Order","Air Slash","Poison Sting","Defend Order"},{"","","",""}};
 			break;
 			case "Pangoro":
@@ -5578,6 +5607,7 @@ class Pokemon{
 				baseDEF=80;
 				baseSPEED=59;
 				type="Fighting";
+				type2="Dark";
 				moveset = new String[][]{{"Hammer Arm","Crunch","Bullet Punch","Bulk Up"},{"","","",""}};
 			break;
 			case "Aggron":
@@ -5586,6 +5616,7 @@ class Pokemon{
 				baseDEF=150;
 				baseSPEED=50;
 				type="Steel";
+				type2="Rock";
 				moveset = new String[][]{{"Iron Tail","Stone Edge","Giga Impact","Iron Defense"},{"","","",""}};
 			break;
 			case "Scizor":
@@ -5594,6 +5625,7 @@ class Pokemon{
 				baseDEF=100;
 				baseSPEED=70;
 				type="Bug";
+				type2="Steel";
 				moveset = new String[][]{{"X-Scissor","Iron Head","Iron Defense","Sword Dance"},{"","","",""}};
 			break;
 			case "Mew":
@@ -5618,6 +5650,7 @@ class Pokemon{
 				baseDEF=70;
 				baseSPEED=110;
 				type="Ice";
+				type2="Ghost";
 				moveset = new String[][]{{"Blizzard","Shadow Ball","Will-O-Wisp","Draining Kiss"},{"","","",""}};
 			break;
 			case "Baxcalibur":
@@ -5626,6 +5659,7 @@ class Pokemon{
 				baseDEF=90;
 				baseSPEED=87;
 				type="Ice";
+				type2="Dragon";
 				moveset = new String[][]{{"Ice Beam","Crunch","Dragon Tail","Sword Dance"},{"","","",""}};
 			break;
 			case "Hydreigon":
@@ -5634,6 +5668,7 @@ class Pokemon{
 				baseDEF=80;
 				baseSPEED=98;
 				type="Dark";
+				type2="Dragon";
 				moveset = new String[][]{{"Hyper Beam","Dragon Rush","Crunch","Work Up"},{"","","",""}};
 			break;
 			case "Zoroark":
@@ -5650,6 +5685,7 @@ class Pokemon{
 				baseDEF=80;
 				baseSPEED=70;
 				type="Rock";
+				type2="Psychic";
 				moveset = new String[][]{{"Solar Beam","Stone Edge","Psychic","Amnesia"},{"","","",""}};
 			break;
 			case "Lunatone":
@@ -5658,6 +5694,7 @@ class Pokemon{
 				baseDEF=70;
 				baseSPEED=75;
 				type="Rock";
+				type2="Psychic";
 				moveset = new String[][]{{"Moonblast","Stone Edge","Shadow Ball","Calm Mind"},{"","","",""}};
 			break;
 			//-------- wave 3 ---------//
@@ -5667,6 +5704,7 @@ class Pokemon{
 				baseDEF=100;
 				baseSPEED=100;
 				type="Fire";
+				type2="Psychic";
 				moveset = new String[][]{{"Mystical Fire","Psyshock","Shadow Ball","Calm Mind"},{"","","",""}};
 			break;
 			case "Gyarados":
@@ -5675,6 +5713,7 @@ class Pokemon{
 				baseDEF=100;
 				baseSPEED=80;
 				type="Water";
+				type2="Flying";
 				moveset = new String[][]{{"Hydro Pump","Crunch","Dual Wingbeat","Dragon Dance"},{"","","",""}};
 			break;
 			case "Sceptile":
@@ -5699,6 +5738,7 @@ class Pokemon{
 				baseDEF=70;
 				baseSPEED=120;
 				type="Water";
+				type2="Dark";
 				moveset = new String[][]{{"Water Shuriken","Shadow Ball","Night Slash","Growl"},{"","","",""}};
 			break;
 			case "Leafeon":
@@ -5723,6 +5763,7 @@ class Pokemon{
 				baseDEF=115;
 				baseSPEED=80;
 				type="Flying";
+				type2="Steel";
 				moveset = new String[][]{{"Brave Bird","Steel Wing","Body Press","Bulk Up"},{"","","",""}};
 			break;
 			case "Umbreon":
@@ -5779,6 +5820,7 @@ class Pokemon{
 				baseDEF=65;
 				baseSPEED=87;
 				type="Poison";
+				type2="Fighting";
 				moveset = new String[][]{{"Group Beating","Venoshock","Drain Punch","Sword Dance"},{"","","",""}};
 			break;
 			case "Cyclizar":
@@ -5795,6 +5837,7 @@ class Pokemon{
 				baseDEF=95;
 				baseSPEED=90;
 				type="Dragon";
+				type2="Ground";
 				moveset = new String[][]{{"Dragon Rush","Earthquake","Stone Edge","Sword Dance"},{"","","",""}};
 			break;
 			case "Gholdengo":
@@ -5803,6 +5846,7 @@ class Pokemon{
 				baseDEF=90;
 				baseSPEED=70;
 				type="Steel";
+				type2="Ghost";
 				moveset = new String[][]{{"Make it Rain","Shadow Ball","Psychic","Thunder Wave"},{"","","",""}};
 			break;
 			case "Galvantula":
@@ -5811,6 +5855,7 @@ class Pokemon{
 				baseDEF=90;
 				baseSPEED=100;
 				type="Electric";
+				type2="Bug";
 				moveset = new String[][]{{"Bug Buzz","Energy Ball","Thunder Wave","String Shot"},{"","","",""}};
 			break;
 			case "Ceruledge":
@@ -5819,6 +5864,7 @@ class Pokemon{
 				baseDEF=120;
 				baseSPEED=86;
 				type="Ghost";
+				type2="Fire";
 				moveset = new String[][]{{"Shadow Claw","Bitter Blade","X-Scissor","Sword Dance"},{"","","",""}};
 			break;
 			case "Chandelure":
@@ -5827,6 +5873,7 @@ class Pokemon{
 				baseDEF=80;
 				baseSPEED=80;
 				type="Ghost";
+				type2="Fire";
 				moveset = new String[][]{{"Hex","Overheat","Trailblaze","Acid Armor"},{"","","",""}};
 			break;
 			case "Flamigo":
@@ -5835,6 +5882,7 @@ class Pokemon{
 				baseDEF=40;
 				baseSPEED=90;
 				type="Flying";
+				type2="Fighting";
 				moveset = new String[][]{{"Brave Bird","Double Kick","Cyclone","Roost"},{"","","",""}};
 			break;
 			case "Zamazenta":
@@ -5859,6 +5907,7 @@ class Pokemon{
 				baseDEF=105;
 				baseSPEED=70;
 				type="Steel";
+				type2="Fairy";
 				moveset = new String[][]{{"Fleur Cannon","Zap Cannon","Flash Cannon","Shift Gear"},{"","","",""}};
 			break;
 			case "Celebi ex":
@@ -5883,6 +5932,7 @@ class Pokemon{
 				baseDEF=110;
 				baseSPEED=62;
 				type="Dark";
+				type2="Steel";
 				moveset = new String[][]{{"Retaliate","Assurance","Metal Sound","Sword Dance"},{"","","",""}};
 			break;
 			case "Azumarill":
@@ -5891,6 +5941,7 @@ class Pokemon{
 				baseDEF=90;
 				baseSPEED=80;
 				type="Fairy";
+				type2="Water";
 				moveset= new String[][]{{"Muddy Water","Alluring Voice","MistyExplosion","Amnesia"},{"","","",""}};
 			break;
 			case "Gallade":
@@ -5899,6 +5950,7 @@ class Pokemon{
 				baseDEF=65;
 				baseSPEED=115;
 				type="Fighting";
+				type2="Psychic";
 				moveset = new String[][]{{"Focus Blast","Psycho Cut","Leaf Blade","Sword Dance"},{"","","",""}};
 			break;
 			case "Regieleki":
@@ -5931,6 +5983,7 @@ class Pokemon{
 				baseDEF=150;
 				baseSPEED=50;
 				type="Rock";
+				type2="Fairy";
 				moveset = new String[][]{{"Diamond Storm","Moonblast","Rock Smash","Rock Polish"},{"","","",""}};
 			break;
 			case "Weavile":
@@ -5939,6 +5992,7 @@ class Pokemon{
 				baseDEF=65;
 				baseSPEED=125;
 				type="Ice";
+				type2="Dark";
 				moveset = new String[][]{{"Triple Axel","Night Slash","Shadow Claw","Sword Dance"},{"","","",""}};
 			break;
 			case "Chien-Pao":
@@ -5947,6 +6001,7 @@ class Pokemon{
 				baseDEF=40;
 				baseSPEED=90;
 				type="Ice";
+				type2="Dark";
 				moveset = new String[][]{{"Avalanche","Ruination","Hyper Beam","Scary Face"},{"","","",""}};
 			break;
 			case "Yanmega":
@@ -5955,6 +6010,7 @@ class Pokemon{
 				baseDEF=90;
 				baseSPEED=95;
 				type="Bug";
+				type2="Flying";
 				moveset = new String[][]{{"Skitter Smack","Dual Wingbeat","Facade","Extreme Speed"},{"","","",""}};
 			break;
 			case "Kleavor":
@@ -5963,6 +6019,7 @@ class Pokemon{
 				baseDEF=85;
 				baseSPEED=85;
 				type="Bug";
+				type2="Rock";
 				moveset = new String[][]{{"Lunge","Stone Axe","Vacuum Wave","Sword Dance"},{"","","",""}};
 			break;
 			case "ADP GX":
