@@ -76,13 +76,15 @@ public class PokemonBattleSim{
 		cout.write("          .^@@@@@@@&&&&&&&&&&&&@@@@@@@@@&       \n");
 		cout.write("         !@@@@@@@@@:           #@@@@@@@@#       \n");
 		cout.flush();
-		
+                
+		System.out.println("Creating temporary files...");
+                PokemonDB pdb = new PokemonDB();
 		System.out.println("Loading configuration file...");
-		System.out.println("Located at: "+System.getProperty("user.home")+"\\"+"PBS_Config.txt"+"\n");
+                PBSFileReader fr = new PBSFileReader();
+		System.out.println("Located at: "+fr.getSaveFilePath()+"\n");
 		
 		wair(m,500000);
-		PBSFileReader fr = new PBSFileReader();
-		
+                
 		if(fr.noErrors){
 			int[] list = fr.configList;
 			
