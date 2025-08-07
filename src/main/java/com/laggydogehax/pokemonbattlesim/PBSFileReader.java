@@ -2,10 +2,15 @@ package com.laggydogehax.pokemonbattlesim;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
 class PBSFileReader{
-        private final String path = System.getProperty("user.home")+"\\"+"PBS_Config.txt";
+        private final String path = Paths.get(System.getProperty("user.home"), ".PBS", "PBS_Config.txt").toString();
+        private final Path pathToPath = Paths.get(System.getProperty("user.home"), ".PBS");
 	boolean noErrors = true;
 	
 	public int[] configList = new int[2];
@@ -31,6 +36,10 @@ class PBSFileReader{
 			}
 		}
 	}
+        
+        public String getSaveFilePath(){
+            return this.path;
+        }
 	
 	public boolean checkFile(){
 		if(saveFile.exists()){
@@ -39,9 +48,10 @@ class PBSFileReader{
 			return false;
 		}
 	}
-	
+        
 	private boolean makeFile(){
 		try{
+                        Files.createDirectories(this.pathToPath);
 			FileWriter fw = new FileWriter(saveFile,true);
 
 			fw.write("// PokemonBattleSim config save file //"+"\n");
@@ -52,7 +62,8 @@ class PBSFileReader{
 
 			fw.close();
 			return true;
-		}catch(Exception e){
+		}catch(IOException e){
+                    System.err.print(e);
 			return false;
 		}
 	}
@@ -116,7 +127,7 @@ class PBSFileReader{
 			fw.write("Battle Animations: "+animations+"\n");
 
 			fw.close();
-		}catch(Exception e){
+		}catch(IOException e){
 			
 		}
 	}
