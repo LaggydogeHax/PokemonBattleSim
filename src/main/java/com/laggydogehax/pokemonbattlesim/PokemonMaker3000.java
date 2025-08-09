@@ -1,6 +1,7 @@
 package com.laggydogehax.pokemonbattlesim;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
@@ -8,7 +9,7 @@ import java.util.*;
 //why does this extend the main class??? i forgor
 class PokemonMaker3000 extends PokemonBattleSim{
 	//funny class name
-        static final char s='s', m='m';
+	static final char s='s', m='m';
         
 	private static void printTypes(){
 		String[] typesVector=getTypesVector();
@@ -39,7 +40,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		String msg="";
 		if(atk>90 && def<81 && speed>99 && hp<350){msg="glasscannon";
 		}if(speed<90 && atk<110 && def>90 && hp>350){msg="tank";
-		}if(msg==""){
+		}if("".equals(msg)){
 			if(total>450 && total<650){msg="balanced";
 			}if(total>=651 && total<900){msg="strong";
 			}if(total>900 && total<1850){msg="op";
@@ -68,9 +69,13 @@ class PokemonMaker3000 extends PokemonBattleSim{
 	}
 
 	public static String[] getTypesVector(){
+		/* nu uh, now we get this from the database cus its more epic and unnecessarily complicated
 		String[] typesVector = {"Fire","Water","Grass","Normal","Fighting","Flying","Poison",
 		"Ground","Rock","Bug","Ghost","Steel","Electric","Psychic","Ice","Dragon","Dark","Fairy"};
-		return typesVector;
+		*/
+		
+		PokemonDB db = new PokemonDB();
+		return db.getTypesVectorInDB();
 	}
 
 	public static String[] getMoveTable(String typ){
@@ -277,7 +282,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 					}
 				}
 			}
-		}catch(Exception e){
+		}catch(IOException | InterruptedException e){
 			// "Write code for the catch!"
 			// :P BLEEHH you can't make me! :3 >_<
 		}
@@ -298,11 +303,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 				}
 			}while(yayornay!=1 && yayornay!=2);
 			
-			if(yayornay==1){
-				txtfile=true;
-			}else{
-				txtfile=false;
-			}
+			txtfile = yayornay==1;
 		}
 		
 		do{//--------Name
@@ -343,7 +344,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 					selectedInt--;
 					monType=typesVector[selectedInt];
 				}
-			}catch(Exception e){
+			}catch(NumberFormatException e){
 				monType="";
 				selectedInt=0;
 				System.out.println("Please try again");
@@ -529,7 +530,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 								selectedInt--;
 								movType=typesVector[selectedInt];
 							}
-						}catch(Exception e){
+						}catch(NumberFormatException e){
 							movType="";
 							selectedInt=0;
 							System.out.println("Please try again");
@@ -639,7 +640,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 			fw.write(moves[3]+"\n");
 
 			fw.close();
-		}catch(Exception e){
+		}catch(IOException e){
 			success=false;
 		}
 
@@ -715,7 +716,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 			customMon.moveset[1][3]=customMon.defineMove(customMon.moveset[0][3]);
 
 			for(int i=0;i<4;i++){//check that the moves got defined correctly
-				if(customMon.moveset[1][i]==""){
+				if("".equals(customMon.moveset[1][i])){
 					throw new NullPointerException("invalid!");
 				}
 			}
@@ -737,7 +738,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 				}
 			}
 			
-		}catch(Exception e){
+		}catch(FileNotFoundException | NullPointerException | NumberFormatException e){
 			if(sc!=null){
 				sc.close();
 			} 
@@ -799,29 +800,8 @@ class PokemonMaker3000 extends PokemonBattleSim{
 
 	private static String selectAMove(String typ,int k,String[] moveset)throws IOException, InterruptedException{
 		String ret="";
-		String[] moves=null;
+		String[] moves=getMoveTable(typ);
 		String input="";
-		switch (typ) {
-			case "normal":moves=getMoveTable("normal");break;
-			case "fire":moves=getMoveTable("fire"); break;
-			case "water":moves=getMoveTable("water"); break;
-			case "grass":moves=getMoveTable("grass"); break;
-			case "bug":moves=getMoveTable("bug"); break;
-			case "electric":moves=getMoveTable("electric"); break;
-			case "steel":moves=getMoveTable("steel"); break;
-			case "ghost":moves=getMoveTable("ghost"); break;
-			case "rock":moves=getMoveTable("rock"); break;
-			case "ground":moves=getMoveTable("ground"); break;
-			case "dark":moves=getMoveTable("dark"); break;
-			case "fairy":moves=getMoveTable("fairy"); break;
-			case "flying":moves=getMoveTable("flying"); break;
-			case "fighting":moves=getMoveTable("fighting"); break;
-			case "psychic":moves=getMoveTable("psychic"); break;
-			case "dragon":moves=getMoveTable("dragon"); break;
-			case "ice":moves=getMoveTable("ice"); break;
-			case "poison":moves=getMoveTable("poison"); break;
-			case "status":moves=getMoveTable("status"); break;
-		}
 
 		do{
 			input="";
@@ -864,12 +844,12 @@ class PokemonMaker3000 extends PokemonBattleSim{
 				ret=input;
 			}
 
-			if(ret==""){
+			if("".equals(ret)){
 				System.out.println("Invalid option, try again!");
 				wair(s,2);
 			}
 			
-		}while(ret=="");
+		}while("".equals(ret));
 
 		return ret;
 	}
@@ -879,7 +859,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		for(int i=0;i<4;i++){
 			if(coumter<2){
 				System.out.print("["+(i+1)+"] ");
-				if(moveset[i]==null || moveset[i]==""){
+				if(moveset[i]==null || "".equals(moveset[i])){
 					System.out.print("...");
 					System.out.print("             ");
 				}else{

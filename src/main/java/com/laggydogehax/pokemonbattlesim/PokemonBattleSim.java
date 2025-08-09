@@ -8,17 +8,17 @@ import java.util.concurrent.*;
 
 public class PokemonBattleSim{
 	static final String OsName = System.getProperty("os.name");
-	static final String version = "beta5 dev8";
+	static final String version = "beta5 dev9 part 1: the db update";
 	static final char s='s', m='m';
 	
-	static boolean battleAnimations=true;
+	static boolean battleAnimations = true;
 	
 	static Pokemon[] playerMons = new Pokemon[3];
 	static Pokemon[] cpuMons = new Pokemon[3];
 	//cpu >> ai  there's NO intelligence to be found here
 
-	static int playerMonActive=0;
-	static int cpuMonActive=0;
+	static int playerMonActive = 0;
+	static int cpuMonActive = 0;
 	
 	static Random rng = new Random();
 	static Scanner tcl = new Scanner(System.in); //STATIC SCANNER, LES GOOOO
@@ -76,11 +76,12 @@ public class PokemonBattleSim{
 		cout.write("          .^@@@@@@@&&&&&&&&&&&&@@@@@@@@@&       \n");
 		cout.write("         !@@@@@@@@@:           #@@@@@@@@#       \n");
 		cout.flush();
-                
-		System.out.println("Creating temporary files...");
-                PokemonDB pdb = new PokemonDB();
+		
+		System.out.println("Creating files if necessary...");
+        PokemonDB pdb = new PokemonDB();
+		pdb.forceReplaceSavedDB();
 		System.out.println("Loading configuration file...");
-                PBSFileReader fr = new PBSFileReader();
+        PBSFileReader fr = new PBSFileReader();
 		System.out.println("Located at: "+fr.getSaveFilePath()+"\n");
 		
 		wair(m,500000);
@@ -153,7 +154,7 @@ public class PokemonBattleSim{
 					|| selecshon.equals("Anims On")){
 					errBypass=true;
 				}
-				
+
 			}catch(StringIndexOutOfBoundsException e){
 				correctName=false;
 			}
@@ -357,23 +358,23 @@ public class PokemonBattleSim{
 
 	//---------------------------------------------//
 
-	static int moveSelec=0;
-	static int moveSelec2=0;
-	static int battleMenuSelec=0;  //<-- quite the important variables if i say so myself
-	static int cpuMoveSelec=0;
-	static boolean cpuJustSwitched=false; //<--prevent cpu from switching twice in a row
-	static boolean doublehitPlayer=false;
-	static boolean doublehitCpu=false;
-	static boolean plyCanMegaEvolve=true; //can only mega-evolve once per battle
-	static boolean cpuCanMegaEvolve=true;
-	static boolean[] plyCanFreeFromAilment = new boolean[]{true,true,true};
-	static boolean[] cpuCanFreeFromAilment = new boolean[]{true,true,true};
+	static int moveSelec = 0;
+	static int moveSelec2 = 0;
+	static int battleMenuSelec = 0;  //<-- quite the important variables if i say so myself
+	static int cpuMoveSelec = 0;
+	static boolean cpuJustSwitched = false; //<--prevent cpu from switching twice in a row
+	static boolean doublehitPlayer = false;
+	static boolean doublehitCpu = false;
+	static boolean plyCanMegaEvolve = true; //can only mega-evolve once per battle
+	static boolean cpuCanMegaEvolve = true;
+	static boolean[] plyCanFreeFromAilment = new boolean[]{true, true, true};
+	static boolean[] cpuCanFreeFromAilment = new boolean[]{true, true, true};
 	//------misc variables for funsies---//
-	static int numbahOfTurns=0;
-	static int highestDamage=0;
-	static int totalPlayerDamage=0;
-	static int totalCPUDamage=0;
-	static String highestDamageName="";
+	static int numbahOfTurns = 0;
+	static int highestDamage = 0;
+	static int totalPlayerDamage = 0;
+	static int totalCPUDamage = 0;
+	static String highestDamageName = "";
 
 	//----------POKEMON BATTLE METHODS-------------//
 	
