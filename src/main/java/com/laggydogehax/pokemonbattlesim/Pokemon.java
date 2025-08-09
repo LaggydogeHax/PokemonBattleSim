@@ -26,10 +26,9 @@ class Pokemon{
 		"Dragon"=15,  "Dark"=16,    "Fairy"=17
 	*/
 
-
 	protected boolean resistsType(String typ){
 		String[] vec = PokemonMaker3000.getTypesVector();
-		
+
 		for (int i=0;i<vec.length;i++){
 			if(typ.contains(vec[i])){
 				if(this.weakToMults[i]<0){

@@ -1,6 +1,7 @@
 package com.laggydogehax.pokemonbattlesim;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,8 +10,8 @@ import java.nio.file.Paths;
 import java.util.Scanner;
 
 class PBSFileReader{
-        private final String path = Paths.get(System.getProperty("user.home"), ".PBS", "PBS_Config.txt").toString();
-        private final Path pathToPath = Paths.get(System.getProperty("user.home"), ".PBS");
+    private final String path = Paths.get(System.getProperty("user.home"), ".PBS", "PBS_Config.txt").toString();
+    private final Path pathToPath = PokemonDB.getSaveFilePath();
 	boolean noErrors = true;
 	
 	public int[] configList = new int[2];
@@ -42,16 +43,12 @@ class PBSFileReader{
         }
 	
 	public boolean checkFile(){
-		if(saveFile.exists()){
-			return true;
-		}else{
-			return false;
-		}
+		return saveFile.exists();
 	}
         
 	private boolean makeFile(){
 		try{
-                        Files.createDirectories(this.pathToPath);
+            Files.createDirectories(this.pathToPath);
 			FileWriter fw = new FileWriter(saveFile,true);
 
 			fw.write("// PokemonBattleSim config save file //"+"\n");
@@ -95,12 +92,11 @@ class PBSFileReader{
 				return null;
 			}
 			
-			
 			int[] config = new int[]{teemSice,animations};
 			
 			return config;
 			
-		}catch(Exception e){
+		}catch(FileNotFoundException | NullPointerException | NumberFormatException e){
 			if(sc!=null){
 				sc.close();
 			} 

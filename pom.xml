@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.laggydogehax</groupId>
     <artifactId>pokemonbattlesim</artifactId>
-    <version>beta5-dev7</version>
+    <version>beta5-dev</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
