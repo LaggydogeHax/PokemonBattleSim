@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 
 public class PokemonBattleSim{
 	static final String OsName = System.getProperty("os.name");
-	static final String version = "beta5 dev9 part 1: the db update";
+	static final String version = "beta5 dev9 part 2: the db update";
 	static final char s='s', m='m';
 	
 	static boolean battleAnimations = true;
@@ -27,21 +27,8 @@ public class PokemonBattleSim{
 	static String[] typeList = PokemonMaker3000.getTypesVector();
 	
 	private static String[] getPkmnNamesVector(){
-		String[] pkmnNamesVector = new String[]{
-		"Venusaur","Blastoise","Charizard",  "Meowscarada","Ninetales","Empoleon",  "Raichu","Mewtwo","Gengar",
-		"Dragonite","Absol","Gardevoir",     "Glaceon","Luxray","Lucario",          "Duraludon","Mismagius","Golisopod",
-		"Heracross","Rampardos","Lycanroc",  "Aurorus","Dugtrio","Sandlash",        "Arbok","Sneasler","Pidgeot",
-		"Lugia","Urshifu","Audino",          "Tauros","Sylveon","Tinkaton",         "Zarude","Dragapult","Mawile",
-		//-----page 2----// each page shall be 36 mons, 2 of each type
-		"Blaziken","Vaporeon","Decidueye",   "Flareon","Lapras","Tsareena",         "Ursaluna","Braviary","Toxtricity",
-		"Krookodile","Toucannon","Zeraora",  "Weezing","Walking Wake","Togekiss",   "Drapion","Roaring Moon","Florges",
-		"Lopunny","Cinccino","Hawlucha",     "Flutter Mane","Trevenant","Volcarona","Vespiquen","Pangoro","Aggron",
-		"Scizor","Mew","Alakazam",           "Froslass","Baxcalibur","Hydreigon",   "Zoroark","Solrock","Lunatone",
-		//-----page 3----//
-		"Delphox","Gyarados","Sceptile",     "Typhlosion","Greninja","Leafeon",     "Donphan","Corviknight","Umbreon",
-		"Jolteon","Espeon","Eevee",          "Arceus","Citrus","Toxicroak",         "Cyclizar","Garchomp","Gholdengo",
-		"Galvantula","Ceruledge","Chandelure","Flamigo","Zamazenta","Zacian",       "Magearna","Cresselia","Kingambit",
-		"Azumarill","Gallade","Seviper",     "Garganacl","Diance","Chien-Pao",      "Weavile","Yanmega","Kleavor"};
+		PokemonDB db = new PokemonDB();
+		String[] pkmnNamesVector = db.getPokemonNamesInDB();
 		
 		return pkmnNamesVector;
 	}
@@ -110,13 +97,12 @@ public class PokemonBattleSim{
 	}
 
 	public static void main(String[] args)throws IOException, InterruptedException{
+		setUpConfigs();
 		String selecshon="";
 		boolean correctName=false;
 		boolean errBypass=false; //this is here so the invalid msg can be skipped o_o
 		int page=1,lastPage=3;
 		String[] pkmnNamesVector = getPkmnNamesVector();
-		
-		setUpConfigs();
 		
 		do{
 			clear();

@@ -42,29 +42,9 @@ public class PokemonDB {
 			// :p
 		}
 	}
-
-	public void getPokemonNamesInDB() {
-		String sql = "SELECT 'name' FROM Pokemon WHERE 1";
-
-		try (var conn = DriverManager.getConnection(this.url)) {
-			try (var stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
-
-				while (rs.next()) {
-					System.out.println("pokemon in db: " + rs.getString("name"));
-				}
-
-			} catch (SQLException e) {
-				System.err.print(e.getMessage());
-			}
-
-		} catch (SQLException e) {
-			System.err.println(e.getMessage());
-		}
-	}
 	
-	public String[] getTypesVectorInDB(){
-		String sql = "SELECT type FROM Types";
-		String[] typesVector = null;
+	private String[] fetchStuff(String sql){
+		String[] fetchString = null;
 		
 		try (var conn = DriverManager.getConnection(this.url)) {
 			try (var stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
@@ -81,8 +61,8 @@ public class PokemonDB {
 					}
 				}
 				//convert arraylist to string[]
-				typesVector = new String[rsList.size()];
-				typesVector = rsList.toArray(typesVector);
+				fetchString = new String[rsList.size()];
+				fetchString = rsList.toArray(fetchString);
 
 			} catch (SQLException e) {
 				System.err.print(e.getMessage());
@@ -92,7 +72,35 @@ public class PokemonDB {
 			System.err.println(e.getMessage());
 		}
 		
-		return typesVector;
+		return fetchString;
+	}
+
+	public String[] getPokemonNamesInDB() {
+		String sql = "SELECT name FROM Pokemon";
+		return this.fetchStuff(sql);
+	}
+	
+	public String[] getTypesVectorInDB(){
+		String sql = "SELECT type FROM Types";
+		String[] typesVector = this.fetchStuff(sql);
+		
+		//someone had the brilliant idea of adding a 19th type NULL in the db because of foreign key constrains
+		String[] typesVectorWithoutNULL = new String[18];
+		//today i learned that System.arraycopy exists
+		System.arraycopy(typesVector, 0, typesVectorWithoutNULL, 0, typesVectorWithoutNULL.length);
+		
+		return typesVectorWithoutNULL;
+	}
+	
+	public String[] getSinglePokemonData(String pkmnName){
+		//wth
+		String sql = "SELECT a.name, b.type,b1.type,a.base_atk,a.base_def,a.base_hp,a.base_speed FROM Pokemon a INNER JOIN Types b ON b.id_type LIKE a.id_type INNER JOIN Types b1 ON b1.id_type LIKE a.id_type2 WHERE a.name LIKE '"+pkmnName+"'";
+		return this.fetchStuff(sql);
+	}
+	
+	public String[] getMoveData(String move){
+		String sql = "SELECT b.type,a.is_attack FROM Moves a INNER JOIN Types b ON a.id_type LIKE b.id_type WHERE a.name LIKE '"+move+"'";
+		return this.fetchStuff(sql);
 	}
 	
 	public static Path getSaveFilePath(){

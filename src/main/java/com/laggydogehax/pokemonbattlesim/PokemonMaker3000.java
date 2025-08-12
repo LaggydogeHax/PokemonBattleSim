@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 //why does this extend the main class??? i forgor
@@ -128,9 +130,13 @@ class PokemonMaker3000 extends PokemonBattleSim{
 	}
 
 	private static String[] getFilePaths(){
-		String path = System.getProperty("user.home");
-		String filenames[] = new String[]{path+"\\"+"customPokemon.txt",path+"\\"+"customPokemon2.txt",
-		path+"\\"+"customPokemon3.txt",path+"\\"+"customPokemon4.txt"};
+		String path = PokemonDB.getSaveFilePath().toString();
+		
+		String filenames[] = new String[]{
+			Paths.get(path,"customPokemon.txt").toString(),
+			Paths.get(path,"customPokemon1.txt").toString(),
+			Paths.get(path,"customPokemon2.txt").toString(),
+			Paths.get(path,"customPokemon3.txt").toString()};
 
 		return filenames;
 	}
