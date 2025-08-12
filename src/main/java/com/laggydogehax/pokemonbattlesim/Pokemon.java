@@ -2019,149 +2019,16 @@ class Pokemon{
 		this.moveset[1][3]=defineMove(this.moveset[0][3]);
 	}
 
-	protected String defineMove(String move){
-		String[] moveTableStatus = PokemonMaker3000.getMoveTable("status");
-		String[] moveTableAtkNormal = PokemonMaker3000.getMoveTable("normal");
-		String[] moveTableAtkFire = PokemonMaker3000.getMoveTable("fire");
-		String[] moveTableAtkWater = PokemonMaker3000.getMoveTable("water");
-		String[] moveTableAtkElectric = PokemonMaker3000.getMoveTable("electric");
-		String[] moveTableAtkGrass = PokemonMaker3000.getMoveTable("grass");
-		String[] moveTableAtkIce = PokemonMaker3000.getMoveTable("ice");
-		String[] moveTableAtkFighting = PokemonMaker3000.getMoveTable("fighting");
-		String[] moveTableAtkPoison = PokemonMaker3000.getMoveTable("poison");
-		String[] moveTableAtkGround = PokemonMaker3000.getMoveTable("ground");
-		String[] moveTableAtkFlying = PokemonMaker3000.getMoveTable("flying");
-		String[] moveTableAtkPsychic = PokemonMaker3000.getMoveTable("psychic");
-		String[] moveTableAtkBug = PokemonMaker3000.getMoveTable("bug");
-		String[] moveTableAtkRock = PokemonMaker3000.getMoveTable("rock");
-		String[] moveTableAtkGhost = PokemonMaker3000.getMoveTable("ghost");
-		String[] moveTableAtkDragon = PokemonMaker3000.getMoveTable("dragon");
-		String[] moveTableAtkDark = PokemonMaker3000.getMoveTable("dark");
-		String[] moveTableAtkSteel = PokemonMaker3000.getMoveTable("steel");
-		String[] moveTableAtkFairy = PokemonMaker3000.getMoveTable("fairy");
-		
-		String returnar = "";
-		
-		// if move is a status
-		for(int i=0;i<moveTableStatus.length;i++){
-			if(move.equals(moveTableStatus[i])){
-				return "Status Effect";
-			}
+	protected String defineMove(String move){		
+		PokemonDB db = new PokemonDB();
+		String[] data = db.getMoveData(move);
+		String tiep = "";
+		if(data[1].equals("0")){
+			tiep = "Status Effect";
+		}else{
+			tiep = data[0]+" Attack";
 		}
 		
-		// ------------move is an attack---------- //
-		
-		// NORMAL
-		for(int i=0;i<moveTableAtkNormal.length;i++){
-			if(move.equals(moveTableAtkNormal[i])){
-				return "Normal Attack";
-			}
-		}
-		// GRASS
-		for(int i=0;i<moveTableAtkGrass.length;i++){
-			if(move.equals(moveTableAtkGrass[i])){
-				return "Grass Attack";
-			}
-		}
-		// FIRE
-		for(int i=0;i<moveTableAtkFire.length;i++){
-			if(move.equals(moveTableAtkFire[i])){
-				return "Fire Attack";
-			}
-		}
-		// WATER
-		for(int i=0;i<moveTableAtkWater.length;i++){
-			if(move.equals(moveTableAtkWater[i])){
-				return "Water Attack";
-			}
-		}
-		// ELECTRIC
-		for(int i=0;i<moveTableAtkElectric.length;i++){
-			if(move.equals(moveTableAtkElectric[i])){
-				return "Electric Attack";
-			}
-		}
-		// FIGHTING
-		for(int i=0;i<moveTableAtkFighting.length;i++){
-			if(move.equals(moveTableAtkFighting[i])){
-				return "Fighting Attack";
-			}
-		}
-		// POISON
-		for(int i=0;i<moveTableAtkPoison.length;i++){
-			if(move.equals(moveTableAtkPoison[i])){
-				return "Poison Attack";
-			}
-		}
-		// FLYING
-		for(int i=0;i<moveTableAtkFlying.length;i++){
-			if(move.equals(moveTableAtkFlying[i])){
-				return "Flying Attack";
-			}
-		}
-		// GROUND
-		for(int i=0;i<moveTableAtkGround.length;i++){
-			if(move.equals(moveTableAtkGround[i])){
-				return "Ground Attack";
-			}
-		}
-		// BUG
-		for(int i=0;i<moveTableAtkBug.length;i++){
-			if(move.equals(moveTableAtkBug[i])){
-				return "Bug Attack";
-			}
-		}
-		// ROCK
-		for(int i=0;i<moveTableAtkRock.length;i++){
-			if(move.equals(moveTableAtkRock[i])){
-				return "Rock Attack";
-			}
-		}
-		// DRAGON
-		for(int i=0;i<moveTableAtkDragon.length;i++){
-			if(move.equals(moveTableAtkDragon[i])){
-				return "Dragon Attack";
-			}
-		}
-		
-		// STEEL
-		for(int i=0;i<moveTableAtkSteel.length;i++){
-			if(move.equals(moveTableAtkSteel[i])){
-				return "Steel Attack";
-			}
-		}
-		// ICE
-		for(int i=0;i<moveTableAtkIce.length;i++){
-			if(move.equals(moveTableAtkIce[i])){
-				return "Ice Attack";
-			}
-		}
-		
-		// PSYCHIC
-		for(int i=0;i<moveTableAtkPsychic.length;i++){
-			if(move.equals(moveTableAtkPsychic[i])){
-				return "Psychic Attack";
-			}
-		}
-		// DARK
-		for(int i=0;i<moveTableAtkDark.length;i++){
-			if(move.equals(moveTableAtkDark[i])){
-				return "Dark Attack";
-			}
-		}
-		// GHOST
-		for(int i=0;i<moveTableAtkGhost.length;i++){
-			if(move.equals(moveTableAtkGhost[i])){
-				return "Ghost Attack";
-			}
-		}
-		// FAIRY
-		for(int i=0;i<moveTableAtkFairy.length;i++){
-			if(move.equals(moveTableAtkFairy[i])){
-				return "Fairy Attack";
-			}
-		}
-		
-		return returnar; //will return "" if failed to define the move
+		return tiep;
 	}
 }//class Pokemon ends
