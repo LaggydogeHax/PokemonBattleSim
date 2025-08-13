@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 
 public class PokemonBattleSim{
 	static final String OsName = System.getProperty("os.name");
-	static final String version = "beta5 dev9 part 2: the db update";
+	static final String version = "beta5 dev9 part 3: the db update";
 	static final char s='s', m='m';
 	
 	static boolean battleAnimations = true;
@@ -4163,7 +4163,8 @@ public class PokemonBattleSim{
 			"Gary","Cyn","Sunna","Mario","Hop","Niko","Blue","Red","Green","Peter","N","Cebollin","CPU",
 			"Nokia","Moya","Evie","Luigi","Noodle","Joel","Oatmeal","Nestle","Panda","Pingu","Gaby",
 			"Maigol","Luci","Java","TWM","Sunflower","Nina","Lola","Obama","Guide","Steve","Freeman","Goku",
-			"Cocuy","Socks","Bacon","Tocino","Arepa","Sans","Meevin","Zazu","Kevin","May","Eleki","Glue"
+			"Cocuy","Socks","Bacon","Tocino","Arepa","Sans","Meevin","Zazu","Kevin","May","Eleki","Glue",
+			"Geminy","Gippidy","Tux","Xenia","Suzanne","Wilber","Emule","Xue","Gnome","Edwin","Maomao"
 		};
 
 		return names[rng.nextInt(names.length)];
