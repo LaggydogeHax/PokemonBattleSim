@@ -844,9 +844,8 @@ class PokemonMaker3000 extends PokemonBattleSim{
 	}
 
 	public static String[] getSuperSecretMonList(){ //extremely secret ok? shhh
-		String[] secretMonList = new String[]{"Celebi ex","Regieleki","ADP GX","Missing No"};
-
-		return secretMonList;
+		PokemonDB db = new PokemonDB();
+		return db.getSecretPokemonNamesInDB();
 	}
 
 }
