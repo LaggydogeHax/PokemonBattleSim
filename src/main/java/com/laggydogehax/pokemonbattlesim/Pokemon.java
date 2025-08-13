@@ -832,8 +832,14 @@ class Pokemon{
 			moveset = new String[][]{{"", "", "", ""}, {"", "", "", ""}};
 			//moveset array cannot contain null spaces or it'll fail to define the moves
 		}else{
+			boolean isSecret = false;
+			String[] data = db.getPokemonData(pkmnName);
 			
-			String[] data = db.getSinglePokemonData(pkmnName);
+			if(data.length == 0){
+				isSecret = true;
+				data = db.getSecretPokemonData(pkmnName);
+			}
+			
 			baseHP = Integer.parseInt(data[5]);
 			baseATK = Integer.parseInt(data[3]);
 			baseDEF = Integer.parseInt(data[4]);
@@ -847,7 +853,12 @@ class Pokemon{
 			}
 			
 			moveset = new String[][]{{"", "", "", ""}, {"", "", "", ""}};
-			data = db.getPokemonMovelist(pkmnName);
+			if(!isSecret){
+				data = db.getPokemonMovelist(pkmnName);
+			}else{
+				data = db.getSecretPokemonMovelist(pkmnName);
+			}
+			
 			
 			System.arraycopy(data, 0, moveset[0], 0, data.length);
 		}
