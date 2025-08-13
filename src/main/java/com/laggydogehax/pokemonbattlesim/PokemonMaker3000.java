@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -81,52 +80,8 @@ class PokemonMaker3000 extends PokemonBattleSim{
 	}
 
 	public static String[] getMoveTable(String typ){
-		String[] table = {};
-		String[] moveTableStatus = new String[]{"Poison Powder","Will-O-Wisp","Sword Dance","Roar","Hone Claws","Calm Mind",
-		"Iron Defense","Toxic","Dragon Dance","Growl","Charm","Bulk Up","Heal Pulse","Charge","Roost","Extreme Speed","Amnesia",
-		"Aqua Ring","Impulse","Jungle Healing","Fake Tears","Scary Face","Agility","Defend Order","Work Up","Thunder Wave","Last Resort",
-		"Shift Gear","String Shot","Acid Armor","Lunar Plumage","Metal Sound","Coil","Salt Cure","Rock Polish","Assist"};
-		String[] moveTableAtkNormal = new String[]{"Quick Attack","Hyper Beam","Giga Impact","Super Fang","Facade","Swift","Judgement","Ascension","Group Beating","Retaliate","Tackle"};
-		String[] moveTableAtkFire = new String[]{"Flamethrower","Flame Charge","Overheat","Fire Blast","Mystical Fire","Bitter Blade"};
-		String[] moveTableAtkWater = new String[]{"Hydro Pump","Hydro Cannon","Surf","Whirlpool","Scald","Water Shuriken","SurgingStrikes","Muddy Water","Water Gun"};
-		String[] moveTableAtkElectric = new String[]{"Thunder","Thunder Fang","Electroweb","Overdrive","Plasma Fists","Zap Cannon","Thunder Cage"};
-		String[] moveTableAtkGrass = new String[]{"Vine Whip","Giga Drain","Flower Trick","Trailblaze","Razor Leaf","Grass Knot","Wood Hammer","Leaf Blade","Solar Beam","Energy Ball","Powerful Bloom"};
-		String[] moveTableAtkIce = new String[]{"Ice Beam","Ice Fang","Freeze Dry","Blizzard","Ice Slash","Aurora Beam","Triple Axel","Avalanche"};
-		String[] moveTableAtkFighting = new String[]{"Aura Sphere","Close Combat","Rock Smash","Body Slam","Double Kick","Hammer Arm","Drain Punch","HJ Kick","Superpower","Flying Press","Focus Blast","Body Press","Sacred Sword","Vacuum Wave"};
-		String[] moveTableAtkPoison = new String[]{"Poison Leech","Toxic Spikes","Venoshock","Poison Sting","Sludge Bomb","Dire Claw"};
-		String[] moveTableAtkGround = new String[]{"Earthquake","Mud Slap","Earth Power","X","Excite","Magnitude"};
-		String[] moveTableAtkFlying = new String[]{"Wing Attack","Gust","Aerial Ace","Dual Wingbeat","Air Slash","Brave Bird","Cyclone","Sky Attack"};
-		String[] moveTableAtkPsychic = new String[]{"Psystrike","Psychic","Dream Eater","Psybeam","Psycho Cut","Psyshock"};
-		String[] moveTableAtkBug = new String[]{"Bug Bite","Life Leech","Bug Buzz","Attack Order","Pin Missile","X-Scissor","Skitter Smack","Lunge"};
-		String[] moveTableAtkRock = new String[]{"Rock Throw","Head Smash","Stone Edge","Meteor Beam","Diamond Storm","Stone Axe"};
-		String[] moveTableAtkGhost = new String[]{"Shadow Ball","Hex","Shadow Sneak","Shadow Claw","Lick"};
-		String[] moveTableAtkDragon = new String[]{"Dragon Breath","Dragon Rush","Dragon Pulse","Dragon Tail","Draco Meteor","AlteredCreation"};
-		String[] moveTableAtkDark = new String[]{"Pursuit","Bite","Sucker Punch","Crunch","Night Slash","Assurance","Ruination","ScratchingNails"};
-		String[] moveTableAtkSteel = new String[]{"Metal Claw","Iron Tail","Iron Head","Flash Cannon","Iron Hammer","Bullet Punch","Steel Wing","Make it Rain","Behemoth Blade","Behemoth Bash","Gigaton Hammer"};
-		String[] moveTableAtkFairy = new String[]{"Moonblast","Play Rough","Draining Kiss","Halo","Fleur Cannon","MistyExplosion","Alluring Voice","OverdriveSmash"};
-
-		switch (typ) {
-			case "status":table=moveTableStatus;break;
-			case "normal":table=moveTableAtkNormal;break;
-			case "fire":table=moveTableAtkFire;break;
-			case "water":table=moveTableAtkWater;break;
-			case "grass":table=moveTableAtkGrass;break;
-			case "bug":table=moveTableAtkBug;break;
-			case "electric":table=moveTableAtkElectric;break;
-			case "steel":table=moveTableAtkSteel;break;
-			case "ghost":table=moveTableAtkGhost;break;
-			case "rock":table=moveTableAtkRock;break;
-			case "ground":table=moveTableAtkGround;break;
-			case "dark":table=moveTableAtkDark;break;
-			case "fairy":table=moveTableAtkFairy;break;
-			case "flying":table=moveTableAtkFlying;break;
-			case "fighting":table=moveTableAtkFighting;break;
-			case "psychic":table=moveTableAtkPsychic;break;
-			case "dragon":table=moveTableAtkDragon;break;
-			case "ice":table=moveTableAtkIce;break;
-			case "poison":table=moveTableAtkPoison;break;
-		}
-		return table;
+		PokemonDB db = new PokemonDB();
+		return db.getMovesOfType(typ);
 	}
 
 	private static String[] getFilePaths(){
@@ -659,7 +614,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		String mname,mtype;
 		String[] monMoveset = new String[4];
 		String[] lines = new String[10];
-		//read AND verify mon from txt file (located in C:\Users\USERNAME\ as customPokemon.txt)
+		//read AND verify mon from txt file (located in C:\Users\USERNAME\.PBS\ as customPokemon.txt)
 		/* FORMAT:
 		 * NAME <-- first line
 		 * TYPE
@@ -732,14 +687,14 @@ class PokemonMaker3000 extends PokemonBattleSim{
 				throw new NullPointerException("nu uh!");
 			}
 			
-			for(int i=0;i<customMon.weakTo.length;i++){
-				if(customMon.weakTo[i].equals("") || customMon.weakTo[i]==null){
+			for (String weakTo : customMon.weakTo) {
+				if (weakTo.equals("") || weakTo == null) {
 					throw new NullPointerException("failed to apply type weaknesses");
 				}
 			}
 			
-			for(int i=0;i<customMon.resists.length;i++){
-				if(customMon.resists[i].equals("") || customMon.resists[i]==null){
+			for (String resist : customMon.resists) {
+				if (resist.equals("") || resist == null) {
 					throw new NullPointerException("failed to apply type resistances");
 				}
 			}
