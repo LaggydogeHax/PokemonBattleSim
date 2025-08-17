@@ -1,9 +1,28 @@
 # PokemonBattleSim.java
-An epic and totally awesome battle simulator for the terminal/cmd
+An epic and totally awesome battle simulator for the terminal/command line
 
-this epik project originally started on November 8th 2024 yeyeye
+this epic project originally started on November 8th 2024
 
-too lazy to make documentation on the code itself so here's the game mechanics
+## Installation
+
+### From the releases page:
+  1. Download the .jar file and the .bat file
+  2. Place the files on the same directory
+  3. Double-click the .bat file to launch the game in a new window.
+
+  #### or:
+  1. Download the .jar file
+  2. Open up a terminal/command prompt and navigate to where the .jar is
+  3. Launch with: `java -jar FILENAME.jar`
+
+### From source:
+  1. Download JDK 17 (or higher) if you haven't already.
+  2. Click on `<> Code` then Download ZIP.
+  3. Extract it somewhere
+  4. Download and install Maven
+  5. Open a terminal and navigate to where the `pom.xml` file is
+  6. Execute: `mvn clean compile assembly:single`
+  7. The compiled jar will be on /target
 
 ## Pokemon's stats and attributes
 
@@ -37,7 +56,7 @@ Critical hit chance is dependant on the Pokemon's SPEED stat. Upon successful, d
 
 **Formula:** CRIT CHANCE = (current SPEED / 806) * 100.
 
-**NOTE:** Some moves (Like Night Slash) have increased critical hit chance. Others (Like Flower Trick) have guaranteed critical hits.
+**NOTE:** Some moves (Like Night Slash) have increased critical hit chance. Others (Like Flower Trick) have guaranteed critical hits!
 
 ### Status Ailments
 Status Ailments affect your Mon in various ways (yay)
@@ -45,6 +64,8 @@ Status Ailments affect your Mon in various ways (yay)
 Burning status can be inflicted by a few Fire Type Moves
 
 Burning deals damage equal to 1/9 of Base HP
+
+Burned status does not lower your stats.
 
 Chance to free from Burn: 25%
 
