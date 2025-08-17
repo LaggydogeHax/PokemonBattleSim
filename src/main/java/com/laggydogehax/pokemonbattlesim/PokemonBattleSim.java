@@ -3201,48 +3201,58 @@ public class PokemonBattleSim{
 		System.out.println("Selected Pokemon: ");
 		
 		Pokemon tempPkmn = new Pokemon(selecshon);
-		
-		float reducPerc=0;
-		float critPerc=0;
-		
-		//shows reduction percentage
-		reducPerc=(float)tempPkmn.currentDEF/400;
-		reducPerc*=100;
-		String rpString = reducPerc+"";
-		String perc="";
-		for(int i=0;i<4;i++){
-			try{
-				perc+=rpString.charAt(i);
-			}catch(StringIndexOutOfBoundsException e){
-				break;
+		if (tempPkmn.name.equals("Missing No")) {
+			System.out.println("Name:    " + tempPkmn.name);
+			System.out.println("Type:    " + tempPkmn.type);
+			System.out.println("HP:      ???");
+			System.out.println("Attack:  ???");
+			System.out.println("Defense: ???");
+			System.out.println("Speed:   ???");
+		} else {
+
+			float reducPerc = 0;
+			float critPerc = 0;
+
+			//shows reduction percentage
+			reducPerc = (float) tempPkmn.currentDEF / 400;
+			reducPerc *= 100;
+			String rpString = reducPerc + "";
+			String perc = "";
+			for (int i = 0; i < 4; i++) {
+				try {
+					perc += rpString.charAt(i);
+				} catch (StringIndexOutOfBoundsException e) {
+					break;
+				}
 			}
-		}
-		//shows crit chance
-		critPerc=(float)tempPkmn.currentSPEED/806;
-		critPerc*=100;
-		String cpString = critPerc+"";
-		String cperc="";
-		for(int i=0;i<4;i++){
-			try{
-				cperc+=cpString.charAt(i);
-			}catch(StringIndexOutOfBoundsException e){
-				break;
+			//shows crit chance
+			critPerc = (float) tempPkmn.currentSPEED / 806;
+			critPerc *= 100;
+			String cpString = critPerc + "";
+			String cperc = "";
+			for (int i = 0; i < 4; i++) {
+				try {
+					cperc += cpString.charAt(i);
+				} catch (StringIndexOutOfBoundsException e) {
+					break;
+				}
 			}
+			String typ1 = Color.getColorFromString(tempPkmn.type) + "" + tempPkmn.type + Clr.R;
+			String typ2 = "";
+			if (tempPkmn.type2.equals("") == false) {
+				typ2 = "/" + Color.getColorFromString(tempPkmn.type2) + tempPkmn.type2 + Clr.R;
+			}
+
+			System.out.println("The Pokemon's stats are reset when switching out \n");//<-- C++ reference!?? //<-- huh?
+			System.out.println("Name:    " + tempPkmn.name);
+			System.out.println("Type:    " + typ1 + typ2);
+			System.out.println("Ability: " + tempPkmn.ability.name);
+			System.out.println("HP:      " + tempPkmn.baseHP);
+			System.out.println("Attack:  " + tempPkmn.baseATK);
+			System.out.println("Defense: " + tempPkmn.baseDEF + " (" + perc + "% reduction)");
+			System.out.println("Speed:   " + tempPkmn.baseSPEED + " (" + cperc + "% crit. chance)");
 		}
-		String typ1=Color.getColorFromString(tempPkmn.type)+""+tempPkmn.type+Clr.R;
-		String typ2="";
-		if(tempPkmn.type2.equals("")==false){
-			typ2="/"+Color.getColorFromString(tempPkmn.type2)+tempPkmn.type2+Clr.R;
-		}
-	
-		System.out.println("The Pokemon's stats are reset when switching out \n");//<-- C++ reference!?? //<-- huh?
-		System.out.println("Name:    "+tempPkmn.name);
-		System.out.println("Type:    "+typ1+typ2);
-		System.out.println("Ability: "+tempPkmn.ability.name);
-		System.out.println("HP:      "+tempPkmn.baseHP);
-		System.out.println("Attack:  "+tempPkmn.baseATK);
-		System.out.println("Defense: "+tempPkmn.baseDEF+" ("+perc+"% reduction)");
-		System.out.println("Speed:   "+tempPkmn.baseSPEED+" ("+cperc+"% crit. chance)");
+		
 		System.out.print("Weak to: ");
 		
 		for(int i=0;i<tempPkmn.weakTo.length;i++){
