@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 
 public class PokemonBattleSim{
 	static final String OsName = System.getProperty("os.name");
-	static final String version = "beta5 dev9 part 3 hotfix 1 revision 1: the db update";
+	static final String version = "beta5 dev10";
 	static final char s='s', m='m';
 	
 	static boolean battleAnimations = true;
@@ -23,8 +23,6 @@ public class PokemonBattleSim{
 	static Random rng = new Random();
 	static Scanner tcl = new Scanner(System.in); //STATIC SCANNER, LES GOOOO
 	static String cpuName = getNewCPUName(); // random cpu name
-	
-	static String[] typeList = PokemonMaker3000.getTypesVector();
 	
 	private static String[] getPkmnNamesVector(){
 		PokemonDB db = new PokemonDB();
@@ -736,8 +734,8 @@ public class PokemonBattleSim{
 			}
 			
 			//animation!!!
-			Clr color2 = getColorFromType(cloneMon,selectedMove);
-			Clr color1 = getBrightColorFromType(cloneMon,selectedMove);
+			Clr color2 = Color.getColorFromMoveType(cloneMon,selectedMove);
+			Clr color1 = Color.getBrightColorFromMoveType(cloneMon,selectedMove);
 			int colorName;
 			if(turnOf==1){ colorName=2; }else{ colorName=1; }
 			
@@ -899,7 +897,7 @@ public class PokemonBattleSim{
 				if(playerMons[i].type2.equals("")==false){
 					typ2="/"+playerMons[i].type2;
 				}
-				String monHP= "HP: ["+playerMons[i].currentHP+" / "+playerMons[i].baseHP+"]";
+				String monHP= "HP: ["+Color.getHPColor(playerMons[i])+playerMons[i].currentHP+Clr.R+" / "+playerMons[i].baseHP+"]";
 				System.out.print("["+(i+1)+"] "+playerMons[i].name);
 				for(int j=0;j<16-playerMons[i].name.length();j++){
 					System.out.print(" ");
@@ -1472,7 +1470,7 @@ public class PokemonBattleSim{
 		totalDmgTaken+=hehehe; //adds the random nonsense
 		totalDmgTaken*=nHits; // multihit multiplier
 
-		if(pkmn1.isSpecialMove(moveInteger)=="cuthp"){
+		if("cuthp".equals(pkmn1.isSpecialMove(moveInteger))){
 			totalDmgTaken=pkmn2.currentHP/2;
 			if(getMoveEffectiveness(moveInteger, pkmn1, pkmn2)==2 || getMoveEffectiveness(moveInteger, pkmn1,pkmn2)==22){
 				totalDmgTaken/=2;
@@ -2923,7 +2921,7 @@ public class PokemonBattleSim{
 						cpuTeamManagerAssignPokemon(lastpage);
 						return;
 					}
-				}catch(Exception e){
+				}catch(IOException | InterruptedException e){
 					op=0;
 					tcl.nextLine();
 				}
@@ -3204,52 +3202,73 @@ public class PokemonBattleSim{
 		
 		Pokemon tempPkmn = new Pokemon(selecshon);
 		
-		if(tempPkmn.name.equals("Missing No")){
-			System.out.println("Name:    "+tempPkmn.name);
-			System.out.println("Type:    "+tempPkmn.type);
-			System.out.println("HP:      ???");
-			System.out.println("Attack:  ???");
-			System.out.println("Defense: ???");
-			System.out.println("Speed:   ???");
-		}else{
-			String typ2="";
-			if(tempPkmn.type2.equals("")==false){
-				typ2="/"+tempPkmn.type2;
+		float reducPerc=0;
+		float critPerc=0;
+		
+		//shows reduction percentage
+		reducPerc=(float)tempPkmn.currentDEF/400;
+		reducPerc*=100;
+		String rpString = reducPerc+"";
+		String perc="";
+		for(int i=0;i<4;i++){
+			try{
+				perc+=rpString.charAt(i);
+			}catch(StringIndexOutOfBoundsException e){
+				break;
 			}
-			
-			System.out.println("Name:    "+tempPkmn.name);
-			System.out.println("Type:    "+tempPkmn.type+typ2);
-			System.out.println("Ability: "+tempPkmn.ability.name);
-			System.out.println("HP:      "+tempPkmn.baseHP);
-			System.out.println("Attack:  "+tempPkmn.baseATK);
-			System.out.println("Defense: "+tempPkmn.baseDEF);
-			System.out.println("Speed:   "+tempPkmn.baseSPEED);
 		}
-		
-		
+		//shows crit chance
+		critPerc=(float)tempPkmn.currentSPEED/806;
+		critPerc*=100;
+		String cpString = critPerc+"";
+		String cperc="";
+		for(int i=0;i<4;i++){
+			try{
+				cperc+=cpString.charAt(i);
+			}catch(StringIndexOutOfBoundsException e){
+				break;
+			}
+		}
+		String typ1=Color.getColorFromString(tempPkmn.type)+""+tempPkmn.type+Clr.R;
+		String typ2="";
+		if(tempPkmn.type2.equals("")==false){
+			typ2="/"+Color.getColorFromString(tempPkmn.type2)+tempPkmn.type2+Clr.R;
+		}
+	
+		System.out.println("The Pokemon's stats are reset when switching out \n");//<-- C++ reference!?? //<-- huh?
+		System.out.println("Name:    "+tempPkmn.name);
+		System.out.println("Type:    "+typ1+typ2);
+		System.out.println("Ability: "+tempPkmn.ability.name);
+		System.out.println("HP:      "+tempPkmn.baseHP);
+		System.out.println("Attack:  "+tempPkmn.baseATK);
+		System.out.println("Defense: "+tempPkmn.baseDEF+" ("+perc+"% reduction)");
+		System.out.println("Speed:   "+tempPkmn.baseSPEED+" ("+cperc+"% crit. chance)");
 		System.out.print("Weak to: ");
 		
 		for(int i=0;i<tempPkmn.weakTo.length;i++){
-			System.out.print(tempPkmn.weakTo[i]);
+			System.out.print(Color.getColorFromString(tempPkmn.weakTo[i]) + tempPkmn.weakTo[i] + Clr.R);
 			if(i!=tempPkmn.weakTo.length-1){
 				System.out.print(", ");
 			}
 		}
 		System.out.println("");
+	
 		System.out.print("Resists: ");
-			
+
 		for(int i=0;i<tempPkmn.resists.length;i++){
-			System.out.print(tempPkmn.resists[i]);
+			System.out.print(Color.getColorFromString(tempPkmn.resists[i]) + tempPkmn.resists[i] + Clr.R);
 			if(i!=tempPkmn.resists.length-1){
 				System.out.print(", ");
 			}
 		}
 		System.out.println("");
-					
+		
 		System.out.println("Moveset: ");
 		for(int i=0;i<4;i++){
-			System.out.println("        "+(i+1)+":"+tempPkmn.moveset[0][i]+" ("+tempPkmn.moveset[1][i]+")");
+			System.out.println("        "+(i+1)+":"+tempPkmn.moveset[0][i]+" ("+ Color.getBGColorFromMoveType(tempPkmn, i) + tempPkmn.moveset[1][i]+ Clr.R +")");
 		}
+		System.out.println("");
+		
 		int totalstats =tempPkmn.baseATK+tempPkmn.baseDEF+tempPkmn.baseHP+tempPkmn.baseSPEED;
 		System.out.println("Total stat points: "+totalstats);
 	}
@@ -3315,15 +3334,15 @@ public class PokemonBattleSim{
 				break;
 			}
 		}
-	
+		String typ1=Color.getColorFromString(tempPkmn.type)+""+tempPkmn.type+Clr.R;
 		String typ2="";
 		if(tempPkmn.type2.equals("")==false){
-			typ2="/"+tempPkmn.type2;
+			typ2="/"+Color.getColorFromString(tempPkmn.type2)+tempPkmn.type2+Clr.R;
 		}
 	
 		System.out.println("The Pokemon's stats are reset when switching out \n");//<-- C++ reference!?? //<-- huh?
 		System.out.println("Name:    "+tempPkmn.name);
-		System.out.println("Type:    "+tempPkmn.type+typ2);
+		System.out.println("Type:    "+typ1+typ2);
 		System.out.println("Ability: "+tempPkmn.ability.name);
 		System.out.println("HP:      "+tempPkmn.currentHP+"/"+tempPkmn.baseHP);
 		System.out.println("Attack:  "+tempPkmn.currentATK+"/"+tempPkmn.baseATK);
@@ -3332,7 +3351,7 @@ public class PokemonBattleSim{
 		System.out.print("Weak to: ");
 		
 		for(int i=0;i<tempPkmn.weakTo.length;i++){
-			System.out.print(tempPkmn.weakTo[i]);
+			System.out.print(Color.getColorFromString(tempPkmn.weakTo[i]) + tempPkmn.weakTo[i] + Clr.R);
 			if(i!=tempPkmn.weakTo.length-1){
 				System.out.print(", ");
 			}
@@ -3342,7 +3361,7 @@ public class PokemonBattleSim{
 		System.out.print("Resists: ");
 
 		for(int i=0;i<tempPkmn.resists.length;i++){
-			System.out.print(tempPkmn.resists[i]);
+			System.out.print(Color.getColorFromString(tempPkmn.resists[i]) + tempPkmn.resists[i] + Clr.R);
 			if(i!=tempPkmn.resists.length-1){
 				System.out.print(", ");
 			}
@@ -3351,7 +3370,7 @@ public class PokemonBattleSim{
 		
 		System.out.println("Moveset: ");
 		for(int i=0;i<4;i++){
-			System.out.println("        "+(i+1)+":"+tempPkmn.moveset[0][i]+" ("+tempPkmn.moveset[1][i]+")");
+			System.out.println("        "+(i+1)+":"+tempPkmn.moveset[0][i]+" ("+ Color.getBGColorFromMoveType(tempPkmn, i) + tempPkmn.moveset[1][i]+ Clr.R +")");
 		}
 		System.out.println("");
 		System.out.println("Press Enter to go back");
@@ -3370,7 +3389,7 @@ public class PokemonBattleSim{
 		do{
 			try{
 				selec=Integer.parseInt(tcl.nextLine());
-			}catch(Exception e){
+			}catch(NumberFormatException e){
 				selec=69;
 			}
 		}while(selec<1 || selec>4);
@@ -3565,6 +3584,15 @@ public class PokemonBattleSim{
 					System.out.println("decreases self DEF after using");
 					System.out.println("the move.");
 				break;
+				case "critIfPoisoned":
+					System.out.println("Lands a Critical Hit if");
+					System.out.println("The opponent is Poisoned.");
+				break;
+				case "critIfEnemyHasStatusAil":
+					System.out.println("Lands a Critical Hit if");
+					System.out.println("The opponent is Poisoned, Burning\n"
+						+ "or Paralized.");
+				break;
 			}
 		}else{
 			switch(statusMoveHandler(playerMons[playerMonActive].moveset[0][selec])){
@@ -3675,13 +3703,14 @@ public class PokemonBattleSim{
 					return 69;
 				}
 				selec=Integer.parseInt(selecSt);
-			}catch(Exception e){
+			}catch(NumberFormatException e){
 				selec=0;
 				selecSt="";
 				tcl.nextLine();
-			}if(selec>playerMons[playerMonActive].items.length || selec<1 ||
-			playerMons[playerMonActive].items[selec-1].equals("")){
-				selec=0;
+			}
+			if (selec > playerMons[playerMonActive].items.length || selec < 1
+				|| playerMons[playerMonActive].items[selec - 1].equals("")) {
+				selec = 0;
 			}
 		}while(selec<1);
 
@@ -3691,8 +3720,8 @@ public class PokemonBattleSim{
 
 	private static void printBattleMenuOptions(){
 	  //System.out.println("Your active Pokemon:       CPU's active Pokemon:");
-		System.out.println("[1] "+Clr.RED_B+"Fight"+Clr.R+"               | [2]"+Clr.CYAN_B+" Pokemon"+Clr.R);
-		System.out.println("[3] "+Clr.GREEN_B+"Items"+Clr.R+"               | [4]"+Clr.WHITE_B+" PKMN Info"+Clr.R);
+		System.out.println("[1] "+Clr.RED_B+"Fight"+Clr.R+"               | [2] "+Clr.CYAN_B+"Pokemon"+Clr.R);
+		System.out.println("[3] "+Clr.GREEN_B+"Items"+Clr.R+"               | [4] "+Clr.WHITE_B+"PKMN Info"+Clr.R);
 		/*
 		System.out.println("[1] Fight               | [2] Pokemon");
 		System.out.println("[3] Items               | [4] PKMN Info");
@@ -3719,6 +3748,9 @@ public class PokemonBattleSim{
 		int pk1HP=playerMons[playerMonActive].currentHP;
 		int pk2HP=cpuMons[cpuMonActive].currentHP;
 
+		String cl1 = Color.getHPColor(playerMons[playerMonActive])+"";
+		String cl2 = Color.getHPColor(cpuMons[cpuMonActive])+"";
+		
 		String spaces="";
 		String par=Clr.YELLOW_B+"[PAR]"+Clr.R,
 			   psn=Clr.MAGENTA_B+"[PSN]"+Clr.R,
@@ -3787,7 +3819,7 @@ public class PokemonBattleSim{
 		cout.write(al1+alSpaces+al2+"\n");
 
 		//---second line: just displays "Your Pokemon:  CPU's Pokemon:"---//
-		cout.write(Clr.WHITE_B+"Your Pokemon:");
+		cout.write(Clr.BOLD+"Your Pokemon:");
 		for(int i=0;i<35-cpuName.length()-11;i++){
 			spaces+=" ";
 		}
@@ -3805,13 +3837,13 @@ public class PokemonBattleSim{
 		cout.write(pk2Name+"\n");
 
 		//----fourth line: display HP count for both pokemon----//
-		cout.write(" HP: "+pk1HP);
+		cout.write(" HP: "+cl1+pk1HP+Clr.R);
 		for(int i=0;i<38-(pk1HP+"").length()-((pk2HP+"").length());i++){
 			spaces+=" ";
 		}
 		cout.write(spaces); spaces="";
 
-		cout.write("HP: "+pk2HP+"\n");
+		cout.write("HP: "+cl2+pk2HP+Clr.R+"\n");
 
 		//----fifth line: display status ailments (if any) for both pokemon---//
 		cout.write(pk1Conditions);
@@ -4053,109 +4085,6 @@ public class PokemonBattleSim{
 			highestDamage=damag;
 			highestDamageName=name;
 		}
-	}
-	
-	
-	static private Clr getColorFromType(Pokemon mon,int moveselec){
-		String montype = mon.moveset[1][moveselec];
-		String[] typesArray = PokemonMaker3000.getTypesVector();
-		
-		for(int i=0;i<typesArray.length;i++){
-			if(montype.contains(typesArray[i])){
-				montype = typesArray[i];
-				break;
-			}
-		}
-		
-		switch(montype){
-			case "Grass": return Clr.GREEN;
-			
-			case "Fire": return Clr.RED;
-			
-			case "Water": return Clr.BLUE;
-			
-			case "Psychic": return Clr.MAGENTA;
-			
-			case "Dark": return Clr.BLACK;
-			
-			case "Fighting": return Clr.RED;
-			
-			case "Electric": return Clr.YELLOW;
-			
-			case "Flying": return Clr.CYAN;
-			
-			case "Bug": return Clr.GREEN;
-			
-			case "Ground": return Clr.YELLOW;
-			
-			case "Rock": return Clr.YELLOW;
-			
-			case "Poison": return Clr.MAGENTA;
-			
-			case "Ghost": return Clr.MAGENTA;
-			
-			case "Steel": return Clr.BLACK;
-			
-			case "Dragon": return Clr.BLUE;
-			
-			case "Fairy": return Clr.MAGENTA;
-			
-			case "Normal": return Clr.BLACK;
-			
-			case "Ice": return Clr.CYAN;
-		}
-		return Clr.R;
-	}
-	
-	static private Clr getBrightColorFromType(Pokemon mon,int moveselec){
-		String montype = mon.moveset[1][moveselec];
-		String[] typesArray = PokemonMaker3000.getTypesVector();
-		
-		for(int i=0;i<typesArray.length;i++){
-			if(montype.contains(typesArray[i])){
-				montype = typesArray[i];
-				break;
-			}
-		}
-		
-		switch(montype){
-			case "Grass": return Clr.GREEN_BB;
-			
-			case "Fire": return Clr.RED_BB;
-			
-			case "Water": return Clr.BLUE_BB;
-			
-			case "Psychic": return Clr.MAGENTA_BB;
-			
-			case "Dark": return Clr.WHITE_BB;
-			
-			case "Fighting": return Clr.RED_BB;
-			
-			case "Electric": return Clr.YELLOW_BB;
-			
-			case "Flying": return Clr.CYAN_BB;
-			
-			case "Bug": return Clr.GREEN_BB;
-			
-			case "Ground": return Clr.YELLOW_BB;
-			
-			case "Rock": return Clr.YELLOW_BB;
-			
-			case "Poison": return Clr.MAGENTA_BB;
-			
-			case "Ghost": return Clr.MAGENTA_BB;
-			
-			case "Steel": return Clr.WHITE_BB;
-			
-			case "Dragon": return Clr.BLUE_BB;
-			
-			case "Fairy": return Clr.MAGENTA_BB;
-			
-			case "Normal": return Clr.WHITE_BB;
-			
-			case "Ice": return Clr.CYAN_BB;
-		}
-		return Clr.R;
 	}
 
 	static private String getNewCPUName(){

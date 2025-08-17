@@ -133,20 +133,11 @@ class Pokemon{
 	}
 
 	protected boolean hasStatusAilment(){
-		if (this.isParalized || this.isBurning || this.isPoisoned) {
-			return true;
-		}//healing over time doesnt count!
-		else{
-			return false;
-		}
+		return this.isParalized || this.isBurning || this.isPoisoned; //healing over time doesnt count!
 	}
 	
 	protected boolean moveIsAnAttack(int selec){
-		if(this.moveset[1][selec].contains("Attack")){
-			return true;
-		}else{
-			return false;
-		}
+		return this.moveset[1][selec].contains("Attack");
 	}
 
 	protected void resetStats(){
@@ -781,6 +772,10 @@ class Pokemon{
 			
 			//50% chance for paralyze,poison or paralysis
 			case "Dire Claw": return "rngPoisonBurnPara";
+			
+			case "Venoshock": return "critIfPoisoned";
+			
+			case "Hex": return "critIfEnemyHasStatusAil";
 		}
 		
 		//----type only----//
