@@ -268,7 +268,8 @@ class Pokemon{
 			"Absol","Lopunny","Venusaur","Charizard","Blastoise","Ninetales","Mewtwo",
 			"Aggron","Blaziken","Gengar","Lucario", "Cinccino", "Audino","Alakazam","Pidgeot", "Heracross",
 			"Gardevoir","Mawile","Sceptile","Eevee","Citrus","Gyarados","Garchomp","Zamazenta","Zacian","Gallade",
-			"Diance","Yanmega","Lapras","Togekiss","Weavile"
+			"Diance","Yanmega","Lapras","Togekiss","Weavile","Zygarde","Hawlucha","Baxcalibur","Delphox","Greninja",
+			"Chandelure","Aurorus"
 		};
 
 		for(int i=0;i<list.length;i++){
@@ -284,7 +285,7 @@ class Pokemon{
 		switch(this.name){
 			case "Absol":
 				addHP=0;
-				addAtk=50;
+				addAtk=69;
 				addDef=-10;
 				addSpeed=20;
 			break;
@@ -326,7 +327,7 @@ class Pokemon{
 			break;
 			case "Mewtwo":
 				addHP=5;
-				addAtk=35;
+				addAtk=45;
 				addDef=-10;
 				addSpeed=-5;
 			break;
@@ -484,6 +485,40 @@ class Pokemon{
 				addSpeed=10;
 				this.moveset[0][1]="ScratchingNails";
 			break;
+			case "Zygarde":
+				addAtk=120;
+			break;
+			case "Hawlucha":
+				addAtk=40;
+				addSpeed=10;
+				addDef=10;
+			break;
+			case "Delphox":
+				addAtk=70;
+				addSpeed=-10;
+			break;
+			case "Greninja":
+				addAtk=35;
+				addDef=10;
+				addSpeed=30;
+			break;
+			case "Baxcalibur":
+				addHP=30;
+				addAtk=30;
+				addDef=30;
+			break;
+			case "Chandelure":
+				addHP=10;
+				addAtk=40;
+				addDef=10;
+				addSpeed=-10;
+			break;
+			case "Aurorus":
+				addHP=10;
+				addDef=50;
+				addAtk=10;
+				this.type2="Steel"; // xd
+			break;
 			case "Eevee": //eevee must go last in the switch statement o.o
 				String listVee[] = new String[]{"Vaporeon","Jolteon","Flareon","Espeon","Umbreon","Leafeon","Glaceon","Sylveon"};
 				Random rng = new Random(); 
@@ -572,10 +607,7 @@ class Pokemon{
 			this.type=ref.type;
 			this.type2=ref.type2;
 			this.moveset=ref.moveset;
-			this.moveset[1][0]=defineMove(this.moveset[0][0]);
-			this.moveset[1][1]=defineMove(this.moveset[0][1]);
-			this.moveset[1][2]=defineMove(this.moveset[0][2]);
-			this.moveset[1][3]=defineMove(this.moveset[0][3]);
+			this.defineAllMoves();
 			this.setTypesWnR();
 			ref=null;
 		}

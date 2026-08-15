@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 
 public class PokemonBattleSim{
 	static final String OsName = System.getProperty("os.name");
-	static final String version = "beta5 dev10";
+	static final String version = "beta5 dev11";
 	static final char s='s', m='m';
 	
 	static boolean battleAnimations = true;
@@ -68,8 +68,6 @@ public class PokemonBattleSim{
 		System.out.println("Loading configuration file...");
         PBSFileReader fr = new PBSFileReader();
 		System.out.println("Located at: "+fr.getSaveFilePath()+"\n");
-		
-		wair(m,500000);
                 
 		if(fr.noErrors){
 			int[] list = fr.configList;
@@ -77,11 +75,7 @@ public class PokemonBattleSim{
 			playerMons = new Pokemon[list[0]];
 			cpuMons = new Pokemon[list[0]];
 			
-			if(list[1]==1){
-				battleAnimations=true;
-			}else{
-				battleAnimations=false;
-			}
+			battleAnimations = list[1]==1;
 			
 			System.out.println("File loaded successfully!!");
 			System.out.println("Starting up in 3 secs...");
@@ -101,6 +95,7 @@ public class PokemonBattleSim{
 		boolean errBypass=false; //this is here so the invalid msg can be skipped o_o
 		int page=1,lastPage=3;
 		String[] pkmnNamesVector = getPkmnNamesVector();
+		String[] commandConfigList = {"Help","6mon","3mon","Cpu","Reset","Anims Off","Anims On"};
 		
 		do{
 			clear();
@@ -129,14 +124,15 @@ public class PokemonBattleSim{
 				selecshon=autoCapitalizeMonName(selecshon);
 				correctName=isNameCorrect(selecshon);
 
-				if(selecshon.equals("Rng")){
+				if(selecshon.equals("Rng") || selecshon.equals("Custom")){
 					correctName=true;
-				}if(selecshon.equals("Custom")){
-					correctName=true;
-				}if(selecshon.equals("Help") || selecshon.equals("6mon") || selecshon.equals("3mon")
-					|| selecshon.equals("Cpu") || selecshon.equals("Reset") || selecshon.equals("Anims Off")
-					|| selecshon.equals("Anims On")){
-					errBypass=true;
+				}else{
+					for(String i : commandConfigList){
+						if(selecshon.equals(i)){
+							errBypass=true;
+							break;
+						}
+					}
 				}
 
 			}catch(StringIndexOutOfBoundsException e){
@@ -895,14 +891,14 @@ public class PokemonBattleSim{
 			if(i!=playerMonActive){
 				String typ2="";
 				if(playerMons[i].type2.equals("")==false){
-					typ2="/"+playerMons[i].type2;
+					typ2="/"+Color.getColorFromString(playerMons[i].type2)+playerMons[i].type2+Clr.R;
 				}
-				String monHP= "HP: ["+Color.getHPColor(playerMons[i])+playerMons[i].currentHP+Clr.R+" / "+playerMons[i].baseHP+"]";
+				String monHP= "HP: ["+Color.getHPColor(playerMons[i])+playerMons[i].currentHP+Clr.R+"/"+playerMons[i].baseHP+"]";
 				System.out.print("["+(i+1)+"] "+playerMons[i].name);
-				for(int j=0;j<16-playerMons[i].name.length();j++){
+				for(int j=0;j<13-playerMons[i].name.length();j++){
 					System.out.print(" ");
 				}
-				System.out.println("| "+monHP+"["+playerMons[i].type+typ2+"]");
+				System.out.println("| "+monHP+"["+Color.getColorFromString(playerMons[i].type)+playerMons[i].type+Clr.R+typ2+"]");
 			}
 		}
 		System.out.println("");
@@ -1020,6 +1016,12 @@ public class PokemonBattleSim{
 		
 		if(mon1.isSpecialMove(moveselec).equals("supEffective")){
 			return 1;
+		}
+		
+		if(mon1.isSpecialMove(moveselec).equals("nihilLight")){
+			if(mon2.resistsType("Dragon")){
+				return 0;
+			}
 		}
 		
 		if(mon2.resistsType(movType)){
@@ -1341,7 +1343,7 @@ public class PokemonBattleSim{
 			break;
 			case "MegaEvolutionHater":
 				String opMonName=pkmn2.name;
-				if(opMonName.contains("Mega-")){
+				if(opMonName.contains("Mega-")){ //this is not a good way to do this
 					atk1*=2;
 				}
 			break;
@@ -1424,6 +1426,12 @@ public class PokemonBattleSim{
 			break;
 			case "rngPoisonBurnPara":
 				atk1-=atk1/5;
+			break;
+			case "nihilLight":
+				atk1*=3; //perfectly balanced
+				if(def2>pkmn2.baseDEF){
+					def2=pkmn2.baseDEF;
+				}
 			break;
 		}//special move switch ends
 
@@ -3138,16 +3146,16 @@ public class PokemonBattleSim{
 		System.out.println(Clr.YELLOW_BB+"[Pokemon Battle Sim "+version+"]"+Clr.R);
 		System.out.println("Totally super cool commands for the Main Menu:");
 		System.out.println("");
-		System.out.println("CUSTOM: allows you to create or manage a\n customized Pokemon. it can be saved to a txt file.\n");
-		System.out.println("RNG: fills empty slots in your team with randomly\n selected Pokemon. then starts the battle.\n");
-		System.out.println("<Number>: view selected page of Pokemon.\n you can select any Pokemon while vieweing any page.\n");
-		System.out.println("<Pokemon Name>: select a Pokemon.\n tip: you can just type the first 4 letters.\n");
-		System.out.println("RESET: Deletes all Pokemon in your team. \n");
-		System.out.println("CPU: Enter the CPU Manager menu. \n");
-		System.out.println("6mon: Changes the Pokemon Team size to 6 Pokemon. \n");
-		System.out.println("3mon: Changes the Pokemon Team size to 3 Pokemon. \n");
-		System.out.println("Anims ON/OFF: Turns ON or OFF the battle animations, \n turn OFF if you experience slowdown or flickering.\n");
-		System.out.println("HELP: brings up this very cool looking screen.");
+		System.out.println(Clr.WHITE_BB+"CUSTOM:"+Clr.R+" allows you to create or manage a\n customized Pokemon. it can be saved to a txt file.\n");
+		System.out.println(Clr.WHITE_BB+"RNG:"+Clr.R+" fills empty slots in your team with randomly\n selected Pokemon. then starts the battle.\n");
+		System.out.println(Clr.WHITE_BB+"<Number>:"+Clr.R+" view selected page of Pokemon.\n you can select any Pokemon while vieweing any page.\n");
+		System.out.println(Clr.WHITE_BB+"<Pokemon Name>:"+Clr.R+" select a Pokemon.\n tip: you can just type the first 4 letters.\n");
+		System.out.println(Clr.WHITE_BB+"RESET:"+Clr.R+" Deletes all Pokemon in your team. \n");
+		System.out.println(Clr.WHITE_BB+"CPU:"+Clr.R+" Enter the CPU Manager menu. \n");
+		System.out.println(Clr.WHITE_BB+"6mon:"+Clr.R+" Changes the Pokemon Team size to 6 Pokemon. \n");
+		System.out.println(Clr.WHITE_BB+"3mon:"+Clr.R+" Changes the Pokemon Team size to 3 Pokemon. \n");
+		System.out.println(Clr.WHITE_BB+"Anims {on|off}:"+Clr.R+" Enables or disables the battle animations, \n turn OFF if you experience slowdown or flickering.\n");
+		System.out.println(Clr.WHITE_BB+"HELP:"+Clr.R+" brings up this very cool looking screen.");
 
 		System.out.println("");
 		System.out.println("Press Enter to go back");
@@ -3172,18 +3180,20 @@ public class PokemonBattleSim{
 			mon = playerMons[playerMonActive];
 		}
 		int coumter=0;
-		for(int i=0;i<4;i++){//they always got 4 moves frfr
-			if(coumter<2){
-				cout.write("["+(i+1)+"] "+mon.moveset[0][i]);
-				for(int j=0;j<20-(mon.moveset[0][i].length());j++){
+		for (int i = 0; i < 4; i++) {//they always got 4 moves frfr
+			if (coumter < 2) {
+				Clr coulour = Color.getBrightColorFromMoveType(mon, i);
+
+				cout.write("[" + (i + 1) + "] " + coulour + mon.moveset[0][i] + Clr.R);
+				for (int j = 0; j < 20 - (mon.moveset[0][i].length()); j++) {
 					cout.write(" ");
 				}
 				coumter++;
-				if(coumter<2){
+				if (coumter < 2) {
 					cout.write("| ");
 				}
-			}else{
-				coumter=0;
+			} else {
+				coumter = 0;
 				cout.write("\n");
 				i--;
 			}
@@ -3406,10 +3416,14 @@ public class PokemonBattleSim{
 		selec--;
 
 		clear();
+		
 		printBattleHUDThing();
+		
+		Clr coulour = Color.getBrightColorFromMoveType(playerMons[playerMonActive], selec);
+		
 		System.out.println("________________________________________________");
-		System.out.println(playerMons[playerMonActive].moveset[0][selec]+":");
-		System.out.println(playerMons[playerMonActive].moveset[1][selec]+" move \n");
+		System.out.println(Clr.WHITE_BB+playerMons[playerMonActive].moveset[0][selec]+":"+Clr.R);
+		System.out.println(coulour+playerMons[playerMonActive].moveset[1][selec]+Clr.R+" move \n");
 		if(playerMons[playerMonActive].moveIsAnAttack(selec)){
 			switch(playerMons[playerMonActive].isSpecialMove(selec)){
 				default:

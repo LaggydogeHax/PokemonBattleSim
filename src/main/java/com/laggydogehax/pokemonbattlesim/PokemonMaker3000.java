@@ -36,7 +36,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 	}
 
 	private static void printSillyMessage(String name,int atk,int def,int speed,int hp){
-		//i love making unnecessary functions!!!!
+		//i love making unnecessary functions!!!! <-- erm akshually these are methods
 		int total=atk+speed+def+hp;
 		String msg="";
 		if(atk>90 && def<81 && speed>99 && hp<350){msg="glasscannon";
