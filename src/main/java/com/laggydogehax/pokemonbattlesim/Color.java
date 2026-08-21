@@ -25,7 +25,7 @@ class Color{
 		return getBackground(montype);
 	}
 	
-	private static String findMonTypeFromMove(String movtype){
+	private static String findMonTypeFromMove(String movtype){ //why is this in the color class
 		String augh = "";
 		String[] typesArray = PokemonMaker3000.getTypesVector();
 		
