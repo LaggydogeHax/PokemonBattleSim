@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class PokemonDB {
 
 	private final String url;
-	private static final Path pathToPath = Paths.get(System.getProperty("user.home"), ".PBS");
+	private static final Path pathToPath = PBSFileReader.getSaveFilePath();
 	private final Path dbPath = Paths.get(pathToPath.toString(),"pbs.db");
 
 	public PokemonDB() {
@@ -80,6 +80,11 @@ public class PokemonDB {
 		return this.fetchStuff(sql);
 	}
 	
+	public String[] getPokemonNamesInTypeOrder(){
+		String sql = "SELECT name FROM Pokemon ORDER BY id_type";
+		return this.fetchStuff(sql);
+	}
+	
 	public String[] getSecretPokemonNamesInDB() {
 		String sql = "SELECT name FROM Pokemon_Secret";
 		return this.fetchStuff(sql);
@@ -118,7 +123,18 @@ public class PokemonDB {
             }
         }
         
-        sql += ")";
+        sql += ") ORDER BY INSTR('";
+		
+		for (int i = 0; i < names.length; i++) { //add names to the query AGAIN to mantain order
+            sql += names[i];
+
+            if (i + 1 < names.length) {
+                sql += ",";
+            }
+        }
+		
+		sql +="',a.name);";
+		
         
         return this.fetchStuff(sql);
     }
@@ -147,10 +163,6 @@ public class PokemonDB {
 	public String[] getMoveData(String move){
 		String sql = "SELECT b.type,a.is_attack FROM Moves a INNER JOIN Types b ON a.id_type LIKE b.id_type WHERE a.name LIKE '"+move+"'";
 		return this.fetchStuff(sql);
-	}
-	
-	public static Path getSaveFilePath(){
-		return pathToPath;
 	}
 
 }

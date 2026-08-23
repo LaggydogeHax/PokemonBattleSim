@@ -6,6 +6,10 @@ class Color{
 		return getClrBright(typ);
 	}
 	
+	static public Clr getBrightColorFromString(String typ){
+		return getClrBright(typ);
+	}
+	
 	static public Clr getBGColorFromString(String typ){
 		return getBackground(typ);
 	}

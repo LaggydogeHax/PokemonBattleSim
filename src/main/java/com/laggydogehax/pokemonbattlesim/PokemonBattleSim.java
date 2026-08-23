@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 public class PokemonBattleSim {
 
     static final String OsName = System.getProperty("os.name");
-    static final String version = "beta5 dev12";
+    static final String version = "beta5 dev13";
     static final char s = 's', m = 'm';
 
     static boolean battleAnimations = true;
@@ -25,6 +25,8 @@ public class PokemonBattleSim {
     static String cpuName = getNewCPUName(); // random cpu name
     
     static String orderOfNames = "default";
+	
+	static BufferedWriter cout = new BufferedWriter(new OutputStreamWriter(System.out));
 
     private static String[] getPkmnNamesVector() {
         PokemonDB db = new PokemonDB();
@@ -39,7 +41,8 @@ public class PokemonBattleSim {
                 Arrays.sort(namesVector);
                 break;
             case "type":
-                
+				PokemonDB db = new PokemonDB();
+                namesVector = db.getPokemonNamesInTypeOrder();
                 break;
             default:
                 //in order of addition :)
@@ -50,9 +53,7 @@ public class PokemonBattleSim {
 
     static private void setUpConfigs() throws IOException, InterruptedException {
 
-        BufferedWriter cout = new BufferedWriter(new OutputStreamWriter(System.out));
-
-        clear();
+        bufferedClear();
         System.out.println(Clr.YELLOW_BB + "[Pokemon Battle Sim " + version + "]" + Clr.R);
         cout.write("                                      :~~~~     \n");
         cout.write("^^^^:                               :^~~~~~     \n");
@@ -84,7 +85,7 @@ public class PokemonBattleSim {
         pdb.forceReplaceSavedDB();
         System.out.println("Loading configuration file...");
         PBSFileReader fr = new PBSFileReader();
-        System.out.println("Located at: " + fr.getSaveFilePath() + "\n");
+        System.out.println("Located at: " + PBSFileReader.getSaveFilePath() + "\n");
 
         if (fr.noErrors) {
             int[] list = fr.configList;
@@ -112,7 +113,7 @@ public class PokemonBattleSim {
         boolean errBypass = false; //this is here so the invalid msg can be skipped o_o
         int page = 1, lastPage = 3;
         String[] pkmnNamesVector = getPkmnNamesVector();
-        String[] commandConfigList = {"Help", "6mon", "3mon", "Cpu", "Reset", "Anims Off", "Anims On"};
+        String[] commandConfigList = {"Help", "6mon", "3mon", "Cpu", "Reset", "Anims Off", "Anims On","Order Def","Order Al","Order Type"};
 
         do {
             clear();
@@ -265,6 +266,18 @@ public class PokemonBattleSim {
                         wair(s, 2);
                     }
                     break;
+					case "Order Def":
+						orderOfNames="default";
+						pkmnNamesVector = orderPkmnNamesVector(getPkmnNamesVector());
+						break;
+					case "Order Al":
+						orderOfNames="alphabetically";
+						pkmnNamesVector = orderPkmnNamesVector(pkmnNamesVector);
+						break;
+					case "Order Type":
+						orderOfNames="type";
+						pkmnNamesVector = orderPkmnNamesVector(pkmnNamesVector);
+						break;
                 }
 
                 errBypass = false;
@@ -387,7 +400,7 @@ public class PokemonBattleSim {
         do {//---------------BATTLE!!!!!!!!!---------------//
 
             do {//get player inputs frfr
-                clear();
+                bufferedClear();
                 battleMenuSelec = 0;
                 moveSelec = 0;
 
@@ -423,7 +436,7 @@ public class PokemonBattleSim {
                     tcl.nextLine();
                     do {
                         
-                        clear();
+                        bufferedClear();
                         printBattleHUDThing();
                         System.out.println("What should " + playerMons[playerMonActive].name + " do?");
                         System.out.println("________________________________________________");
@@ -454,7 +467,7 @@ public class PokemonBattleSim {
 
                     if (playerMons[playerMonActive].energyDrink && battleMenuSelec==1) {
                         do {
-                            clear();
+                            bufferedClear();
                             printBattleHUDThing();
                             System.out.println("What should " + playerMons[playerMonActive].name + " do after " + playerMons[playerMonActive].moveset[0][moveSelec] + "?");
                             System.out.println("________________________________________________");
@@ -751,7 +764,7 @@ public class PokemonBattleSim {
             }
 
             //start printing... now!
-            clear();
+            bufferedClear();
             printBattleHUDThing();
             System.out.println(cloneMon.name + " used " + cloneMon.moveset[0][selectedMove] + "!");
             if (cloneMon.isSpecialMove(selectedMove).equals("magnitude")) {
@@ -759,7 +772,7 @@ public class PokemonBattleSim {
                 System.out.println("Magnitude " + (cloneMon.extraDmg + 4) + "!");
             }
             wair(s, 1);
-            clear();
+            bufferedClear();
             enemyMon.currentHP -= getSmackedBich;//applies dmg
 
             // auhgfjdkgkdfd
@@ -899,7 +912,7 @@ public class PokemonBattleSim {
             }
 
         } else { //move is a status effect
-            clear();
+            bufferedClear();
             printBattleHUDThing();
             System.out.println(cloneMon.name + " used " + cloneMon.moveset[0][selectedMove] + "!");
             wair(s, 1);
@@ -3255,7 +3268,6 @@ public class PokemonBattleSim {
 
     //-------------PRINT METHODS-----------//
     private static void printPkmnNamesPage(String[] namesVector, int page, int lastPage) throws IOException {
-        BufferedWriter cout = new BufferedWriter(new OutputStreamWriter(System.out));
         int coumter = 0;
         int from = 0, to = 0;//0-35, 36-71, 72-107
         boolean toLeft = false, toRight = false;
@@ -3346,15 +3358,16 @@ public class PokemonBattleSim {
         System.out.println(Clr.WHITE_BB + "6mon:" + Clr.R + " Changes the Pokemon Team size to 6 Pokemon. \n");
         System.out.println(Clr.WHITE_BB + "3mon:" + Clr.R + " Changes the Pokemon Team size to 3 Pokemon. \n");
         System.out.println(Clr.WHITE_BB + "Anims {on|off}:" + Clr.R + " Enables or disables the battle animations, \n turn OFF if you experience slowdown or flickering.\n");
+		System.out.println(Clr.WHITE_BB + "Order {Def|Al|Type}:" +Clr.R+" Changes the order of the Pokemon in the Main Menu.\n");
         System.out.println(Clr.WHITE_BB + "HELP:" + Clr.R + " brings up this very cool looking screen.");
-
+		
+		
         System.out.println("");
         System.out.println("Press Enter to go back");
         tcl.nextLine();
     }
 
     private static void printPlayerActivePkmnMoveset(boolean plyWillMegaEvolve) throws IOException {
-        BufferedWriter cout = new BufferedWriter(new OutputStreamWriter(System.out));
         Pokemon mon = null;
         if (plyWillMegaEvolve && plyCanMegaEvolve) {
             if (playerMons[playerMonActive].name.equals("Eevee")) {
@@ -3894,7 +3907,7 @@ public class PokemonBattleSim {
     }
 
     private static int printSelectBattleItem() throws IOException, InterruptedException {
-        clear();
+        bufferedClear();
         printBattleHUDThing();
         System.out.println("Select an item to use");
         System.out.println("________________________________________________");
@@ -3963,7 +3976,7 @@ public class PokemonBattleSim {
         }
 
         //BufferedWriter is fast as heck
-        BufferedWriter cout = new BufferedWriter(new OutputStreamWriter(System.out));
+        //BufferedWriter cout = new BufferedWriter(new OutputStreamWriter(System.out)); now a static object
         //THESE VARIALES ARE TOO LONG WTH
         //"playerPokemonTeam[playerPokemonActive].name"
         int plyAliveMon = countAliveMonInTeam(playerMons);
@@ -4114,25 +4127,25 @@ public class PokemonBattleSim {
         //print colored name with color1, then color2, then go back to normal
 
         if (shake) {
-            System.out.println(); //xd
+            cout.write("\n"); //xd
             printBattleHUDThing(ply, color1, msg);
             wair(m, 80000);
-            clear();
+            bufferedClear();
             printBattleHUDThing(ply, color1, msg);
             wair(m, 80000);
-            clear();
-            System.out.println();
+            bufferedClear();
+            cout.write("\n");
             printBattleHUDThing(ply, color2, msg);
             wair(m, 80000);
-            clear();
+            bufferedClear();
             printBattleHUDThing();
         } else {
             printBattleHUDThing(ply, color1, msg);
             wair(m, 80000);
-            clear();
+            bufferedClear();
             printBattleHUDThing(ply, color2, msg);
             wair(m, 80000);
-            clear();
+            bufferedClear();
             printBattleHUDThing();
         }
     }
@@ -4147,7 +4160,11 @@ public class PokemonBattleSim {
                         System.out.print("           ");
                     }
                 }
-                System.out.print("[" + playerMons[i].name + "] ");
+                System.out.print("[" 
+					+ Color.getColorFromString(playerMons[i].type)
+					+ playerMons[i].name 
+					+ Clr.R
+					+ "] ");
             }
 
         }
@@ -4162,7 +4179,11 @@ public class PokemonBattleSim {
                     System.out.println();
                     System.out.print("           ");
                 }
-                System.out.print("[" + cpuMons[i].name + "] ");
+                System.out.print("[" 
+					+ Color.getColorFromString(cpuMons[i].type)
+					+ cpuMons[i].name 
+					+ Clr.R
+					+  "] ");
             }
         }
         System.out.println("");
@@ -4375,6 +4396,15 @@ public class PokemonBattleSim {
             System.out.print("\033[H\033[2J"); // Linux terminal
         }
     }
+	
+	static void bufferedClear() throws IOException, InterruptedException{
+		if(OsName.contains("Windows")){
+			clear();
+			return;
+		}
+		
+		cout.write("\033[H\033[2J");
+	}
 
     static void wair(char opc, int tim) { //opciones.... s=segundos.... m=microsegundos. tim = tiempo
         switch (opc) {

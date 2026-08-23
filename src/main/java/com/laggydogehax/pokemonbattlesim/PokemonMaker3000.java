@@ -85,7 +85,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 	}
 
 	private static String[] getFilePaths(){
-		String path = PokemonDB.getSaveFilePath().toString();
+		String path = PBSFileReader.getSaveFilePath().toString();
 		
 		String filenames[] = new String[]{
 			Paths.get(path,"customPokemon.txt").toString(),
