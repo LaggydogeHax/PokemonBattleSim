@@ -10,16 +10,31 @@ import java.nio.file.Paths;
 import java.util.Scanner;
 
 class PBSFileReader{
-    private final String path = Paths.get(System.getProperty("user.home"), ".PBS", "PBS_Config.txt").toString();
-    private final Path pathToPath = PokemonDB.getSaveFilePath();
+    private final String path = getConfigFilePath();
+    private final Path pathToPath = getSaveFilePath();
 	boolean noErrors = true;
 	
 	public int[] configList = new int[2];
 	
 	File saveFile = new File(this.path);
 	
+	protected static String getConfigFilePath(){
+		return Paths.get(getSaveFilePath().toString(),"PBS_Config.txt").toString();
+	}
+	
+	protected static Path getSaveFilePath(){
+		if(System.getProperty("os.name").contains("Windows")){
+			return Paths.get(System.getProperty("user.home"), ".PBS");
+		}else{ //on linux (or mac idk)
+			if(Files.exists(Paths.get(System.getProperty("user.home"),".config"))){
+				return Paths.get(System.getProperty("user.home"), ".config","PBS");
+			}else{
+				return Paths.get(System.getProperty("user.home"), ".PBS");
+			}
+		}
+	}
+	
 	public PBSFileReader(){
-		//Scanner sc = new Scanner(saveFile);
 		
 		if(checkFile()){
 			configList=readConfigs();
@@ -36,10 +51,6 @@ class PBSFileReader{
 				}
 			}
 		}
-	}
-        
-	public String getSaveFilePath() {
-		return this.path;
 	}
 	
 	public boolean checkFile(){
