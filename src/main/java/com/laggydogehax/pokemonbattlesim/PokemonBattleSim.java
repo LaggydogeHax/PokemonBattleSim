@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 public class PokemonBattleSim {
 
     static final String OsName = System.getProperty("os.name");
-    static final String version = "beta5 dev13";
+    static final String version = "beta5 dev14";
     static final char s = 's', m = 'm';
 
     static boolean battleAnimations = true;
@@ -54,7 +54,7 @@ public class PokemonBattleSim {
     static private void setUpConfigs() throws IOException, InterruptedException {
 
         bufferedClear();
-        System.out.println(Clr.YELLOW_BB + "[Pokemon Battle Sim " + version + "]" + Clr.R);
+        cout.write(Clr.YELLOW_BB + "[Pokemon Battle Sim " + version + "]" + Clr.R + "\n");
         cout.write("                                      :~~~~     \n");
         cout.write("^^^^:                               :^~~~~~     \n");
         cout.write("!!~~~::                             ~~~~~!!     \n");
@@ -398,6 +398,8 @@ public class PokemonBattleSim {
         boolean cpuWillMegaEvolve = false;
 
         do {//---------------BATTLE!!!!!!!!!---------------//
+			int plyDamageInTurn = 0;
+			int cpuDamageInTurn = 0;
 
             do {//get player inputs frfr
                 bufferedClear();
@@ -429,6 +431,14 @@ public class PokemonBattleSim {
                 }
                 if (battleMenuSelec == 4) {//mon info
                     printMonInfo();
+                }
+				
+				if (battleMenuSelec == 2) { //SWITCH PLAYER POKEMON
+					if(playerSwitchMon(true)==0){ //returns 1 if the player canceled the operation
+						p1SkipTurn = true;
+					}else{
+						battleMenuSelec = 0;
+					}
                 }
                 
                 if (battleMenuSelec == 1) { //chose to fight!!!!!
@@ -485,14 +495,8 @@ public class PokemonBattleSim {
                     }
 
                 }
-                
-                
-                if (battleMenuSelec == 2) { //SWITCH PLAYER POKEMON
-                    p1SkipTurn = true;
-                    playerSwitchMon();
-                }
 
-            } while (battleMenuSelec != 1 && epicSoftLockPrevention1());
+            } while (battleMenuSelec != 1 && battleMenuSelec != 2 && epicSoftLockPrevention1());
 
             
 
@@ -511,7 +515,7 @@ public class PokemonBattleSim {
                     cpuMoveSelec = cpuAIHandler();
                 } while (cpuMoveSelec > 3);
             }
-            if (cpuMoveSelec > 600 && cpuMoveSelec < 700) {
+            if (cpuMoveSelec > 600 && cpuMoveSelec < 700) { //handle items
                 cpuSkipTurn = true;
                 cpuWillMegaEvolve = false;
                 cpuBattleItemsHandler(cpuMoveSelec);
@@ -534,13 +538,13 @@ public class PokemonBattleSim {
             if (playerFirst && !p1SkipTurn) {
                 //player first
                 if (!p1SkipTurn) {
-                    plyerTurn();
+                    plyDamageInTurn = plyerTurn();
                     if (cpuMons[cpuMonActive].currentHP == 0) {
                         cpuSkipTurn = true;
                     }
                     if (playerMons[playerMonActive].energyDrink) {
                         moveSelec = moveSelec2;
-                        plyerTurn();
+                        plyDamageInTurn += plyerTurn();
                         if (cpuMons[cpuMonActive].currentHP == 0) {
                             cpuSkipTurn = true;
                         }
@@ -556,7 +560,7 @@ public class PokemonBattleSim {
                     }
                     cpuSkipTurn = rollForParalysis(cpuMons[cpuMonActive]);
                     if (!cpuSkipTurn) {
-                        cpuTurn();
+                        cpuDamageInTurn = cpuTurn();
                     } else {
                         cpuSkipTurn = false;
                     }
@@ -573,7 +577,7 @@ public class PokemonBattleSim {
                     }
                     cpuSkipTurn = rollForParalysis(cpuMons[cpuMonActive]);
                     if (!cpuSkipTurn) {
-                        cpuTurn();
+                        cpuDamageInTurn = cpuTurn();
                         if (playerMons[playerMonActive].currentHP == 0) {//fainted lol
                             p1SkipTurn = true;
                             //let the block of code below handle pkmon switching
@@ -592,10 +596,10 @@ public class PokemonBattleSim {
                     }
                     p1SkipTurn = rollForParalysis(playerMons[playerMonActive]);
                     if (!p1SkipTurn) {
-                        plyerTurn();
+                        plyDamageInTurn = plyerTurn();
                         if (playerMons[playerMonActive].energyDrink) {
                             moveSelec = moveSelec2;
-                            plyerTurn();
+                            plyDamageInTurn = plyerTurn();
                             if (cpuMons[cpuMonActive].currentHP == 0) {
                                 cpuSkipTurn = true;
                             }
@@ -615,8 +619,12 @@ public class PokemonBattleSim {
             //----------------------CPU------------------//
             if (cpuMons[cpuMonActive].currentHP == 0) {//if mon ded-- i mean fainted
                 //change mon
-                //int switching=0;
-                System.out.println(cpuMons[cpuMonActive].name + " fainted!");
+				if(plyDamageInTurn >= cpuMons[cpuMonActive].baseHP * 3){
+					System.out.println(cpuMons[cpuMonActive].name + " straight up died!");
+				}else{
+					System.out.println(cpuMons[cpuMonActive].name + " fainted!");
+				}
+                
                 wair(s, 2);
                 if (checkAllCPUMons()) {
                     cpuSwitchMon();
@@ -630,7 +638,13 @@ public class PokemonBattleSim {
 
             //player's mon fainted 
             if (playerMons[playerMonActive].currentHP == 0) {
-                System.out.println(playerMons[playerMonActive].name + " fainted!");
+				
+				if(cpuDamageInTurn >= playerMons[playerMonActive].baseHP * 3){
+					System.out.println(playerMons[playerMonActive].name + " straight up died!");
+				}else{
+					System.out.println(playerMons[playerMonActive].name + " fainted!");
+				}
+                
                 wair(s, 2);
                 if (checkAllPlayerMons()) {
                     playerSwitchMon();
@@ -702,11 +716,12 @@ public class PokemonBattleSim {
         tcl.nextLine();
     }
 
-    private static void pokemonBattleSequence(int turnOf) throws IOException, InterruptedException {
+    private static int pokemonBattleSequence(int turnOf) throws IOException, InterruptedException {
         Pokemon cloneMon;
         Pokemon enemyMon;
 
         int selectedMove;
+		int trueDmg = 0;
 
         pokemonAbiliyHandler(turnOf, true);
 
@@ -724,7 +739,7 @@ public class PokemonBattleSim {
 
         if (cloneMon.moveIsAnAttack(selectedMove)) {
 
-            int trueDmg = damageCalc(cloneMon, enemyMon, selectedMove, 0);
+            trueDmg = damageCalc(cloneMon, enemyMon, selectedMove, 0);
             int getSmackedBich = trueDmg;
             int effectiveness = 0;
             boolean crit = false, shakeScreen = false;
@@ -933,19 +948,25 @@ public class PokemonBattleSim {
             cpuMons[cpuMonActive] = cloneMon;
             playerMons[playerMonActive] = enemyMon;
         }
+		
+		return trueDmg; //returns damage dealt
     }
 
-    private static void plyerTurn() throws IOException, InterruptedException {
-        pokemonBattleSequence(1);
+    private static int plyerTurn() throws IOException, InterruptedException {
+        return pokemonBattleSequence(1);
     }
+	
+	private static int playerSwitchMon() throws IOException, InterruptedException {
+		return playerSwitchMon(false);
+	}
 
-    private static void playerSwitchMon() throws IOException, InterruptedException {
+    private static int playerSwitchMon(boolean canCancel) throws IOException, InterruptedException {
         int switchin = 0;
         //boolean flag1=true;
-        clear();
+        bufferedClear();
         printBattleHUDThing();
-        System.out.println("Select one of your Pokemon to switch in:");
-        System.out.println("________________________________________________");
+        cout.write("Select one of your Pokemon to switch in:\n");
+        cout.write("________________________________________________\n");
         for (int i = 0; i < playerMons.length; i++) {
             if (i != playerMonActive) {
                 String typ2 = "";
@@ -953,23 +974,38 @@ public class PokemonBattleSim {
                     typ2 = "/" + Color.getColorFromString(playerMons[i].type2) + playerMons[i].type2 + Clr.R;
                 }
                 String monHP = "HP: [" + Color.getHPColor(playerMons[i]) + playerMons[i].currentHP + Clr.R + "/" + playerMons[i].baseHP + "]";
-                System.out.print("[" + (i + 1) + "] " + playerMons[i].name);
+                cout.write("[" + (i + 1) + "] " + playerMons[i].name);
                 for (int j = 0; j < 13 - playerMons[i].name.length(); j++) {
-                    System.out.print(" ");
+                    cout.write(" ");
                 }
-                System.out.println("| " + monHP + "[" + Color.getColorFromString(playerMons[i].type) + playerMons[i].type + Clr.R + typ2 + "]");
+                cout.write("| " + monHP + "[" + Color.getColorFromString(playerMons[i].type) + playerMons[i].type + Clr.R + typ2 + "]");
+				cout.write("\n");
             }
         }
-        System.out.println("");
+        cout.write("\n");
+		
+		if(canCancel){
+			cout.write("[c]: Go back.\n");
+		}
+		
+		cout.flush();
         do {
+			String inp = "";
             try {
-                switchin = tcl.nextInt();
+				inp = tcl.nextLine();
+                switchin = Integer.parseInt(inp);
                 if (switchin > 0) {
                     switchin--;
                 }
-            } catch (InputMismatchException e) {
-                switchin = 99;
-                tcl.nextLine();
+            } catch (NumberFormatException e) {
+				
+				if((inp.equals("c") || inp.equals("C")) && canCancel){
+					return 1;
+				}else{
+					switchin = 99;
+					inp="";
+				}
+
             }
 
             try {
@@ -982,7 +1018,7 @@ public class PokemonBattleSim {
 
         } while (checkSwitchIn(switchin, playerMonActive, playerMons) || playerMons[switchin].currentHP == 0);
 
-        clear();
+        bufferedClear();
         printBattleHUDThing();
         System.out.println(getRandomSwitchOutQuote(playerMons[playerMonActive].name));
         wair(s, 2);
@@ -994,14 +1030,16 @@ public class PokemonBattleSim {
             playerMons[playerMonActive].isBurning = true;
         }
 
-        clear();
+        bufferedClear();
         printBattleHUDThing();
         System.out.println(getRandomSwitchInQuote(playerMons[playerMonActive].name));
         wair(s, 2);
+		
+		return 0;
     }
 
-    private static void cpuTurn() throws IOException, InterruptedException {
-        pokemonBattleSequence(2);
+    private static int cpuTurn() throws IOException, InterruptedException {
+        return pokemonBattleSequence(2);
     }
 
     private static void cpuSwitchMon() throws IOException, InterruptedException {
@@ -1025,7 +1063,7 @@ public class PokemonBattleSim {
                 switching = rng.nextInt(cpuMons.length);
             } while (checkSwitchIn(switching, cpuMonActive, cpuMons) || cpuMons[switching].currentHP == 0);
         }
-        clear();
+        bufferedClear();
         printBattleHUDThing();
         System.out.println(getRandomSwitchOutQuote(cpuMons[cpuMonActive].name));
         wair(s, 2);
@@ -1038,7 +1076,7 @@ public class PokemonBattleSim {
             cpuMons[cpuMonActive].isBurning = true;
         }
 
-        clear();
+        bufferedClear();
         printBattleHUDThing();
         System.out.println(getRandomSwitchInQuote(cpuMons[cpuMonActive].name, true));
         wair(s, 2);
@@ -1109,7 +1147,7 @@ public class PokemonBattleSim {
         boolean yn = false;//skip turn or not
         if (pkmn.isParalized) {
             int para = rng.nextInt(2);
-            clear();
+            bufferedClear();
             printBattleHUDThing();
             System.out.println(pkmn.name + " is paralized!");
             wair(s, 1);
@@ -1705,20 +1743,20 @@ public class PokemonBattleSim {
             //didnt decide to switch mon
             //look for super effective attacking move
             for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < monsWeaknesses.length; j++) {
-                    if (cpuMon.moveset[1][i].contains(monsWeaknesses[j])) {
-                        shoulduse[i] = true;
-                    }
-                }
+				for (String monsWeakness : monsWeaknesses) {
+					if (cpuMon.moveset[1][i].contains(monsWeakness)) {
+						shoulduse[i] = true;
+					}
+				}
             }
 
             //look for not very effective at all attacking move
             for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < monsResistances.length; j++) {
-                    if (cpuMon.moveset[1][i].contains(monsResistances[j])) {
-                        shoulduse[i] = false;
-                    }
-                }
+				for (String monsResistance : monsResistances) {
+					if (cpuMon.moveset[1][i].contains(monsResistance)) {
+						shoulduse[i] = false;
+					}
+				}
             }
             //count nonUsables xd
             int nonUsables = 0;
@@ -2341,7 +2379,7 @@ public class PokemonBattleSim {
                 if (playerMons[playerMonActive].currentHP < 0) {
                     playerMons[playerMonActive].currentHP = 0;
                 }
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println(playerMons[playerMonActive].name + " hurt itself in recoil!");
                 wair(s, 1);
@@ -2531,7 +2569,7 @@ public class PokemonBattleSim {
                 if (cpuMons[cpuMonActive].currentHP < 0) {
                     cpuMons[cpuMonActive].currentHP = 0;
                 }
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println(cpuMons[cpuMonActive].name + " hurt itself in recoil!");
                 wair(s, 1);
@@ -2645,33 +2683,33 @@ public class PokemonBattleSim {
         //------playerer
         if (playerMons[playerMonActive].currentHP != 0) {
             if (playerMons[playerMonActive].healingOverTime && playerMons[playerMonActive].currentHP != playerMons[playerMonActive].baseHP) {
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println(playerMons[playerMonActive].name + " recovered health!");
                 wair(s, 1);
-                clear();
+                bufferedClear();
                 playerMons[playerMonActive].healOverTime();
                 printBattleHUDThing();
                 System.out.println(playerMons[playerMonActive].name + " recovered health!");
                 wair(s, 1);
             }
             if (playerMons[playerMonActive].isBurning) {
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println(playerMons[playerMonActive].name + " is burning up!");
                 wair(s, 1);
-                clear();
+                bufferedClear();
                 playerMons[playerMonActive].aukBurning();
                 printBattleHUDThing();
                 System.out.println(playerMons[playerMonActive].name + " is burning up!");
                 wair(s, 1);
             }
             if (playerMons[playerMonActive].isPoisoned) {
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println(playerMons[playerMonActive].name + " is hurt by poison!");
                 wair(s, 1);
-                clear();
+                bufferedClear();
                 playerMons[playerMonActive].aukPoisoned();
                 printBattleHUDThing();
                 System.out.println(playerMons[playerMonActive].name + " is hurt by poison!");
@@ -2708,33 +2746,33 @@ public class PokemonBattleSim {
         //--------cpu
         if (cpuMons[cpuMonActive].currentHP != 0) {
             if (cpuMons[cpuMonActive].healingOverTime && cpuMons[cpuMonActive].currentHP != cpuMons[cpuMonActive].baseHP) {
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println(cpuMons[cpuMonActive].name + " recovered health!");
                 wair(s, 1);
-                clear();
+                bufferedClear();
                 cpuMons[cpuMonActive].healOverTime();
                 printBattleHUDThing();
                 System.out.println(cpuMons[cpuMonActive].name + " recovered health!");
                 wair(s, 1);
             }
             if (cpuMons[cpuMonActive].isBurning) {
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println(cpuMons[cpuMonActive].name + " is burning up!");
                 wair(s, 1);
-                clear();
+                bufferedClear();
                 cpuMons[cpuMonActive].aukBurning();
                 printBattleHUDThing();
                 System.out.println(cpuMons[cpuMonActive].name + " is burning up!");
                 wair(s, 1);
             }
             if (cpuMons[cpuMonActive].isPoisoned) {
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println(cpuMons[cpuMonActive].name + " is hurt by poison!");
                 wair(s, 1);
-                clear();
+                bufferedClear();
                 cpuMons[cpuMonActive].aukPoisoned();
                 printBattleHUDThing();
                 System.out.println(cpuMons[cpuMonActive].name + " is hurt by poison!");
@@ -2776,14 +2814,14 @@ public class PokemonBattleSim {
             }
         }
         String prevName = playerMons[playerMonActive].name;
-        clear();
+        bufferedClear();
         printBattleHUDThing();
         if (prevName.equals("Eevee")) {
             System.out.println(playerMons[playerMonActive].name + " is evolving!");
             wair(s, 2);
             playerMons[playerMonActive].megaEvolve();
             plyCanMegaEvolve = false;
-            clear();
+            bufferedClear();
             printBattleHUDThing();
             System.out.println(prevName + " is evolving!");
             System.out.println(prevName + " has evolved into " + playerMons[playerMonActive].name + "!");
@@ -2793,7 +2831,7 @@ public class PokemonBattleSim {
             wair(s, 2);
             playerMons[playerMonActive].megaEvolve();
             plyCanMegaEvolve = false;
-            clear();
+            bufferedClear();
             printBattleHUDThing();
             System.out.println(prevName + " is Mega-Evolving!");
             System.out.println(prevName + " has Mega-Evolved into " + playerMons[playerMonActive].name + "!");
@@ -2806,14 +2844,14 @@ public class PokemonBattleSim {
         cpuMons[cpuMonActive].disableAllItems();
 
         String prevName = cpuMons[cpuMonActive].name;
-        clear();
+        bufferedClear();
         printBattleHUDThing();
         if (prevName.equals("Eevee")) {
             System.out.println(cpuMons[cpuMonActive].name + " is evolving!");
             wair(s, 2);
             cpuMons[cpuMonActive].megaEvolve();
             cpuCanMegaEvolve = false;
-            clear();
+            bufferedClear();
             printBattleHUDThing();
             System.out.println(prevName + " is evolving!");
             System.out.println(prevName + " has evolved into " + cpuMons[cpuMonActive].name + "!");
@@ -2823,7 +2861,7 @@ public class PokemonBattleSim {
             wair(s, 2);
             cpuMons[cpuMonActive].megaEvolve();
             cpuCanMegaEvolve = false;
-            clear();
+            bufferedClear();
             printBattleHUDThing();
             System.out.println(prevName + " is Mega-Evolving!");
             System.out.println(prevName + " has Mega-Evolved into " + cpuMons[cpuMonActive].name + "!");
@@ -2835,19 +2873,19 @@ public class PokemonBattleSim {
         String itemToUse = playerMons[playerMonActive].items[selecItem];
         switch (itemToUse) {
             case "Potion":
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println("You used a Potion!");
                 wair(s, 1);
                 playerMons[playerMonActive].healSelf("half");
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println("You used a Potion!");
                 System.out.println(playerMons[playerMonActive].name + " recovered health!");
                 wair(s, 2);
                 break;
             case "X-Attack":
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println("You used X-Attack!");
                 wair(s, 1);
@@ -2857,7 +2895,7 @@ public class PokemonBattleSim {
                 wair(s, 2);
                 break;
             case "X-Defense":
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println("You used X-Defense!");
                 wair(s, 1);
@@ -2867,7 +2905,7 @@ public class PokemonBattleSim {
                 wair(s, 2);
                 break;
             case "X-Speed":
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println("You used X-Speed!");
                 wair(s, 1);
@@ -2877,7 +2915,7 @@ public class PokemonBattleSim {
                 wair(s, 2);
                 break;
             case "Dash Earring":
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println("You gave " + playerMons[playerMonActive].name + " a Dash Earring!");
                 wair(s, 1);
@@ -2888,7 +2926,7 @@ public class PokemonBattleSim {
                 wair(s, 2);
                 break;
             case "Strike Earrings":
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println("You gave " + playerMons[playerMonActive].name + " Strike Earrings!");
                 wair(s, 1);
@@ -2907,7 +2945,7 @@ public class PokemonBattleSim {
                 wair(s, 2);
                 break;
             case "Energy Drink":
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println("You gave " + playerMons[playerMonActive].name + " an Energy Drink!");
                 wair(s, 1);
@@ -2956,19 +2994,19 @@ public class PokemonBattleSim {
         cpuMons[cpuMonActive].disableAllItems();
         switch (itemToUse) {
             case 660:
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println(cpuName + " used a Potion!");
                 wair(s, 1);
                 cpuMons[cpuMonActive].healSelf("half");
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println(cpuName + " used a Potion!");
                 System.out.println(cpuMons[cpuMonActive].name + " recovered health!");
                 wair(s, 2);
                 break;
             case 663:
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println(cpuName + " used X-Attack!");
                 wair(s, 1);
@@ -2978,7 +3016,7 @@ public class PokemonBattleSim {
                 wair(s, 2);
                 break;
             case 662:
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println(cpuName + " used X-Defense!");
                 wair(s, 1);
@@ -2988,7 +3026,7 @@ public class PokemonBattleSim {
                 wair(s, 2);
                 break;
             case 661:
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println(cpuName + " used X-Speed!");
                 wair(s, 1);
@@ -2998,7 +3036,7 @@ public class PokemonBattleSim {
                 wair(s, 2);
                 break;
             case 669:
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println(cpuName + " gave " + cpuMons[cpuMonActive].name + " a Dash Earring!");
                 wair(s, 1);
@@ -3009,7 +3047,7 @@ public class PokemonBattleSim {
                 wair(s, 2);
                 break;
             case 670:
-                clear();
+                bufferedClear();
                 printBattleHUDThing();
                 System.out.println(cpuName + " gave " + cpuMons[cpuMonActive].name + " Strike Earrings!");
                 wair(s, 1);
@@ -3499,7 +3537,7 @@ public class PokemonBattleSim {
 
     private static void printMonInfo() throws IOException, InterruptedException {
         //this just a copypaste
-        clear();
+        bufferedClear();
         //again gotta make this cus em variables are too long frfrfr
         Pokemon tempPkmn;
         int input = 0;
@@ -3604,7 +3642,7 @@ public class PokemonBattleSim {
 
     private static void printMoveInfo() throws IOException, InterruptedException {
         int selec = 69;
-        clear();
+        bufferedClear();
         printBattleHUDThing();
         System.out.println("Select a move to see its info.");
         System.out.println("________________________________________________");
@@ -3619,8 +3657,7 @@ public class PokemonBattleSim {
         } while (selec < 1 || selec > 4);
         selec--;
 
-        clear();
-
+        bufferedClear();
         printBattleHUDThing();
 
         Clr coulour = Color.getBrightColorFromMoveType(playerMons[playerMonActive], selec);
@@ -4349,7 +4386,8 @@ public class PokemonBattleSim {
             "Nokia", "Moya", "Evie", "Luigi", "Noodle", "Joel", "Oatmeal", "Nestle", "Panda", "Pingu", "Gaby",
             "Maigol", "Luci", "Java", "TWM", "Sunflower", "Nina", "Lola", "Obama", "Guide", "Steve", "Freeman", "Goku",
             "Cocuy", "Socks", "Bacon", "Tocino", "Arepa", "Sans", "Meevin", "Zazu", "Kevin", "May", "Eleki", "Glue",
-            "Geminy", "Gippidy", "Tux", "Xenia", "Suzanne", "Wilber", "Emule", "Xue", "Gnome", "Edwin", "Maomao"
+            "Geminy", "Gippidy", "Tux", "Xenia", "Suzanne", "Wilber", "Emule", "Xue", "Gnome", "Edwin", "Maomao",
+			"Kit", "Bliko","Owen", "Lyphe", "Ross", "Garfield", "Jacket", "Poof"
         };
 
         return names[rng.nextInt(names.length)];
