@@ -175,35 +175,35 @@ class Pokemon{
 		}
 	}
 
-	protected void healSelf(String amount){
-		switch(amount){
-			case "full":
-			this.currentHP=this.baseHP;
-			break;
-			case "half":
-			if(this.energyDrink){
-				this.healSelf("third");
-				return;
-			}
-			this.currentHP+=(this.baseHP/2);
-			if(this.currentHP>this.baseHP){
-				this.currentHP=this.baseHP;
-			}
-			break;
-			case "third":
-			this.currentHP+=(this.baseHP/3);
-			if(this.currentHP>this.baseHP){
-				this.currentHP=this.baseHP;
-			}
-			break;
-			case "quarter":
-			this.currentHP+=(this.baseHP/4);
-			if(this.currentHP>this.baseHP){
-				this.currentHP=this.baseHP;
-			}
-			break;
-		}
-	}
+    protected void healSelf(String amount) {
+        switch (amount) {
+            case "full":
+                this.currentHP = this.baseHP;
+                break;
+            case "half":
+                if (this.energyDrink) {
+                    this.healSelf("third");
+                    return;
+                }
+                this.currentHP += (this.baseHP / 2);
+                if (this.currentHP > this.baseHP) {
+                    this.currentHP = this.baseHP;
+                }
+                break;
+            case "third":
+                this.currentHP += (this.baseHP / 3);
+                if (this.currentHP > this.baseHP) {
+                    this.currentHP = this.baseHP;
+                }
+                break;
+            case "quarter":
+                this.currentHP += (this.baseHP / 4);
+                if (this.currentHP > this.baseHP) {
+                    this.currentHP = this.baseHP;
+                }
+                break;
+        }
+    }
 
 	protected void decreaseStat(String stat){
 		switch(stat){
@@ -555,6 +555,7 @@ class Pokemon{
 				}
 				return;
 		}
+        
 		this.baseATK+=addAtk;
 		this.baseDEF+=addDef;
 		this.baseSPEED+=addSpeed;
@@ -580,12 +581,13 @@ class Pokemon{
 	}
 
 	protected void deMegaEvolve(){
-		if(this.name.contains("Mega-")){
+		if(this.megaEvolved){
 			String nam="";
 			//remove mega from name xd
+            Pokemon ref;
 			try{
 				//try to make a mon without Mega-. if fails, it's a custom mon with Mega- in the name -_-
-				Pokemon aye = new Pokemon(this.name.substring(5));
+				ref = new Pokemon(this.name.substring(5));
 			}catch(Exception e){
 				return;
 			}
@@ -595,8 +597,6 @@ class Pokemon{
 			}
 			
 			//reset stats from base
-			this.name=nam;
-			Pokemon ref = new Pokemon(nam);
 			this.baseHP=ref.baseHP;
 			if(this.currentHP>this.baseHP){
 				this.currentHP=this.baseHP;
@@ -609,7 +609,6 @@ class Pokemon{
 			this.moveset=ref.moveset;
 			this.defineAllMoves();
 			this.setTypesWnR();
-			ref=null;
 		}
 	}
 
@@ -1011,7 +1010,7 @@ class Pokemon{
 	*/
 	
 	
-	protected void setTypesWnR(){
+	protected final void setTypesWnR(){
 		this.weakTo = getListOfWnR(this.type,0);
 		this.resists = getListOfWnR(this.type,1);
 		
@@ -1094,7 +1093,7 @@ class Pokemon{
 		
 	}
 
-	public void defineAllMoves(){
+	public final void defineAllMoves(){
 		this.moveset[1][0]=defineMove(this.moveset[0][0]);
 		this.moveset[1][1]=defineMove(this.moveset[0][1]);
 		this.moveset[1][2]=defineMove(this.moveset[0][2]);

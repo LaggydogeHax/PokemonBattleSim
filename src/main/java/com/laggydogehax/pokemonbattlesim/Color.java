@@ -89,13 +89,13 @@ class Color{
 				return Clr.GREEN;
 
 			case "Ground":
-				return Clr.YELLOW;
+				return Clr.BROWN;
 
 			case "Rock":
 				return Clr.YELLOW;
 
 			case "Poison":
-				return Clr.MAGENTA;
+				return Clr.PURPLE;
 
 			case "Ghost":
 				return Clr.MAGENTA;
@@ -148,13 +148,13 @@ class Color{
 				return Clr.GREEN_BB;
 
 			case "Ground":
-				return Clr.YELLOW_BB;
+				return Clr.BROWN_BB;
 
 			case "Rock":
 				return Clr.YELLOW_BB;
 
 			case "Poison":
-				return Clr.MAGENTA_BB;
+				return Clr.PURPLE_BB;
 
 			case "Ghost":
 				return Clr.MAGENTA_BB;
@@ -251,6 +251,8 @@ enum Clr{
 	ORANGE("\033[38;5;130m"),  // ORANGE
 	PINK("\033[38;5;132m"),  // PINK
 	LBLUE("\033[38;5;75m"), // LIGHT BLUE
+	BROWN("\033[38;5;94m"), //BROWN
+	PURPLE("\033[38;5;129m"), //PURPLE
 	
 	//BRIGHT COLORS
 	BLACK_B("\033[0;90m"),     // BLACK
@@ -274,6 +276,8 @@ enum Clr{
 	ORANGE_BB("\033[38;5;214m"), //ORANGE
 	PINK_BB("\033[38;5;218m"), // PINK
 	LBLUE_BB("\033[38;5;123m"), // LIGHT BLUE
+	BROWN_BB("\033[38;5;136m"), // BROWN
+	PURPLE_BB("\033[38;5;165m"), //PURPLE
 	
 	// BACKGROUND COLOR!!1
     BLACK_BG("\033[40;30m"),   // BLACK AND WHITE TEXT
