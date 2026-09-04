@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 public class PokemonBattleSim {
 
     static final String OsName = System.getProperty("os.name");
-    static final String version = "beta5 dev14";
+    static final String version = "beta5 dev15";
     static final char s = 's', m = 'm';
 
     static boolean battleAnimations = true;
@@ -113,7 +113,7 @@ public class PokemonBattleSim {
         boolean errBypass = false; //this is here so the invalid msg can be skipped o_o
         int page = 1, lastPage = 3;
         String[] pkmnNamesVector = getPkmnNamesVector();
-        String[] commandConfigList = {"Help", "6mon", "3mon", "Cpu", "Reset", "Anims Off", "Anims On","Order Def","Order Al","Order Type"};
+        String[] commandList = {"Help", "6mon", "3mon", "Cpu", "Reset", "Anims Off", "Anims On","Order Def","Order Al","Order Type","Boss"};
 
         do {
             clear();
@@ -145,7 +145,7 @@ public class PokemonBattleSim {
                 if (selecshon.equals("Rng") || selecshon.equals("Custom")) {
                     correctName = true;
                 } else {
-                    for (String i : commandConfigList) {
+                    for (String i : commandList) {
                         if (selecshon.equals(i)) {
                             errBypass = true;
                             break;
@@ -278,6 +278,13 @@ public class PokemonBattleSim {
 						orderOfNames="type";
 						pkmnNamesVector = orderPkmnNamesVector(pkmnNamesVector);
 						break;
+                    case "Boss":
+                        Pokemon bos = new PokemonBoss("Zamazenta").bossToPokemon();
+                        
+                        cpuMons = new Pokemon[1];
+                        
+                        cpuMons[cpuMonActive] = bos;
+                        break;
                 }
 
                 errBypass = false;
@@ -408,7 +415,7 @@ public class PokemonBattleSim {
 
                 printBattleHUDThing();
                 System.out.println("What should " + playerMons[playerMonActive].name + " do?");
-                System.out.println("________________________________________________");
+                System.out.println("────────────────────────┬───────────────────────");
                 printBattleMenuOptions();
 
                 try {
@@ -449,7 +456,7 @@ public class PokemonBattleSim {
                         bufferedClear();
                         printBattleHUDThing();
                         System.out.println("What should " + playerMons[playerMonActive].name + " do?");
-                        System.out.println("________________________________________________");
+                        System.out.println("────────────────────────┬───────────────────────");
                         printPlayerActivePkmnMoveset(plyWillMegaEvolve);
                         
                         System.out.println("[c]: Go back.");
@@ -480,7 +487,7 @@ public class PokemonBattleSim {
                             bufferedClear();
                             printBattleHUDThing();
                             System.out.println("What should " + playerMons[playerMonActive].name + " do after " + playerMons[playerMonActive].moveset[0][moveSelec] + "?");
-                            System.out.println("________________________________________________");
+                            System.out.println("────────────────────────┬───────────────────────");
                             printPlayerActivePkmnMoveset(plyWillMegaEvolve);
 
                             try {
@@ -962,11 +969,12 @@ public class PokemonBattleSim {
 
     private static int playerSwitchMon(boolean canCancel) throws IOException, InterruptedException {
         int switchin = 0;
+		//will return 1 if the player canceled the operation
         //boolean flag1=true;
         bufferedClear();
         printBattleHUDThing();
         cout.write("Select one of your Pokemon to switch in:\n");
-        cout.write("________________________________________________\n");
+        cout.write("─────────────────┬──────────────────────────────\n");
         for (int i = 0; i < playerMons.length; i++) {
             if (i != playerMonActive) {
                 String typ2 = "";
@@ -978,7 +986,7 @@ public class PokemonBattleSim {
                 for (int j = 0; j < 13 - playerMons[i].name.length(); j++) {
                     cout.write(" ");
                 }
-                cout.write("| " + monHP + "[" + Color.getColorFromString(playerMons[i].type) + playerMons[i].type + Clr.R + typ2 + "]");
+                cout.write("│ " + monHP + "[" + Color.getColorFromString(playerMons[i].type) + playerMons[i].type + Clr.R + typ2 + "]");
 				cout.write("\n");
             }
         }
@@ -1449,8 +1457,7 @@ public class PokemonBattleSim {
                 }
                 break;
             case "MegaEvolutionHater":
-                String opMonName = pkmn2.name;
-                if (opMonName.contains("Mega-")) { //this is not a good way to do this
+                if(pkmn2.megaEvolved){
                     atk1 *= 2;
                 }
                 break;
@@ -3351,26 +3358,36 @@ public class PokemonBattleSim {
         }
 
         cout.write("                 " + arrLeft + " Page " + page + " " + arrRight + "\n");
+		
+		//crop the names vector to the only 36 pokemon we need
+		String[] displayedNamesVector = new String[36];
+		int k=0;
+		for(int i = from; i <= to; i++){
+			displayedNamesVector[k] = namesVector[i];
+			k++;
+		}
         
-        String[] typeColors = new String[namesVector.length];
+        String[] typeColors = new String[displayedNamesVector.length];
         PokemonDB db = new PokemonDB();
-        String[] tyeps = db.getArrayOfTypesFromNames(namesVector);
+        String[] tyeps = db.getArrayOfTypesFromNames(displayedNamesVector);
         
-        
-        for (int i = 0; i < tyeps.length; i++) {
-            typeColors[i] = Color.getColorFromString(tyeps[i])+"";
+        for (int i = 0; i < typeColors.length; i++) {
+			typeColors[i] = Color.getColorFromString(tyeps[i])+"";
         }
         
-        for (int i = from; i <= to; i++) {
+        for (int i = 0; i < displayedNamesVector.length; i++) {
             String space = "";
             if (coumter < 3) {
-                cout.write(" " + typeColors[i] + namesVector[i] + Clr.R);
+                cout.write(" " + typeColors[i] + displayedNamesVector[i] + Clr.R);
                 
-                for (int j = 0; j <= 12 - (namesVector[i].length()); j++) {
+                for (int j = 0; j <= 12 - (displayedNamesVector[i].length()); j++) {
                     space += " ";
                 }
-                cout.write(space + "|");
+                cout.write(space);
                 coumter++;
+                if(coumter!=3){
+                    cout.write("│");
+                }
             } else {
                 coumter = 0;
                 cout.write("\n");
@@ -3432,7 +3449,7 @@ public class PokemonBattleSim {
                 }
                 coumter++;
                 if (coumter < 2) {
-                    cout.write("| ");
+                    cout.write("│ ");
                 }
             } else {
                 coumter = 0;
@@ -3527,7 +3544,7 @@ public class PokemonBattleSim {
 
         System.out.println("Moveset: ");
         for (int i = 0; i < 4; i++) {
-            System.out.println("        " + (i + 1) + ":" + tempPkmn.moveset[0][i] + " (" + Color.getBGColorFromMoveType(tempPkmn, i) + tempPkmn.moveset[1][i] + Clr.R + ")");
+            System.out.println("        " + (i + 1) + ":" + tempPkmn.moveset[0][i] + " (" + Color.getBrightColorFromMoveType(tempPkmn, i) + tempPkmn.moveset[1][i] + Clr.R + ")");
         }
         System.out.println("");
 
@@ -3545,7 +3562,7 @@ public class PokemonBattleSim {
         float critPerc = 0;
         printBattleHUDThing();
         System.out.println("Which Pokemon do you want to inspect? O_o");
-        System.out.println("________________________________________________");
+        System.out.println("────────────────────────────────────────────────");
         System.out.println("[1] Your Mon (" + playerMons[playerMonActive].name + ")");
         System.out.println("[2] " + cpuName + "'s Mon (" + cpuMons[cpuMonActive].name + ")");
         System.out.println("\n" + "[3] Your Pokemon moveset");
@@ -3632,7 +3649,7 @@ public class PokemonBattleSim {
 
         System.out.println("Moveset: ");
         for (int i = 0; i < 4; i++) {
-            System.out.println("        " + (i + 1) + ":" + tempPkmn.moveset[0][i] + " (" + Color.getBGColorFromMoveType(tempPkmn, i) + tempPkmn.moveset[1][i] + Clr.R + ")");
+            System.out.println("        " + (i + 1) + ": " + tempPkmn.moveset[0][i] + " (" + Color.getBrightColorFromMoveType(tempPkmn, i) + tempPkmn.moveset[1][i] + Clr.R + ")");
         }
         System.out.println("");
         System.out.println("Press Enter to go back");
@@ -3645,7 +3662,7 @@ public class PokemonBattleSim {
         bufferedClear();
         printBattleHUDThing();
         System.out.println("Select a move to see its info.");
-        System.out.println("________________________________________________");
+        System.out.println("────────────────────────┬───────────────────────");
         printPlayerActivePkmnMoveset(false);
 
         do {
@@ -3662,19 +3679,28 @@ public class PokemonBattleSim {
 
         Clr coulour = Color.getBrightColorFromMoveType(playerMons[playerMonActive], selec);
 
-        System.out.println("________________________________________________");
+        System.out.println("────────────────────────────────────────────────");
         System.out.println(Clr.WHITE_BB + playerMons[playerMonActive].moveset[0][selec] + ":" + Clr.R);
         System.out.println(coulour + playerMons[playerMonActive].moveset[1][selec] + Clr.R + " move \n");
         if (playerMons[playerMonActive].moveIsAnAttack(selec)) {
             switch (playerMons[playerMonActive].isSpecialMove(selec)) {
                 default:
                     System.out.println("Deals damage!");
+                   
+                    if (playerMons[playerMonActive].moveset[1][selec].contains("Electric")) {
+                        System.out.println("Also has a 20% chance to inflict " + Clr.YELLOW_B + "paralysis" + Clr.R + "\n after using the move.");
+                    }
+                    
                     break;
                 case "+priority":
                     System.out.println("This move has priority, making it go first!");
                     break;
                 case "lifedrain":
-                    System.out.println("-33% ATK");
+                    if(playerMons[playerMonActive].moveset[0][selec].equals("Excite")){
+                        System.out.println("33% of missing HP -> ATK for this move");
+                    }else{
+                        System.out.println("-33% ATK");
+                    }
                     System.out.println("Half of damage dealt -> HP recovery");
                     break;
                 case "rngBurn":
@@ -3812,7 +3838,7 @@ public class PokemonBattleSim {
                     break;
                 case "magnitude":
                     System.out.println("-66% ATK");
-                    System.out.println("Multiplies ATK by a random amount (upto x7)");
+                    System.out.println("Multiplies ATK by a random amount (up to x7)");
                     break;
                 case "rngBuffDef":
                     System.out.println("50% chance to buff self DEF after using the move");
@@ -3947,7 +3973,7 @@ public class PokemonBattleSim {
         bufferedClear();
         printBattleHUDThing();
         System.out.println("Select an item to use");
-        System.out.println("________________________________________________");
+        System.out.println("────────────────────────┬───────────────────────");
         int coumter = 0;
         for (int i = 0; i < playerMons[playerMonActive].items.length; i++) {
             if (playerMons[playerMonActive].items[i].equals("") == false
@@ -3959,7 +3985,7 @@ public class PokemonBattleSim {
                     }
                     coumter++;
                     if (coumter < 2) {
-                        System.out.print("| ");
+                        System.out.print("│ ");
                     }
                 } else {
                     coumter = 0;
@@ -3996,8 +4022,8 @@ public class PokemonBattleSim {
 
     private static void printBattleMenuOptions() {
         //System.out.println("Your active Pokemon:       CPU's active Pokemon:");
-        System.out.println("[1] " + Clr.RED_B + "Fight" + Clr.R + "               | [2] " + Clr.CYAN_B + "Pokemon" + Clr.R);
-        System.out.println("[3] " + Clr.GREEN_B + "Items" + Clr.R + "               | [4] " + Clr.WHITE_B + "PKMN Info" + Clr.R);
+        System.out.println("[1] " + Clr.RED_B + "Fight" + Clr.R + "               │ [2] " + Clr.CYAN_B + "Pokemon" + Clr.R);
+        System.out.println("[3] " + Clr.GREEN_B + "Items" + Clr.R + "               │ [4] " + Clr.WHITE_B + "PKMN Info" + Clr.R);
         /*
 		System.out.println("[1] Fight               | [2] Pokemon");
 		System.out.println("[3] Items               | [4] PKMN Info");

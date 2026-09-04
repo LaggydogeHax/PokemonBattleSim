@@ -135,7 +135,6 @@ public class PokemonDB {
 		
 		sql +="',a.name);";
 		
-        
         return this.fetchStuff(sql);
     }
 	
