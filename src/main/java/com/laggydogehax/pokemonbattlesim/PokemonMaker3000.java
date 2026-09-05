@@ -540,12 +540,12 @@ class PokemonMaker3000 extends PokemonBattleSim{
 				System.out.println("File saved successfully!!!!!");
 				System.out.println("Directory: "+savePaths[slot]);
 				System.out.println("");
-				wair(s,2);
+				wair(s,1);
 			}else{
 				System.out.println("ERROR, COULDN'T SAVE THE FILE :(");
 				System.out.println("Directory: "+savePaths[slot]);
 				System.out.println("");
-				wair(s,2);
+				wair(s,1);
 			}
 		}
 
@@ -569,10 +569,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 		customMon.moveset[0][2]=monMoveset[2];
 		customMon.moveset[0][3]=monMoveset[3];
 
-		customMon.moveset[1][0]=customMon.defineMove(customMon.moveset[0][0]);
-		customMon.moveset[1][1]=customMon.defineMove(customMon.moveset[0][1]);
-		customMon.moveset[1][2]=customMon.defineMove(customMon.moveset[0][2]);
-		customMon.moveset[1][3]=customMon.defineMove(customMon.moveset[0][3]);
+		customMon.defineAllMoves();
 		
 		System.out.println("Pokemon created!!");
 		System.out.println(customMon.name+" is ready for battle!");

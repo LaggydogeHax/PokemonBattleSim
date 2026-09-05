@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 public class PokemonBattleSim {
 
     static final String OsName = System.getProperty("os.name");
-    static final String version = "beta5 dev15";
+    static final String version = "beta5 dev16";
     static final char s = 's', m = 'm';
 
     static boolean battleAnimations = true;
@@ -113,7 +113,7 @@ public class PokemonBattleSim {
         boolean errBypass = false; //this is here so the invalid msg can be skipped o_o
         int page = 1, lastPage = 3;
         String[] pkmnNamesVector = getPkmnNamesVector();
-        String[] commandList = {"Help", "6mon", "3mon", "Cpu", "Reset", "Anims Off", "Anims On","Order Def","Order Al","Order Type","Boss"};
+        String[] commandList = {"Help", "6mon", "3mon", "Cpu", "Reset", "Anims Off", "Anims On","Order Def","Order Al","Order Type","Boss","Bossme"};
 
         do {
             clear();
@@ -278,13 +278,30 @@ public class PokemonBattleSim {
 						orderOfNames="type";
 						pkmnNamesVector = orderPkmnNamesVector(pkmnNamesVector);
 						break;
-                    case "Boss":
-                        Pokemon bos = new PokemonBoss("Zamazenta").bossToPokemon();
+                    case "Boss":{
+                        //super secret mode in development ok dont tell anybody ok shhh
+                        Pokemon bos;
+                        if(cpuMons[0]!=null){ //pokemon was assigned before using cputeammanager
+                            bos = new PokemonBoss("Custom").pokemonToBoss(cpuMons[0]).bossToPokemon();
+                        }else{
+                            bos = new PokemonBoss(pkmnNamesVector[rng.nextInt(pkmnNamesVector.length)]).bossToPokemon();
+                        }
                         
                         cpuMons = new Pokemon[1];
                         
                         cpuMons[cpuMonActive] = bos;
+                        
+                        System.out.println("enjoy :P");
+                        wair(s, 2);
                         break;
+                    }
+                    case "Bossme":{ //this wont stay
+                        Pokemon bos;
+                        
+                        bos = new PokemonBoss("Citrus").bossToPokemon();
+                        
+                        playerMons[0] = bos;
+                    }
                 }
 
                 errBypass = false;
@@ -398,7 +415,6 @@ public class PokemonBattleSim {
 
     //----------POKEMON BATTLE METHODS-------------//
     private static void doTheBattling() throws IOException, InterruptedException {
-        //playerMons[playerMonActive].currentHP=1;//testing healing moves :)
         boolean playerFirst = true;
         boolean p1SkipTurn = false, cpuSkipTurn = false;
         boolean plyWillMegaEvolve = false;
@@ -719,7 +735,6 @@ public class PokemonBattleSim {
         System.out.println("");
         System.out.println("Press Enter to exit");
         wair(s, 1);
-        tcl.nextLine();
         tcl.nextLine();
     }
 
@@ -1665,15 +1680,22 @@ public class PokemonBattleSim {
     private static int cpuAIHandler() {//still!! no intelligence!!
         Pokemon myMon = playerMons[playerMonActive];
         Pokemon cpuMon = cpuMons[cpuMonActive];
-        boolean[] shoulduse = {true, true, true, true};
+        //boolean[] shoulduse = {true, true, true, true};
+        boolean[] shoulduse = new boolean[cpuMons[cpuMonActive].moveset[0].length];
         String[] monsWeaknesses = myMon.weakTo;
         String[] monsResistances = myMon.resists;
         int rand = 0;
 
         //might switch mon according to these conditions
         if (!cpuJustSwitched) {
-            if (cpuMon.currentHP < (cpuMon.baseHP / 2) || cpuMon.currentATK < 30 || cpuMon.currentDEF < (cpuMon.baseDEF / 2)
-                    || cpuMon.currentSPEED < (cpuMon.baseSPEED / 2) || cpuMon.isPoisoned || (cpuMon.isBurning && !cpuMon.permaBurn) || cpuMon.isParalized) {
+            if (cpuMon.currentHP < (cpuMon.baseHP / 2)
+                    || cpuMon.currentATK < 30
+                    || cpuMon.currentDEF < (cpuMon.baseDEF / 2)
+                    || cpuMon.currentSPEED < (cpuMon.baseSPEED / 2)
+                    || cpuMon.isPoisoned
+                    || (cpuMon.isBurning && !cpuMon.permaBurn)
+                    || cpuMon.isParalized) {
+                
                 if (countAliveMonInTeam(cpuMons) > 1) {
                     int shouldswitch = rng.nextInt(100);
                     if (shouldswitch > 69) {
@@ -1749,7 +1771,7 @@ public class PokemonBattleSim {
         if (rand != 69) {
             //didnt decide to switch mon
             //look for super effective attacking move
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < cpuMons[cpuMonActive].moveset[0].length; i++) {
 				for (String monsWeakness : monsWeaknesses) {
 					if (cpuMon.moveset[1][i].contains(monsWeakness)) {
 						shoulduse[i] = true;
@@ -1758,7 +1780,7 @@ public class PokemonBattleSim {
             }
 
             //look for not very effective at all attacking move
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < cpuMons[cpuMonActive].moveset[0].length; i++) {
 				for (String monsResistance : monsResistances) {
 					if (cpuMon.moveset[1][i].contains(monsResistance)) {
 						shoulduse[i] = false;
@@ -1773,11 +1795,11 @@ public class PokemonBattleSim {
                 }
             }
 
-            if (nonUsables == 4) {
+            if (nonUsables == cpuMon.moveset[0].length) {
                 //YOLO
-                rand = rng.nextInt(4);
+                rand = rng.nextInt(cpuMons[cpuMonActive].moveset[0].length);
                 if (cpuMons[cpuMonActive].moveset[0][rand].equals(prevCpuMove)) {
-                    rand = rng.nextInt(4);
+                    rand = rng.nextInt(cpuMons[cpuMonActive].moveset[0].length);
                 }
             } else {
                 if (cpuMon.countAttackingMoves() == nonUsables) { //all attacking moves are not effective
@@ -1786,9 +1808,9 @@ public class PokemonBattleSim {
                     }
                 }
                 do {
-                    rand = rng.nextInt(4);
+                    rand = rng.nextInt(cpuMons[cpuMonActive].moveset[0].length);
                     if (cpuMons[cpuMonActive].moveset[0][rand].equals(prevCpuMove)) {
-                        rand = rng.nextInt(4); //roll again ouo
+                        rand = rng.nextInt(cpuMons[cpuMonActive].moveset[0].length); //roll again ouo
                     }
                 } while (!epicCpuAiRandomMoveCheckerThing(shoulduse, rand));
             }
@@ -3648,7 +3670,7 @@ public class PokemonBattleSim {
         System.out.println("");
 
         System.out.println("Moveset: ");
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < tempPkmn.moveset[0].length; i++) {
             System.out.println("        " + (i + 1) + ": " + tempPkmn.moveset[0][i] + " (" + Color.getBrightColorFromMoveType(tempPkmn, i) + tempPkmn.moveset[1][i] + Clr.R + ")");
         }
         System.out.println("");

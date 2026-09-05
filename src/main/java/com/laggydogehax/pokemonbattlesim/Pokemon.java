@@ -183,25 +183,21 @@ class Pokemon{
             case "half":
                 if (this.energyDrink) {
                     this.healSelf("third");
-                    return;
+                    break;
                 }
                 this.currentHP += (this.baseHP / 2);
-                if (this.currentHP > this.baseHP) {
-                    this.currentHP = this.baseHP;
-                }
                 break;
             case "third":
                 this.currentHP += (this.baseHP / 3);
-                if (this.currentHP > this.baseHP) {
-                    this.currentHP = this.baseHP;
-                }
+
                 break;
             case "quarter":
                 this.currentHP += (this.baseHP / 4);
-                if (this.currentHP > this.baseHP) {
-                    this.currentHP = this.baseHP;
-                }
                 break;
+        }
+       
+        if (this.currentHP > this.baseHP) {
+            this.currentHP = this.baseHP;
         }
     }
 
@@ -262,7 +258,7 @@ class Pokemon{
 		return false;
 	}
 
-	protected boolean canMegaEvolve(){
+	protected final boolean canMegaEvolve(){
 		String[] list = new String[]{//list of mon that can megaevolve
 			//duh obviously absol goes first
 			"Absol","Lopunny","Venusaur","Charizard","Blastoise","Ninetales","Mewtwo",
@@ -582,12 +578,12 @@ class Pokemon{
 
 	protected void deMegaEvolve(){
 		if(this.megaEvolved){
-			String nam="";
+			String nam=this.name;
 			//remove mega from name xd
             Pokemon ref;
 			try{
 				//try to make a mon without Mega-. if fails, it's a custom mon with Mega- in the name -_-
-				ref = new Pokemon(this.name.substring(5));
+				ref = new Pokemon(nam.substring(5));
 			}catch(Exception e){
 				return;
 			}
@@ -817,7 +813,7 @@ class Pokemon{
 	}
 
 	protected boolean hasMoveNameInMoveset(String nam){
-		for(int i=0;i<4;i++){
+		for(int i=0;i<this.moveset[0].length;i++){
 			if(this.moveset[0][i].equals(nam)){
 				return true;
 			}
@@ -827,7 +823,7 @@ class Pokemon{
 	
 	protected int countAttackingMoves(){
 		int count=0;
-		for(int i=0;i<4;i++){
+		for(int i=0;i<this.moveset[0].length;i++){
 			if(this.moveset[1][i].contains("Attack")){
 				count++;
 			}
@@ -837,7 +833,7 @@ class Pokemon{
 	
 	protected int countStatusMoves(){
 		int count=0;
-		for(int i=0;i<4;i++){
+		for(int i=0;i<this.moveset[0].length;i++){
 			if(this.moveset[1][i].contains("Attack")==false){
 				count++;
 			}
@@ -1094,15 +1090,14 @@ class Pokemon{
 	}
 
 	public final void defineAllMoves(){
-		this.moveset[1][0]=defineMove(this.moveset[0][0]);
-		this.moveset[1][1]=defineMove(this.moveset[0][1]);
-		this.moveset[1][2]=defineMove(this.moveset[0][2]);
-		this.moveset[1][3]=defineMove(this.moveset[0][3]);
+        for (int i=0; i < this.moveset[0].length ; i++){
+            this.moveset[1][i] = defineMove(this.moveset[0][i]);
+        }
 	}
 
 	protected String defineMove(String move){
 		
-		if(move.equals("") || move == null){
+		if(move.equals("")){
 			return ""; //this is necessary for custom mon creation or the program explodes
 		}
 		
