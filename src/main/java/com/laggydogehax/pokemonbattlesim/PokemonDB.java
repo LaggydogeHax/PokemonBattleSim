@@ -112,6 +112,12 @@ public class PokemonDB {
 		return this.fetchStuff(sql);
 	}
     
+    public String[] getMoveNames(){
+        String sql = "SELECT name FROM Moves";
+        
+        return this.fetchStuff(sql);
+    }
+    
     public String[] getArrayOfTypesFromNames(String[] names){
         String sql = "SELECT b.type FROM Pokemon a INNER JOIN Types b WHERE  b.id_type LIKE a.id_type AND a.name IN (";
         

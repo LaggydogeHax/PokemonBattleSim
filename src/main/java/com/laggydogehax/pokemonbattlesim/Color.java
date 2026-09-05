@@ -74,7 +74,7 @@ class Color{
 				return Clr.MAGENTA;
 
 			case "Dark":
-				return Clr.BLACK;
+				return Clr.VIOLET;
 
 			case "Fighting":
 				return Clr.RED;
@@ -86,13 +86,13 @@ class Color{
 				return Clr.LBLUE;
 
 			case "Bug":
-				return Clr.GREEN;
+				return Clr.YGREEN;
 
 			case "Ground":
 				return Clr.BROWN;
 
 			case "Rock":
-				return Clr.YELLOW;
+				return Clr.CREAM;
 
 			case "Poison":
 				return Clr.PURPLE;
@@ -133,7 +133,7 @@ class Color{
 				return Clr.MAGENTA_BB;
 
 			case "Dark":
-				return Clr.WHITE_BB;
+				return Clr.VIOLET_BB;
 
 			case "Fighting":
 				return Clr.RED_BB;
@@ -145,13 +145,13 @@ class Color{
 				return Clr.LBLUE_BB;
 
 			case "Bug":
-				return Clr.GREEN_BB;
+				return Clr.YGREEN_BB;
 
 			case "Ground":
 				return Clr.BROWN_BB;
 
 			case "Rock":
-				return Clr.YELLOW_BB;
+				return Clr.CREAM_BB;
 
 			case "Poison":
 				return Clr.PURPLE_BB;
@@ -253,6 +253,9 @@ enum Clr{
 	LBLUE("\033[38;5;75m"), // LIGHT BLUE
 	BROWN("\033[38;5;94m"), //BROWN
 	PURPLE("\033[38;5;129m"), //PURPLE
+	YGREEN("\033[38;5;112m"), //YELLOWISH GREEN
+	CREAM("\033[38;5;185m"), // CREAM
+	VIOLET("\033[38;5;66m"), // FADED VIOLET
 	
 	//BRIGHT COLORS
 	BLACK_B("\033[0;90m"),     // BLACK
@@ -278,6 +281,9 @@ enum Clr{
 	LBLUE_BB("\033[38;5;123m"), // LIGHT BLUE
 	BROWN_BB("\033[38;5;136m"), // BROWN
 	PURPLE_BB("\033[38;5;165m"), //PURPLE
+	YGREEN_BB("\033[38;5;154m"),  //YELLOWISH GREEN
+	CREAM_BB("\033[38;5;228m"), // CREAM
+	VIOLET_BB("\033[38;5;105m"), // FADED VIOLET
 	
 	// BACKGROUND COLOR!!1
     BLACK_BG("\033[40;30m"),   // BLACK AND WHITE TEXT
