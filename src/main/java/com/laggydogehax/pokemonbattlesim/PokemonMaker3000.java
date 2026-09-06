@@ -668,10 +668,7 @@ class PokemonMaker3000 extends PokemonBattleSim{
 			customMon.moveset[0][2]=monMoveset[2];
 			customMon.moveset[0][3]=monMoveset[3];
 
-			customMon.moveset[1][0]=customMon.defineMove(customMon.moveset[0][0]);
-			customMon.moveset[1][1]=customMon.defineMove(customMon.moveset[0][1]);
-			customMon.moveset[1][2]=customMon.defineMove(customMon.moveset[0][2]);
-			customMon.moveset[1][3]=customMon.defineMove(customMon.moveset[0][3]);
+			customMon.defineAllMoves();
 
 			for(int i=0;i<4;i++){//check that the moves got defined correctly
 				if("".equals(customMon.moveset[1][i])){
