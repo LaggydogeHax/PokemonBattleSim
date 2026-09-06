@@ -10,11 +10,13 @@ class PokemonBoss extends Pokemon{
     }
     
     private void bossify(){ //funny name
-        this.baseHP *= 20;
-        this.baseATK *= 1.2;
+        this.baseHP *= 18;
+        this.baseATK *= 1.1;
+		this.baseSPEED *= 0.8;
         
         this.currentHP = this.baseHP;
         this.currentATK = this.baseATK;
+		this.currentSPEED = this.baseSPEED;
         
         //they'll have 8 moves!!
         
@@ -29,12 +31,17 @@ class PokemonBoss extends Pokemon{
         
         String[] movesList = db.getMoveNames();
         
-        for (int i=4; i < 8 ; i ++){
+        for (int i=4; i < 8 ; i ++){ //fills the 4 new move slots with random moves
             this.moveset[0][i] = movesList[rng.nextInt(movesList.length)];
         }
         
         this.defineAllMoves();
     }
+	
+	@Override
+	public boolean isBoss(){
+		return true; // >:)
+	}
     
     @Override
     protected void healOverTime(){

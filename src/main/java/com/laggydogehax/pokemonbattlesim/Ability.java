@@ -359,9 +359,16 @@ class Ability{
 		String[] abilityTableBeforeGettingHit = new String[] {"Magic Bounce"};
 		String[] abilityTableAtEndOfTurn = new String[]{};
 		
-		for(int i=0;i<abilityTableBeforeMove.length;i++){
-			if(name.equals(abilityTableBeforeMove[i])){
+		for (String abi : abilityTableBeforeMove) {
+			if (name.equals(abi)) {
 				this.triggerTime="before move";
+				return;
+			}
+		}
+		
+		for (String abi : abilityTableBeforeGettingHit){
+			if(name.equals(abi)){
+				this.triggerTime = "before getting hit";
 				return;
 			}
 		}

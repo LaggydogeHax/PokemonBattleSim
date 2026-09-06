@@ -1095,6 +1095,10 @@ class Pokemon{
         }
 	}
 
+	protected void defineSelfMove(int selec){ //defines self moves
+		this.moveset[1][selec] =  this.defineMove(moveset[0][selec]);
+	}
+	
 	protected String defineMove(String move){
 		
 		if(move.equals("")){
@@ -1112,5 +1116,9 @@ class Pokemon{
 		}
 		
 		return tiep;
+	}
+	
+	public boolean isBoss(){
+		return false;
 	}
 }//class Pokemon ends

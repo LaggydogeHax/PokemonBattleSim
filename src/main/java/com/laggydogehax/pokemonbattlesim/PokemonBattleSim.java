@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 public class PokemonBattleSim {
 
     static final String OsName = System.getProperty("os.name");
-    static final String version = "beta5 dev16";
+    static final String version = "beta5 dev17";
     static final char s = 's', m = 'm';
 
     static boolean battleAnimations = true;
@@ -297,8 +297,15 @@ public class PokemonBattleSim {
                     }
                     case "Bossme":{ //this wont stay
                         Pokemon bos;
+                        if(playerMons[0]!=null){ //pokemon was assigned before
+                            bos = new PokemonBoss("Custom").pokemonToBoss(playerMons[0]).bossToPokemon();
+                        }else{
+                            bos = new PokemonBoss(pkmnNamesVector[rng.nextInt(pkmnNamesVector.length)]).bossToPokemon();
+                        }
                         
-                        bos = new PokemonBoss("Citrus").bossToPokemon();
+                        playerMons = new Pokemon[1];
+                        
+                        playerMons[playerMonActive] = bos;
                         
                         playerMons[0] = bos;
                     }
@@ -317,12 +324,7 @@ public class PokemonBattleSim {
                     case "Custom": //----HELL YEA CUSTOM MON 
                         Pokemon customMon = PokemonMaker3000.makeCustomMon();
                         if (customMon != null) {
-                            for (int i = 0; i < playerMons.length; i++) {
-                                if (playerMons[i] == null) {
-                                    playerMons[i] = customMon;
-                                    break;
-                                }
-                            }
+                            savePokemonInTeam(customMon);
                         }
                         break;
                     default://other
@@ -384,11 +386,29 @@ public class PokemonBattleSim {
             }
         }
     }
+	
+	static void savePokemonInTeam(Pokemon pok){
+		for (int i = 0; i < playerMons.length; i++) {
+            if (playerMons[i] == null) {
+                playerMons[i] = pok;
+                break;
+            }
+        }
+	}
 
     static void savePokemonInCPUTeam(String name) {
         for (int i = 0; i < cpuMons.length; i++) {
             if (cpuMons[i] == null) {
                 cpuMons[i] = new Pokemon(name);
+                break;
+            }
+        }
+    }
+	
+	static void savePokemonInCPUTeam(Pokemon pok) {
+        for (int i = 0; i < cpuMons.length; i++) {
+            if (cpuMons[i] == null) {
+                cpuMons[i] = pok;
                 break;
             }
         }
@@ -440,7 +460,7 @@ public class PokemonBattleSim {
                     battleMenuSelec = 0;
                     tcl.nextLine();
                 }
-                if (battleMenuSelec == 3) { //select an item to use
+                if (battleMenuSelec == 3 && !epicSoftLockPrevention1()) { //select an item to use
                     tcl.nextLine();
                     int selecItem = printSelectBattleItem();
                     if (selecItem != 69) {
@@ -456,7 +476,7 @@ public class PokemonBattleSim {
                     printMonInfo();
                 }
 				
-				if (battleMenuSelec == 2) { //SWITCH PLAYER POKEMON
+				if (battleMenuSelec == 2 && !epicSoftLockPrevention1()) { //SWITCH PLAYER POKEMON
 					if(playerSwitchMon(true)==0){ //returns 1 if the player canceled the operation
 						p1SkipTurn = true;
 					}else{
@@ -519,7 +539,7 @@ public class PokemonBattleSim {
 
                 }
 
-            } while (battleMenuSelec != 1 && battleMenuSelec != 2 && epicSoftLockPrevention1());
+            } while ((battleMenuSelec != 1 && battleMenuSelec != 2) || epicSoftLockPrevention1());
 
             
 
@@ -713,7 +733,7 @@ public class PokemonBattleSim {
             wair(s, 1);
             printMiscStats();
             wair(s, 5);
-        } else {//<-- this means that if somehow both are wiped out, cpu wins by deault
+        } else {//<-- this means that if somehow both are wiped out, cpu wins by deault- ACTUALLY, TH PLAYER WINS
             // but im too lazy to add an extremely rare "YOU TIED!" screen so imma leave it like this
             //cpu dieded
             clear();
@@ -1317,9 +1337,7 @@ public class PokemonBattleSim {
                 } else {
                     switch (playerMons[playerMonActive].ability.name) {
                         case "Pixilate":
-                            for (int i = 0; i < 4; i++) {
-                                playerMons[playerMonActive].moveset[1][i] = playerMons[playerMonActive].defineMove(playerMons[playerMonActive].moveset[0][i]);
-                            }//maybe i should rewrite defineMove()
+                            playerMons[playerMonActive].defineAllMoves(); //resets
                             break;
                         case "Super Luck":
                             playerMons[playerMonActive].currentSPEED /= 2;
@@ -1349,225 +1367,20 @@ public class PokemonBattleSim {
 
         //def range from 0 to 300, 400=100% reduction, 300=75% reduction...
         //--if move has special conditions--//
-        switch (pkmn1.isSpecialMove(moveInteger)) {
-            case "lifedrain":
-                if (movename.equals("Excite")) {
-                    int lostHP = pkmn1.baseHP - pkmn1.currentHP;
-                    atk1 += lostHP / 2;
-                    //gain adversity effect
-                }
-                atk1 -= atk1 / 3;
-                break;
-            case "overclock":
-                atk1 *= 1.8;//DOUBLE ATK, WOOOOOOO-- nvm it was too op
-                break;
-            case "doublehit":
-                atk1 -= atk1 / 3;
-                break;
-            case "powerboost"://hyperbeam and some others
-                atk1 += atk1 / 2;
-                break;
-            case "debuffselfdef":
-                atk1 *= 1.2;
-                break;
-            case "ignoredef":
-                atk1 -= atk1 / 4;
-                def2 = 0;
-                break;
-            case "defisatk":
-                atk1 = def2;
-                def2 /= 2;
-                break;
-            case "selfdefisatk":
-                atk1 = pkmn1.currentDEF;
-                break;
-            case "recoil":
-                atk1 += atk1 / 3;
-                break;
-            case "rngMultihit":
-                atk1 = atk1 / 3; //aughgh
-                doEmStab /= 2; //nerf stab ._.
-                doEmStab /= 4;
-                nHits += extraD;
-                break;
-            case "plus2hit":
-                atk1 *= 0.25;
-                doEmStab /= 2;
-                nHits += 2;
-                break;
-            case "plus3hit":
-                atk1 -= atk1 / 1.85;
-                doEmStab /= 3;
-                nHits += 3;
-                break;
-            case "adversity":
-                int lostHP = pkmn1.baseHP - pkmn1.currentHP;
-                atk1 += lostHP / 2;
-                if (movename.equals("X")) {
-                    nHits += 1;
-                    atk1 -= atk1 / 3;
-                }
-                if (pkmn1.energyDrink) {
-                    atk1 -= atk1 / 3;
-                }
-                break;
-            case "adversity2":
-                atk1 /= 3;
-                lostHP = pkmn1.baseHP - pkmn1.currentHP;
-                atk1 += lostHP / 2;
-                if (pkmn1.energyDrink) {
-                    atk1 -= atk1 / 3;
-                }
-                break;
-            case "supEffective":
-                atk1 -= atk1 / 3;
-                break;
-            case "groupB":
-                Pokemon[] monlist = null;
-                int monactive = 0;
-                if (turnOf == 0) {
-                    monlist = new Pokemon[playerMons.length];
-                    monlist = playerMons;
-                    monactive = playerMonActive;
-                } else {
-                    monlist = new Pokemon[cpuMons.length];
-                    monlist = cpuMons;
-                    monactive = cpuMonActive;
-                }
-                int reduce = 1;
-                if (monlist.length > 3) {
-                    reduce = 14;
-                } else {
-                    reduce = 4;
-                }
+		MoveCalcHandler pmch = new MoveCalcHandler(pkmn1,pkmn2,moveInteger,turnOf);
+		//Calc is short for calculations, im just using slang
+		pmch.specialMoveCalculator(); //do all the calcs inside this little machine
 
-                atk1 /= reduce;
-                for (int i = 0; i < monlist.length; i++) {
-                    if (i != monactive && monlist[i].currentHP > 0) {
-                        atk1 += monlist[monactive].baseATK / reduce;
-                        nHits += 1;
-                    }
-                }
-                break;
-            case "reverseGroupB":
-                if (turnOf == 1) {
-                    monlist = new Pokemon[playerMons.length];
-                    monlist = playerMons;
-                } else {
-                    monlist = new Pokemon[cpuMons.length];
-                    monlist = cpuMons;
-                }
-
-                if (monlist.length > 3) {
-                    reduce = 5;
-                } else {
-                    reduce = 3;
-                }
-
-                atk1 /= reduce;
-                for (int i = 0; i < monlist.length; i++) {
-                    if (monlist[i].currentHP > 0) {
-                        atk1 += baseatk1 / reduce;
-                    }
-                }
-                break;
-            case "MegaEvolutionHater":
-                if(pkmn2.megaEvolved){
-                    atk1 *= 2;
-                }
-                break;
-            case "avenger":
-                //fallen allies = more power for this move
-                atk1 -= atk1 / 4;
-                if (turnOf == 0) {
-                    monlist = new Pokemon[playerMons.length];
-                    monlist = playerMons;
-                } else {
-                    monlist = new Pokemon[cpuMons.length];
-                    monlist = cpuMons;
-                }
-
-                if (monlist.length > 3) {
-                    reduce = 4;
-                } else {
-                    reduce = 2;
-                }
-
-                for (int i = 0; i < monlist.length; i++) {
-                    if (monlist[i].currentHP < 1) {
-                        atk1 += baseatk1 / reduce;
-                    }
-                }
-                if (countAliveMonInTeam(playerMons) == 1 && turnOf == 0) {
-                    nHits += 1;
-                }
-                if (countAliveMonInTeam(cpuMons) == 1 && turnOf == 1) {
-                    nHits += 1;
-                }
-                break;
-            case "kamikaze":
-                atk1 += doEmStab;
-                atk1 *= 4; //AAAAAAAAAAAAA
-                break;
-            case "thundercage":
-                atk1 += pkmn2.baseHP / 8;
-                break;
-            case "magnitude":
-                int mag = pkmn1.extraDmg;
-                atk1 /= 3;
-                atk1 *= mag;
-                nHits += mag / 4;
-                break;
-            case "buffPowerIfDebuffed":
-                if ((pkmn1.currentATK < pkmn1.baseATK) || (pkmn1.currentDEF < pkmn1.baseDEF)
-                        || (pkmn1.currentSPEED < pkmn1.baseSPEED)) {
-                    atk1 += baseatk1 / 2;
-                } else {
-                    atk1 -= atk1 / 3;
-                }
-                break;
-            case "osmash":
-                atk1 -= atk1 / 3;
-                break;
-            case "guaranteedCrit":
-                atk1 -= atk1 / 5;
-                break;
-            case "facade":
-                atk1 -= atk1 / 5;
-                if (pkmn1.hasStatusAilment()) {
-                    atk1 *= 2; // DOUBLE ATK WOOOOO
-                }
-                break;
-            case "brokenCardMove":
-                atk1 -= atk1 / 3;
-                break;
-            case "scnails":
-                atk1 /= 2;
-                monactive = 0;
-                if (turnOf == 1) {
-                    monlist = new Pokemon[playerMons.length];
-                    monlist = playerMons;
-                    monactive = playerMonActive;
-                } else {
-                    monlist = new Pokemon[cpuMons.length];
-                    monlist = cpuMons;
-                    monactive = cpuMonActive;
-                }
-
-                if (monlist[monactive].currentHP <= ((monlist[monactive].baseHP / 3) * 2)) {
-                    atk1 *= 4;
-                }
-                break;
-            case "rngPoisonBurnPara":
-                atk1 -= atk1 / 5;
-                break;
-            case "nihilLight":
-                atk1 *= 3; //perfectly balanced
-                if (def2 > pkmn2.baseDEF) {
-                    def2 = pkmn2.baseDEF;
-                }
-                break;
-        }//special move switch ends
+		//extract the data !!
+		nHits = pmch.nHits;
+		atk1 = pmch.atk1;
+		extraD = pmch.extraD;
+		baseatk1 = pmch.baseatk1;
+		doEmStab = pmch.doEmStab;
+		def2 = pmch.def2;
+		
+		pkmn1 = pmch.pkmn1;
+		pkmn2 = pmch.pkmn2;
 
         // add Same Type Attack Bonus
         if (pkmn1.hasSTAB(movename)) {
@@ -1627,52 +1440,33 @@ public class PokemonBattleSim {
         if (totalDmgTaken < 1) {
             totalDmgTaken = 1;
         }
-        //if(pkmn2.currentHP-totalDmgTaken<0){totalDmgTaken=pkmn2.currentHP;}
 
         return totalDmgTaken;//amount to substract from the pokemon's HP
     }
 
     private static boolean epicSoftLockPrevention1() {// im running out of names for these methods
-        boolean sHALLNOTPASS = false;
         int pk1ded = 0;
         if (battleMenuSelec == 2) {
-            for (int i = 0; i < playerMons.length; i++) {
-                if (i != playerMonActive && playerMons[i].currentHP == 0) {
-                    pk1ded++;
-                }
-            }
-        } else {
-            if (battleMenuSelec != 1 && battleMenuSelec != 2) {
-                battleMenuSelec = 69;
-                sHALLNOTPASS = true;
-            }
+            pk1ded = countAliveMonInTeam(playerMons);
+
+			if (pk1ded == 1) {
+				System.out.println("You can't change pokemon right now");
+				wair(s, 1);
+				battleMenuSelec = 69;
+				return true;
+			}//prevents player from entering pokmon switch screen if their other mons are ded
+			
         }
 
         if (battleMenuSelec == 3) { //item selec
-            int unusables = 0;
-            for (int i = 0; i < playerMons[playerMonActive].items.length; i++) {
-                if (playerMons[playerMonActive].items[i].equals("")) {
-                    unusables++;
-                } else {
-                    unusables = 0;
-                    break;
-                }
-            }
-            if (unusables >= (playerMons[playerMonActive].items.length - 1)) {
-                sHALLNOTPASS = true;
+            if (playerMons[playerMonActive].items.length < 2) {
                 System.out.println("You can't use any more items with this Pokemon");
                 wair(s, 1);
+				return true;
             }
         }
 
-        if (pk1ded >= (playerMons.length - 1)) {
-            sHALLNOTPASS = true;
-            System.out.println("You can't change pokemon right now");
-            wair(s, 1);
-
-        }//prevents player from entering pokmon switch screen if their other mons are ded
-
-        return sHALLNOTPASS;
+        return false;
     }
 
     static String prevCpuMove = ""; //SECRET STATIC VARIABLE!!!
@@ -2060,12 +1854,12 @@ public class PokemonBattleSim {
                 String randomMove = teamMatesMoves[rng.nextInt(teamMatesMoves.length)];
 
                 playerMons[playerMonActive].moveset[0][moveSelec] = randomMove;
-                playerMons[playerMonActive].moveset[1][moveSelec] = playerMons[playerMonActive].defineMove(playerMons[playerMonActive].moveset[0][moveSelec]);
+                playerMons[playerMonActive].defineSelfMove(moveSelec);
 
                 plyerTurn();
 
                 playerMons[playerMonActive].moveset[0][moveSelec] = guh;
-                playerMons[playerMonActive].moveset[1][moveSelec] = playerMons[playerMonActive].defineMove(playerMons[playerMonActive].moveset[0][moveSelec]);
+                playerMons[playerMonActive].defineSelfMove(moveSelec);
 
                 break;
         }
@@ -2186,12 +1980,12 @@ public class PokemonBattleSim {
                 String randomMove = teamMatesMoves[rng.nextInt(teamMatesMoves.length)];
 
                 cpuMons[cpuMonActive].moveset[0][moveSelec] = randomMove;
-                cpuMons[cpuMonActive].moveset[1][moveSelec] = cpuMons[cpuMonActive].defineMove(cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]);
+                cpuMons[cpuMonActive].defineSelfMove(moveSelec);
 
                 cpuTurn();
 
                 cpuMons[cpuMonActive].moveset[0][moveSelec] = guh;
-                cpuMons[cpuMonActive].moveset[1][moveSelec] = cpuMons[cpuMonActive].defineMove(cpuMons[cpuMonActive].moveset[0][cpuMoveSelec]);
+                cpuMons[cpuMonActive].defineSelfMove(moveSelec);
 
                 break;
         }
@@ -3232,7 +3026,7 @@ public class PokemonBattleSim {
             if (op == 2) {
                 Pokemon custm = PokemonMaker3000.makeCustomMon();
                 if (custm != null) {
-                    saveMonInCPUTeam2(custm);
+                    savePokemonInCPUTeam(custm);
                 }
             }
             if (op == 1) {
@@ -3322,15 +3116,6 @@ public class PokemonBattleSim {
                 } while (cpuMons[cpuMons.length - 1] == null);
             }
         } while (true);
-    }
-
-    private static void saveMonInCPUTeam2(Pokemon mon) { // works with custom mon :3
-        for (int i = 0; i < cpuMons.length; i++) {
-            if (cpuMons[i] == null) {
-                cpuMons[i] = mon;
-                break;
-            }
-        }
     }
 
     //-------------PRINT METHODS-----------//
@@ -3994,30 +3779,36 @@ public class PokemonBattleSim {
     private static int printSelectBattleItem() throws IOException, InterruptedException {
         bufferedClear();
         printBattleHUDThing();
-        System.out.println("Select an item to use");
-        System.out.println("────────────────────────┬───────────────────────");
+        cout.write("Select an item to use"+"\n");
+		if(playerMons[playerMonActive].items.length > 1){
+			cout.write("────────────────────────┬───────────────────────\n");
+		}else{
+			cout.write("────────────────────────────────────────────────\n");
+		}
+        
         int coumter = 0;
         for (int i = 0; i < playerMons[playerMonActive].items.length; i++) {
             if (playerMons[playerMonActive].items[i].equals("") == false
                     && playerMons[playerMonActive].items[i] != null) {
                 if (coumter < 2) {
-                    System.out.print("[" + (i + 1) + "] " + playerMons[playerMonActive].items[i]);
+                    cout.write("[" + (i + 1) + "] " + playerMons[playerMonActive].items[i]);
                     for (int j = 0; j < 20 - (playerMons[playerMonActive].items[i].length()); j++) {
-                        System.out.print(" ");
+                        cout.write(" ");
                     }
                     coumter++;
                     if (coumter < 2) {
-                        System.out.print("│ ");
+                        cout.write("│ ");
                     }
                 } else {
                     coumter = 0;
-                    System.out.println("");
+                    cout.write("\n");
                     i--;
                 }
             }
         }
-        System.out.println("");
-        System.out.println("[c]: Cancel");
+        cout.write("\n");
+        cout.write("[c]: Cancel"+"\n");
+		cout.flush();
         int selec = 0;
         String selecSt = "";
         do {
@@ -4042,11 +3833,12 @@ public class PokemonBattleSim {
         return selec;
     }
 
-    private static void printBattleMenuOptions() {
+    private static void printBattleMenuOptions() throws IOException {
         //System.out.println("Your active Pokemon:       CPU's active Pokemon:");
-        System.out.println("[1] " + Clr.RED_B + "Fight" + Clr.R + "               │ [2] " + Clr.CYAN_B + "Pokemon" + Clr.R);
-        System.out.println("[3] " + Clr.GREEN_B + "Items" + Clr.R + "               │ [4] " + Clr.WHITE_B + "PKMN Info" + Clr.R);
-        /*
+        cout.write("[1] " + Clr.RED_B + "Fight" + Clr.R + "               │ [2] " + Clr.CYAN_B + "Pokemon" + Clr.R + "\n");
+        cout.write("[3] " + Clr.GREEN_B + "Items" + Clr.R + "               │ [4] " + Clr.WHITE_B + "PKMN Info" + Clr.R + "\n");
+        cout.flush();
+		/*
 		System.out.println("[1] Fight               | [2] Pokemon");
 		System.out.println("[3] Items               | [4] PKMN Info");
          */
@@ -4076,13 +3868,13 @@ public class PokemonBattleSim {
         String cl2 = Color.getHPColor(cpuMons[cpuMonActive]) + "";
 
         String spaces = "";
-        String par = Clr.YELLOW_B + "[PAR]" + Clr.R,
-                psn = Clr.MAGENTA_B + "[PSN]" + Clr.R,
-                brn = Clr.RED_B + "[BRN]" + Clr.R;
+		String par = Clr.YELLOW_B + "[PAR]" + Clr.R,
+			   psn = Clr.MAGENTA_B + "[PSN]" + Clr.R,
+			   brn = Clr.RED_B + "[BRN]" + Clr.R;
         String pk1Conditions = " ", pk2Conditions = " ";
 
-        int ansiLength = ((ANSIcolor + "").length());
-        int resemtLength = ((Clr.R + "").length());
+        //int ansiLength = ((ANSIcolor + "").length());
+        //int resemtLength = ((Clr.R + "").length());
 
         int truePk1NameLength = pk1Name.length();
         int truePk2NameLength = pk2Name.length();
@@ -4411,7 +4203,7 @@ public class PokemonBattleSim {
         return false;
     }
 
-    static private int countAliveMonInTeam(Pokemon[] team) {
+    static int countAliveMonInTeam(Pokemon[] team) {
         int count = 0;
         for (int i = 0; i < team.length; i++) {
             if (team[i].currentHP != 0) {
