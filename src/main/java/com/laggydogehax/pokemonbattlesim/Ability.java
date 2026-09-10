@@ -1,14 +1,11 @@
 package com.laggydogehax.pokemonbattlesim;
 
-class Ability{
-	String triggerTime="";
-	String name="";
-	
-	public Ability(String nam){ //ENORMOUS SWITCH STATEMENT!!!!!!!!!!!!!!!
-		switch(nam){
-			case "Custom":
-				//this.name="";
-			break;
+class AbilityFactory{
+	public static Ability create(Pokemon nam){ //ENORMOUS SWITCH STATEMENT!!!!!!!!!!!!!!!
+		switch(nam.name){
+			default:
+				return new Ability();
+			
 			case "Venusaur":
 				
 			break;
@@ -40,8 +37,8 @@ class Ability{
 				
 			break;
 			case "Absol":
-				this.name="Super Luck";
-			break;
+				return new Ability_SuperLuck(nam);
+				
 			case "Gardevoir":
 				
 			break;
@@ -52,8 +49,8 @@ class Ability{
 				
 			break;
 			case "Lucario":
-				
-			break;
+				return new Ability_Justified(nam);
+			
 			case "Duraludon":
 				
 			break;
@@ -103,8 +100,8 @@ class Ability{
 				
 			break;
 			case "Sylveon":
-				this.name = "Pixilate";
-			break;
+				return new Ability_Pixilate(nam);
+
 			case "Tinkaton":
 				
 			break;
@@ -240,8 +237,8 @@ class Ability{
 				
 			break;
 			case "Greninja":
-				this.name="Protean";
-			break;
+				return new Ability_Protean(nam);
+
 			case "Leafeon":
 				
 			break;
@@ -349,31 +346,137 @@ class Ability{
 			break;
 		}
 		
-		defineTriggerTime();
+		return new Ability();
+
 	}
 	
-	private void defineTriggerTime(){
-		
-		String[] abilityTableBeforeMove = new String[]{"Pixilate","Super Luck","Protean"};
-		String[] abilityTableAfterGettingHit = new String[]{};
-		String[] abilityTableBeforeGettingHit = new String[] {"Magic Bounce"};
-		String[] abilityTableAtEndOfTurn = new String[]{};
-		
-		for (String abi : abilityTableBeforeMove) {
-			if (name.equals(abi)) {
-				this.triggerTime="before move";
-				return;
-			}
-		}
-		
-		for (String abi : abilityTableBeforeGettingHit){
-			if(name.equals(abi)){
-				this.triggerTime = "before getting hit";
-				return;
-			}
-		}
-		
-		this.triggerTime="None";
+}
+
+//this is practically a skeleton
+class Ability{
+	String name="";
+	
+	public Ability(){
+		this.name = "";
+		//this.defineTriggerTime();
 	}
 	
+	
+	//template methods jumpscare
+	public void trigger_beforeMove(){
+		
+	}
+	
+	public void trigger_beforeMove(int moveSelec){
+		this.trigger_beforeMove();
+	}
+	
+	public void trigger_afterGettingHit(){
+		
+	}
+	
+	public void trigger_afterGettingHit(Pokemon enemyMon, int enemySelec){
+		this.trigger_afterGettingHit();
+	}
+	
+	public void trigger_beforeGettingHit(){
+		
+	}
+	
+	public void trigger_endOfTurn(){
+		
+	}
+	
+}
+
+class Ability_Pixilate extends Ability {
+	Pokemon me;
+	
+	public Ability_Pixilate(Pokemon me) {
+		this.me = me;
+		this.name="Pixilate";
+	}
+	
+	@Override
+	public void trigger_beforeMove() {
+		for (int i = 0; i < 4; i++) {
+			if (me.moveset[1][i].equals("Normal Attack")) {
+				me.moveset[1][i] = "Fairy Attack";
+			}
+		}
+	}
+	
+	@Override
+	public void trigger_endOfTurn(){
+		me.defineAllMoves();
+	}
+	
+}
+
+class Ability_SuperLuck extends Ability{
+	Pokemon me;
+	
+	public Ability_SuperLuck(Pokemon me) {
+		this.me = me;
+		this.name="Super Luck";
+	}
+	
+	@Override
+	public void trigger_beforeMove() {
+		me.currentSPEED *= 2;
+	}
+	
+	@Override
+	public void trigger_endOfTurn(){
+		me.currentSPEED /= 2;
+	}
+}
+
+class Ability_Protean extends Ability {
+	Pokemon me;
+	
+	public Ability_Protean(Pokemon me) {
+		this.me = me;
+		this.name="Protean";
+	}
+	
+	@Override
+	public void trigger_beforeMove(int moveSelec) {
+		String typeToUse = "";
+
+		if (me.moveIsAnAttack(moveSelec)) {
+			for (int i = 0; i < me.moveset[1][moveSelec].length(); i++) {
+
+				if (me.moveset[1][moveSelec].charAt(i) != ' ') {
+					typeToUse += me.moveset[1][moveSelec].charAt(i);
+				} else {
+					break;
+				}
+			}
+
+			me.type = typeToUse;
+			me.type2 = "";
+
+			me.setTypesWnR();
+			if (me.energyDrink) {
+				me.resists = new String[]{"Nothing!"};
+			}
+		}
+	}
+}
+
+class Ability_Justified extends Ability {
+	Pokemon me;
+	
+	public Ability_Justified(Pokemon me) {
+		this.me = me;
+		this.name="Justified";
+	}
+	
+	@Override
+	public void trigger_afterGettingHit(Pokemon enemyMon, int enemySelec){
+		if(enemyMon.moveset[1][enemySelec].contains("Dark")){
+			me.raiseStat("ATK");
+		}
+	}
 }
