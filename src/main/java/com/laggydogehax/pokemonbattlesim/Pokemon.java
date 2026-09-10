@@ -842,7 +842,6 @@ class Pokemon{
 	}
 
 	public Pokemon(String pkmnName){//constructor frfr
-		PokemonDB db = new PokemonDB();
 		
 		if(pkmnName.equals("Custom")){
 			baseHP = 1;
@@ -854,6 +853,7 @@ class Pokemon{
 			moveset = new String[][]{{"", "", "", ""}, {"", "", "", ""}};
 			//moveset array cannot contain null spaces or it'll fail to define the moves
 		}else{
+			PokemonDB db = new PokemonDB();
 			boolean isSecret = false;
 			String[] data = db.getPokemonData(pkmnName);
 			
@@ -903,12 +903,12 @@ class Pokemon{
 		energyDrink=false; //+1 move per turn
 		this.defineAllMoves();
 		
-		ability = new Ability(this.name);
-
 		items= new String[]{"Potion","X-Attack","X-Defense","X-Speed","","Dash Earring","Strike Earrings","Energy Drink"};
 		if(this.canMegaEvolve()){
 			items[4]="Mega Stone";
 		}
+		
+		ability = AbilityFactory.create(this);
 		
 	}//class Pokemon constructor ends
 	

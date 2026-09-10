@@ -35,6 +35,7 @@ class MoveCalcHandler {
 		this.turnOf = turnOf;
 	}
 	
+	//template method jumpscare
 	public void specialMoveCalculator() {
 		switch (pkmn1.isSpecialMove(moveInteger)) {
             case "lifedrain":
@@ -129,9 +130,7 @@ class MoveCalcHandler {
 
 	private void lifedrain() {
 		if (movename.equals("Excite")) {
-			int lostHP = pkmn1.baseHP - pkmn1.currentHP;
-			atk1 += lostHP / 2;
-			//gain adversity effect
+			this.adversity();
 		}
 		atk1 -= atk1 / 3;
 	}
