@@ -121,6 +121,8 @@ class PokemonBoss extends Pokemon{
 		this.baseATK=pok.baseATK;
 		this.baseDEF=pok.baseDEF;
 		this.baseSPEED=pok.baseSPEED;
+		
+		this.ability = pok.ability;
 
 		this.currentHP=this.baseHP;
 		this.currentATK=this.baseATK;

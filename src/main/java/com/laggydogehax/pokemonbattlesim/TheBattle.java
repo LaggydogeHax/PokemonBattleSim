@@ -153,6 +153,7 @@ public class TheBattle {
             if (playerFirst && !p1SkipTurn) {
                 //player first
                 if (!p1SkipTurn) {
+					playerMons[playerMonActive].ability.trigger_startOfTurn(cpuMons[cpuMonActive]);
                     plyDamageInTurn = plyerTurn();
                     if (cpuMons[cpuMonActive].currentHP == 0) {
                         cpuSkipTurn = true;
@@ -175,6 +176,7 @@ public class TheBattle {
                     }
                     cpuSkipTurn = rollForParalysis(cpuMons[cpuMonActive]);
                     if (!cpuSkipTurn) {
+						cpuMons[cpuMonActive].ability.trigger_startOfTurn(playerMons[playerMonActive]);
                         cpuDamageInTurn = cpuTurn();
                     } else {
                         cpuSkipTurn = false;
@@ -192,6 +194,7 @@ public class TheBattle {
                     }
                     cpuSkipTurn = rollForParalysis(cpuMons[cpuMonActive]);
                     if (!cpuSkipTurn) {
+						cpuMons[cpuMonActive].ability.trigger_startOfTurn(playerMons[playerMonActive]);
                         cpuDamageInTurn = cpuTurn();
                         if (playerMons[playerMonActive].currentHP == 0) {//fainted lol
                             p1SkipTurn = true;
@@ -211,6 +214,7 @@ public class TheBattle {
                     }
                     p1SkipTurn = rollForParalysis(playerMons[playerMonActive]);
                     if (!p1SkipTurn) {
+						playerMons[playerMonActive].ability.trigger_startOfTurn(cpuMons[cpuMonActive]);
                         plyDamageInTurn = plyerTurn();
                         if (playerMons[playerMonActive].energyDrink) {
                             moveSelec = moveSelec2;
@@ -226,10 +230,10 @@ public class TheBattle {
                     p1SkipTurn = false;
                 }
             }
-
+			
+			playerMons[playerMonActive].ability.trigger_endOfTurn(cpuMons[cpuMonActive],moveSelec);
+			cpuMons[cpuMonActive].ability.trigger_endOfTurn(playerMons[playerMonActive],cpuMoveSelec);
             statusAilmentsHandler(); //burn, poison, HoT, paralysis statuses
-			playerMons[playerMonActive].ability.trigger_endOfTurn();
-			cpuMons[cpuMonActive].ability.trigger_endOfTurn();
 
             //----------------------CPU------------------//
             if (cpuMons[cpuMonActive].currentHP == 0) {//if mon ded-- i mean fainted
@@ -365,13 +369,15 @@ public class TheBattle {
 
         if (turnOf == 1) {
             selectedMove = moveSelec;
-			cloneMon.ability.trigger_beforeMove(moveSelec);
+			cloneMon.ability.trigger_beforeMove(selectedMove);
         } else {
             selectedMove = cpuMoveSelec;
-			cloneMon.ability.trigger_beforeMove(cpuMoveSelec);
+			cloneMon.ability.trigger_beforeMove(selectedMove);
         }
 
         cloneMon.extraDmg = rng.nextInt(7);
+		
+		enemyMon.ability.trigger_beforeGettingHit(cloneMon, selectedMove);
 
         if (cloneMon.moveIsAnAttack(selectedMove)) {
 
@@ -426,7 +432,7 @@ public class TheBattle {
             bufferedClear();
             enemyMon.currentHP -= getSmackedBich;//applies dmg
 			
-			enemyMon.ability.trigger_afterGettingHit(cloneMon, moveSelec);
+			enemyMon.ability.trigger_afterGettingHit(cloneMon, selectedMove);
 
             // auhgfjdkgkdfd
             if (turnOf == 1) {
@@ -1173,7 +1179,7 @@ public class TheBattle {
         }
         if (!cpuMons[cpuMonActive].moveIsAnAttack(num)) {
             //tells the cpu if it should use these status moves depending on da situation
-            switch (statusMoveHandler(cpuMons[cpuMonActive].moveset[0][num])) {
+            switch (cpuMons[cpuMonActive].statusMoveHandler(num)) {
                 case "hot":
                     if (cpuMons[cpuMonActive].healingOverTime) {
                         ret = false;
@@ -1282,7 +1288,7 @@ public class TheBattle {
     }
 
     public void statusPlayerHandler(String movv) throws IOException, InterruptedException {
-        switch (statusMoveHandler(movv)) {
+        switch (Pokemon.statusMoveHandler(movv)) {
             case "buffatk&def":
                 playerMons[playerMonActive].raiseStat("ATK");
                 playerMons[playerMonActive].raiseStat("DEF");
@@ -1408,7 +1414,7 @@ public class TheBattle {
     }
 
     public void statusCPUHandler(String movv) throws IOException, InterruptedException {
-        switch (statusMoveHandler(movv)) {
+        switch (Pokemon.statusMoveHandler(movv)) {
             case "buffatk&def":
                 cpuMons[cpuMonActive].raiseStat("ATK");
                 cpuMons[cpuMonActive].raiseStat("DEF");
@@ -1531,121 +1537,6 @@ public class TheBattle {
 
                 break;
         }
-    }
-
-    public String statusMoveHandler(String move) {
-        String ret = "";
-        switch (move) {
-            case "Calm Mind":
-                ret = "buffatk&def";
-                break;
-            case "Coil":
-                ret = "buffatk&def";
-                break;
-            case "Sword Dance":
-                ret = "buffatk2";
-                break;
-            case "Work Up":
-                ret = "buffatk2";
-                break;
-            case "Charge":
-                ret = "buffatk2";
-                break;
-            case "Hone Claws":
-                ret = "buffatk";
-                break;
-            case "Roar":
-                ret = "debuffdef";
-                break;
-            case "Fake Tears":
-                ret = "debuffdef2";
-                break;
-            case "Dragon Dance":
-                ret = "buffatk&speed";
-                break;
-            case "Growl":
-                ret = "debuffatk";
-                break;
-            case "Charm":
-                ret = "debuffatk2";
-                break;
-            case "Metal Sound":
-                ret = "debuffatk2";
-                break;
-            case "Agility":
-                ret = "buffspeed2";
-                break;
-            case "Scary Face":
-                ret = "debuffspeed2";
-                break;
-            case "Bulk Up":
-                ret = "buffatk&def";
-                break;
-            case "Iron Defense":
-                ret = "buffdef";
-                break;
-            case "Amnesia":
-                ret = "buffdef2";
-                break;
-            case "Defend Order":
-                ret = "buffdef2";
-                break;
-            case "Acid Armor":
-                ret = "buffdef2";
-                break;
-            case "Toxic":
-                ret = "poison";
-                break;
-            case "Poison Powder":
-                ret = "poison";
-                break;
-            case "Will-O-Wisp":
-                ret = "burn";
-                break;
-            case "Heal Pulse":
-                ret = "healhalf";
-                break;
-            case "Roost":
-                ret = "healhalf";
-                break;
-            case "Extreme Speed":
-                ret = "buffspeed2";
-                break;
-            case "Impulse":
-                ret = "debuffatk";
-                break;
-            case "Aqua Ring":
-                ret = "hot";
-                break;
-            case "Jungle Healing":
-                ret = "healhalf";
-                break;
-            case "Thunder Wave":
-                ret = "paralyze";
-                break;
-            case "Last Resort":
-                ret = "lr";
-                break;
-            case "Shift Gear":
-                ret = "buffatk&speed";
-                break;
-            case "String Shot":
-                ret = "debuffspeed2";
-                break;
-            case "Lunar Plumage":
-                ret = "hot";
-                break;
-            case "Salt Cure":
-                ret = "hot";
-                break;
-            case "Rock Polish":
-                ret = "buffspeed2";
-                break;
-            case "Assist":
-                ret = "assist";
-                break;
-        }
-        return ret;
     }
 
     public void specialMoveHandlerPlayerToCPU(int moveSelec, int getSmackedBich) throws IOException, InterruptedException {
@@ -3121,7 +3012,7 @@ public class TheBattle {
                     break;
             }
         } else {
-            switch (statusMoveHandler(playerMons[playerMonActive].moveset[0][selec])) {
+            switch (Pokemon.statusMoveHandler(playerMons[playerMonActive].moveset[0][selec])) {
                 case "buffatk&def":
                     System.out.println("Increases ATK and DEF by 25%");
                     break;
