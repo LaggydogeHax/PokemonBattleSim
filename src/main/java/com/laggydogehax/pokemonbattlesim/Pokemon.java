@@ -144,6 +144,7 @@ class Pokemon{
 		if(this.currentHP<=0){
 			this.deMegaEvolve();
 		}
+		this.resetAbility();
 		this.currentATK=this.baseATK;
 		this.currentDEF=this.baseDEF;
 		this.currentSPEED=this.baseSPEED;
@@ -153,6 +154,10 @@ class Pokemon{
 		this.healingOverTime=false;
 		//this.numberOfHits=1;
 		this.extraDmg=0;
+	}
+	
+	protected void resetAbility(){
+		this.ability = AbilityFactory.create(this);
 	}
 
 	protected void raiseStat(String stat){
@@ -811,6 +816,125 @@ class Pokemon{
 		}
 		return "";
 	}
+	
+	public String statusMoveHandler(int moveSelec){
+		return Pokemon.statusMoveHandler(this.moveset[0][moveSelec]);
+	}
+	
+	public static String statusMoveHandler(String move) {
+        String ret = "";
+        switch (move) {
+            case "Calm Mind":
+                ret = "buffatk&def";
+                break;
+            case "Coil":
+                ret = "buffatk&def";
+                break;
+            case "Sword Dance":
+                ret = "buffatk2";
+                break;
+            case "Work Up":
+                ret = "buffatk2";
+                break;
+            case "Charge":
+                ret = "buffatk2";
+                break;
+            case "Hone Claws":
+                ret = "buffatk";
+                break;
+            case "Roar":
+                ret = "debuffdef";
+                break;
+            case "Fake Tears":
+                ret = "debuffdef2";
+                break;
+            case "Dragon Dance":
+                ret = "buffatk&speed";
+                break;
+            case "Growl":
+                ret = "debuffatk";
+                break;
+            case "Charm":
+                ret = "debuffatk2";
+                break;
+            case "Metal Sound":
+                ret = "debuffatk2";
+                break;
+            case "Agility":
+                ret = "buffspeed2";
+                break;
+            case "Scary Face":
+                ret = "debuffspeed2";
+                break;
+            case "Bulk Up":
+                ret = "buffatk&def";
+                break;
+            case "Iron Defense":
+                ret = "buffdef";
+                break;
+            case "Amnesia":
+                ret = "buffdef2";
+                break;
+            case "Defend Order":
+                ret = "buffdef2";
+                break;
+            case "Acid Armor":
+                ret = "buffdef2";
+                break;
+            case "Toxic":
+                ret = "poison";
+                break;
+            case "Poison Powder":
+                ret = "poison";
+                break;
+            case "Will-O-Wisp":
+                ret = "burn";
+                break;
+            case "Heal Pulse":
+                ret = "healhalf";
+                break;
+            case "Roost":
+                ret = "healhalf";
+                break;
+            case "Extreme Speed":
+                ret = "buffspeed2";
+                break;
+            case "Impulse":
+                ret = "debuffatk";
+                break;
+            case "Aqua Ring":
+                ret = "hot";
+                break;
+            case "Jungle Healing":
+                ret = "healhalf";
+                break;
+            case "Thunder Wave":
+                ret = "paralyze";
+                break;
+            case "Last Resort":
+                ret = "lr";
+                break;
+            case "Shift Gear":
+                ret = "buffatk&speed";
+                break;
+            case "String Shot":
+                ret = "debuffspeed2";
+                break;
+            case "Lunar Plumage":
+                ret = "hot";
+                break;
+            case "Salt Cure":
+                ret = "hot";
+                break;
+            case "Rock Polish":
+                ret = "buffspeed2";
+                break;
+            case "Assist":
+                ret = "assist";
+                break;
+        }
+        return ret;
+    }
 
 	protected boolean hasMoveNameInMoveset(String nam){
 		for(int i=0;i<this.moveset[0].length;i++){
@@ -908,7 +1032,7 @@ class Pokemon{
 			items[4]="Mega Stone";
 		}
 		
-		ability = AbilityFactory.create(this);
+		this.resetAbility();
 		
 	}//class Pokemon constructor ends
 	

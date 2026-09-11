@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 public class PokemonBattleSim {
 
     static final String OsName = System.getProperty("os.name");
-    static final String version = "beta5 dev18";
+    static final String version = "beta5 dev19";
     static final char s = 's', m = 'm';
 
     static boolean battleAnimations = true;
@@ -547,12 +547,14 @@ public class PokemonBattleSim {
             }
 
             if (op == 2) {
+				tcl.nextLine();
                 Pokemon custm = PokemonMaker3000.makeCustomMon();
                 if (custm != null) {
                     savePokemonInCPUTeam(custm);
                 }
             }
             if (op == 1) {
+				tcl.nextLine();
                 String[] namesVector = getPkmnNamesVector();
                 int page = 1;
                 boolean correctName = false;

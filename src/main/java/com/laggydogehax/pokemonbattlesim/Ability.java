@@ -6,57 +6,43 @@ class AbilityFactory{
 			default:
 				return new Ability();
 			
-			case "Venusaur":
+			case "Venusaur": return new Ability_Overgrow(nam);
 				
-			break;
-			case "Charizard":
+			case "Charizard": return new Ability_Blaze(nam);
+					
+			case "Blastoise": return new Ability_Torrent(nam);
 				
-			break;
-			case "Blastoise":
+			case "Meowscarada": return new Ability_Protean(nam);
+			
+			case "Ninetales": return new Ability_FlashFire(nam);
 				
-			break;
-			case "Meowscarada":
+			case "Empoleon": return new Ability_Competitive(nam);
 				
-			break;
-			case "Ninetales":
+			case "Raichu": return new Ability_LightningRod(nam);
 				
-			break;
-			case "Empoleon":
-				
-			break;
-			case "Raichu":
-				
-			break;
 			case "Mewtwo":
 				
 			break;
 			case "Gengar":
 				
 			break;
-			case "Dragonite":
+			case "Dragonite": return new Ability_Levitate(nam);
 				
-			break;
-			case "Absol":
-				return new Ability_SuperLuck(nam);
+			case "Absol": return new Ability_SuperLuck(nam);
 				
-			case "Gardevoir":
+			case "Gardevoir": return new Ability_Trace(nam);
 				
-			break;
-			case "Glaceon":
+			case "Glaceon": return new Ability_IceBody(nam);
 				
-			break;
-			case "Luxray":
-				
-			break;
-			case "Lucario":
-				return new Ability_Justified(nam);
+			case "Luxray": return new Ability_Guts(nam);
+
+			case "Lucario": return new Ability_Justified(nam);
 			
 			case "Duraludon":
 				
 			break;
-			case "Mismagius":
+			case "Mismagius": return new Ability_Levitate(nam);
 				
-			break;
 			case "Golisopod":
 				
 			break;
@@ -81,9 +67,8 @@ class AbilityFactory{
 			case "Arbok":
 				
 			break;
-			case "Sneasler":
+			case "Sneasler": return new Ability_Unburden(nam);
 				
-			break;
 			case "Pidgeot":
 				
 			break;
@@ -115,21 +100,17 @@ class AbilityFactory{
 				
 			break;
 			//--------wave 2 of pokemen--------//
-			case "Blaziken":
+			case "Blaziken": return new Ability_SpeedBoost(nam);
 				
-			break;
-			case "Vaporeon":
+			case "Vaporeon": return new Ability_WaterAbsorb(nam);
 				
-			break;
 			case "Ursaluna":
 				
 			break;
-			case "Decidueye":
+			case "Decidueye": return new Ability_Overgrow(nam);
 				
-			break;
-			case "Flareon":
+			case "Flareon": return new Ability_Guts(nam);
 				
-			break;
 			case "Lapras":
 				
 			break;
@@ -224,20 +205,17 @@ class AbilityFactory{
 				
 			break;
 			//-------- wave 3 ---------//
-			case "Delphox":
+			case "Delphox": return new Ability_Blaze(nam);
 				
-			break;
 			case "Gyarados":
 				
 			break;
 			case "Sceptile":
 				
 			break;
-			case "Typhlosion":
+			case "Typhlosion": return new Ability_FlashFire(nam);
 				
-			break;
-			case "Greninja":
-				return new Ability_Protean(nam);
+			case "Greninja": return new Ability_Protean(nam);
 
 			case "Leafeon":
 				
@@ -248,9 +226,8 @@ class AbilityFactory{
 			case "Corviknight":
 				
 			break;
-			case "Umbreon":
+			case "Umbreon": return new Ability_Synchronize(nam);
 				
-			break;
 			case "Jolteon":
 				
 			break;
@@ -308,9 +285,8 @@ class AbilityFactory{
 			case "Kingambit":
 				
 			break;
-			case "Azumarill":
+			case "Azumarill": return new Ability_Guts(nam);
 				
-			break;
 			case "Gallade":
 				
 			break;
@@ -371,6 +347,14 @@ class Ability{
 		this.trigger_beforeMove();
 	}
 	
+	public void trigger_startOfTurn(){
+		
+	}
+	
+	public void trigger_startOfTurn(Pokemon enemyMon){
+		this.trigger_startOfTurn();
+	}
+	
 	public void trigger_afterGettingHit(){
 		
 	}
@@ -383,8 +367,16 @@ class Ability{
 		
 	}
 	
+	public void trigger_beforeGettingHit(Pokemon enemyMon, int enemySelec){
+		this.trigger_beforeGettingHit();
+	}
+	
 	public void trigger_endOfTurn(){
 		
+	}
+	
+	public void trigger_endOfTurn(Pokemon enemyMon, int moveSelec){
+		this.trigger_endOfTurn();
 	}
 	
 }
@@ -477,6 +469,313 @@ class Ability_Justified extends Ability {
 	public void trigger_afterGettingHit(Pokemon enemyMon, int enemySelec){
 		if(enemyMon.moveset[1][enemySelec].contains("Dark")){
 			me.raiseStat("ATK");
+		}
+	}
+}
+
+class Ability_Overgrow extends Ability{
+	Pokemon me;
+	
+	public Ability_Overgrow(Pokemon me){
+		this.me = me;
+		this.name = "Overgrow";
+	}
+	
+	@Override
+	public void trigger_beforeMove(int moveSelec){
+		if(me.currentHP < me.baseHP/3 && me.moveset[1][moveSelec].contains("Grass")){
+			me.currentATK += me.baseATK/2;
+		}
+	}
+	
+	@Override
+	public void trigger_endOfTurn(Pokemon enemyMon, int moveSelec){
+		if(me.currentHP < me.baseHP/3 && me.moveset[1][moveSelec].contains("Grass")){
+			me.currentATK -= me.baseATK/2;
+		}
+	}
+}
+
+class Ability_Blaze extends Ability{
+	Pokemon me;
+	
+	public Ability_Blaze(Pokemon me){
+		this.me = me;
+		this.name = "Blaze";
+	}
+	
+	@Override
+	public void trigger_beforeMove(int moveSelec){
+		if(me.currentHP < me.baseHP/3 && me.moveset[1][moveSelec].contains("Fire")){
+			me.currentATK += me.baseATK/2;
+		}
+	}
+	
+	@Override
+	public void trigger_endOfTurn(Pokemon enemyMon, int moveSelec){
+		if(me.currentHP < me.baseHP/3 && me.moveset[1][moveSelec].contains("Fire")){
+			me.currentATK -= me.baseATK/2;
+		}
+	}
+}
+
+class Ability_Torrent extends Ability{
+	Pokemon me;
+	
+	public Ability_Torrent(Pokemon me){
+		this.me = me;
+		this.name = "Torrent";
+	}
+	
+	@Override
+	public void trigger_beforeMove(int moveSelec){
+		if(me.currentHP < me.baseHP/3 && me.moveset[1][moveSelec].contains("Water")){
+			me.currentATK += me.baseATK/2;
+		}
+	}
+	
+	@Override
+	public void trigger_endOfTurn(Pokemon enemyMon, int moveSelec){
+		if(me.currentHP < me.baseHP/3 && me.moveset[1][moveSelec].contains("Water")){
+			me.currentATK -= me.baseATK/2;
+		}
+	}
+}
+
+class Ability_FlashFire extends Ability{
+	Pokemon me;
+	
+	public Ability_FlashFire(Pokemon me){
+		this.me = me;
+		this.name = "Flash Fire";
+	}
+	
+	@Override
+	public void trigger_beforeGettingHit(Pokemon enemyMon, int enemySelec){
+		if(enemyMon.moveset[1][enemySelec].contains("Fire")){
+			me.currentATK += me.baseATK/2;
+			me.currentDEF += me.baseDEF/2;
+		}
+	}
+	
+	@Override
+	public void trigger_afterGettingHit(Pokemon enemyMon, int enemySelec){
+		if(enemyMon.moveset[1][enemySelec].contains("Fire")){
+			me.currentDEF -= me.baseDEF/2;
+		}
+	}
+	
+	@Override
+	public void trigger_endOfTurn(){
+		if(me.isBurning){
+			me.currentATK += me.baseATK/2;
+			me.isBurning = false;
+			me.permaBurn = false;
+		}
+	}
+}
+
+class Ability_Competitive extends Ability{
+	Pokemon me;
+	
+	public Ability_Competitive(Pokemon me){
+		this.me = me;
+		this.name = "Competitive";
+	}
+	
+	@Override
+	public void trigger_afterGettingHit(Pokemon enemyMon, int enemySelec){
+		switch(enemyMon.statusMoveHandler(enemySelec)){
+			case "debuffdef","debuffdef2","debuffatk","debuffatk2","debuffspeed2","debuffspeed":
+				me.raiseStat("ATK");
+				me.raiseStat("ATK");
+			break;
+		}
+	}
+}
+
+class Ability_LightningRod extends Ability {
+	Pokemon me;
+	
+	public Ability_LightningRod(Pokemon me){
+		this.me = me;
+		this.name = "Lightning Rod";
+	}
+	
+	@Override
+	public void trigger_beforeGettingHit(Pokemon enemyMon, int enemySelec){
+		if(enemyMon.moveset[1][enemySelec].contains("Electric")){
+			me.currentATK += me.baseATK/2;
+			me.currentDEF += me.baseDEF/2;
+		}
+	}
+	
+	@Override
+	public void trigger_afterGettingHit(Pokemon enemyMon, int enemySelec){
+		if(enemyMon.moveset[1][enemySelec].contains("Electric")){
+			me.currentDEF -= me.baseDEF/2;
+		}
+	}
+	
+}
+
+class Ability_Trace extends Ability{
+	Pokemon me;
+	
+	public Ability_Trace(Pokemon me){
+		this.me = me;
+		this.name = "Trace";
+	}
+	
+	@Override
+	public void trigger_startOfTurn(Pokemon enemyMon){
+		if(!enemyMon.ability.name.equals("") && !enemyMon.ability.name.equals("Trace")){
+			me.ability = AbilityFactory.create(enemyMon);
+		}
+		
+	}
+}
+
+class Ability_IceBody extends Ability{
+	Pokemon me;
+	
+	public Ability_IceBody(Pokemon me){
+		this.me = me;
+		this.name = "Ice Body";
+	}
+	
+	@Override
+	public void trigger_beforeMove(int moveSelec){
+		if(me.moveset[1][moveSelec].contains("Ice")){
+			me.healOverTime();
+		}
+	}
+}
+
+
+class Ability_Guts extends Ability{
+	Pokemon me;
+	
+	public Ability_Guts(Pokemon me){
+		this.me = me;
+		this.name = "Guts";
+	}
+	
+	@Override
+	public void trigger_beforeMove(){
+		if(me.hasStatusAilment()){
+			me.raiseStat("ATK");
+			me.raiseStat("ATK");
+		}
+	}
+	
+	@Override
+	public void trigger_endOfTurn(){
+		if(me.hasStatusAilment()){
+			me.decreaseStat("ATK");
+			me.decreaseStat("ATK");
+		}
+	}
+}
+
+class Ability_Levitate extends Ability{
+	Pokemon me;
+	
+	public Ability_Levitate(Pokemon me){
+		this.me = me;
+		this.name = "Levitate";
+	}
+	
+	@Override //can't add full immunity so this will do for now
+	public void trigger_beforeGettingHit(Pokemon enemyMon,int moveSelec){
+		if(enemyMon.moveset[1][moveSelec].contains("Ground")){
+			enemyMon.currentATK -= enemyMon.baseATK;
+			me.currentDEF += me.baseDEF*4;
+		}
+	}
+	
+	@Override
+	public void trigger_afterGettingHit(Pokemon enemyMon,int moveSelec){
+		if(enemyMon.moveset[1][moveSelec].contains("Ground")){
+			enemyMon.currentATK += enemyMon.baseATK;
+			me.currentDEF -= me.baseDEF*4;
+		}
+	}
+}
+
+class Ability_SpeedBoost extends Ability{
+	Pokemon me;
+	
+	public Ability_SpeedBoost(Pokemon me){
+		this.me = me;
+		this.name = "Speed Boost";
+	}
+	
+	@Override
+	public void trigger_endOfTurn(){
+		me.raiseStat("SPEED");
+	}
+}
+
+class Ability_WaterAbsorb extends Ability{
+	Pokemon me;
+	
+	public Ability_WaterAbsorb(Pokemon me){
+		this.me = me;
+		this.name = "Water Absorb";
+	}
+	
+	@Override
+	public void trigger_afterGettingHit(Pokemon enemyMon, int moveSelec){
+		if(enemyMon.moveset[1][moveSelec].contains("Water")){
+			me.healSelf("quarter");
+		}
+	}
+}
+
+class Ability_Synchronize extends Ability{
+	Pokemon me;
+	
+	public Ability_Synchronize(Pokemon me){
+		this.me = me;
+		this.name = "Synchronize";
+	}
+	
+	@Override
+	public void trigger_endOfTurn(Pokemon enemyMon, int moveSelec){
+		if(me.isBurning){
+			enemyMon.isBurning = true;
+		}
+		
+		if(me.isParalized){
+			enemyMon.isParalized = true;
+		}
+		
+		if(me.isPoisoned){
+			enemyMon.isPoisoned = true;
+		}
+	}
+}
+
+class Ability_Unburden extends Ability{
+	Pokemon me;
+	
+	public Ability_Unburden(Pokemon me){
+		this.me = me;
+		this.name = "Unburden";
+	}
+	
+	@Override
+	public void trigger_startOfTurn(){
+		if(me.items.length < 2){
+			me.currentSPEED *= 2;
+		}
+	}
+	
+	@Override
+	public void trigger_endOfTurn(){
+		if(me.items.length < 2){
+			me.currentSPEED /= 2;
 		}
 	}
 }
