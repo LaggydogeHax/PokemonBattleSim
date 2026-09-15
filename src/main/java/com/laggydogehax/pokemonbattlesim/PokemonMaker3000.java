@@ -1,5 +1,8 @@
 package com.laggydogehax.pokemonbattlesim;
 
+import static com.laggydogehax.pokemonbattlesim.PokemonBattleSim.clear;
+import static com.laggydogehax.pokemonbattlesim.PokemonBattleSim.tcl;
+import static com.laggydogehax.pokemonbattlesim.PokemonBattleSim.wair;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -7,8 +10,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
 
-//why does this extend the main class??? i forgor
-class PokemonMaker3000 extends PokemonBattleSim{
+class PokemonMaker3000{
 	//funny class name
 	static final char s='s', m='m';
         
