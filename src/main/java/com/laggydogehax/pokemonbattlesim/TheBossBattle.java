@@ -581,38 +581,13 @@ public class TheBossBattle extends TheBattle{
 	}
 	
 	@Override
-		public int pokemonBattleSequence(int turnOf) throws IOException, InterruptedException {
-        Pokemon cloneMon;
-        Pokemon enemyMon;
-
-        int selectedMove = 0;
+	public int pokemonBattleSequence(Pokemon cloneMon, Pokemon enemyMon, int turnOf, int selectedMove) throws IOException, InterruptedException {
 		int trueDmg = 0;
-		
-		cloneMon = getCloneMon(turnOf);
-		enemyMon = getEnemyMon(turnOf);
-
-		switch (turnOf) {
-			case 1:
-				selectedMove = moveSelec;
-				cloneMon.ability.trigger_beforeMove(moveSelec);
-				break;
-			case 2:
-				selectedMove = cpuMoveSelec;
-				cloneMon.ability.trigger_beforeMove(cpuMoveSelec);
-				break;
-			case 3:
-				selectedMove = moveSelec3;
-				cloneMon.ability.trigger_beforeMove(moveSelec3);
-				break;
-			case 4:
-				selectedMove = moveSelec4;
-				cloneMon.ability.trigger_beforeMove(moveSelec4);
-				break;
-			default:
-				break;
-		}
 
         cloneMon.extraDmg = rng.nextInt(7);
+		
+		cloneMon.ability.trigger_beforeMove(selectedMove);
+		enemyMon.ability.trigger_beforeGettingHit(cloneMon, selectedMove);
 
         if (cloneMon.moveIsAnAttack(selectedMove)) {
 
@@ -667,29 +642,7 @@ public class TheBossBattle extends TheBattle{
             bufferedClear();
             enemyMon.currentHP -= getSmackedBich;//applies dmg
 			
-			enemyMon.ability.trigger_afterGettingHit(cloneMon, moveSelec);
-			
-			// auhgfjdkgkdfd
-			switch (turnOf) {
-				case 1:
-					playerMons[playerMonActive] = cloneMon;
-					cpuMons[cpuMonActive] = enemyMon;
-					break;
-				case 3:
-					playerMons[playerMonActive2] = cloneMon;
-					cpuMons[cpuMonActive] = enemyMon;
-					break;
-				case 4:
-					playerMons[playerMonActive3] = cloneMon;
-					cpuMons[cpuMonActive] = enemyMon;
-					break;
-				case 2:
-					cpuMons[cpuMonActive] = cloneMon;
-					playerMons[playerMonActive] = enemyMon;
-					break;
-				default:
-					break;
-			}
+			enemyMon.ability.trigger_afterGettingHit(cloneMon, selectedMove);
 
             //animation!!!
             Clr color2 = Color.getColorFromMoveType(cloneMon, selectedMove);
@@ -757,7 +710,7 @@ public class TheBossBattle extends TheBattle{
                     }
                     break;
                 case "groupB":
-                    if (turnOf == 1) {
+                    if (turnOf == 1 || turnOf == 3 || turnOf == 4) {
                         numbHits += countAliveMonInTeam(playerMons);
                     } else {
                         numbHits += countAliveMonInTeam(cpuMons);
@@ -765,7 +718,7 @@ public class TheBossBattle extends TheBattle{
                     numbHits--;
                     break;
                 case "reverseGroupB":
-                    if (turnOf == 1) {
+                    if (turnOf == 1 || turnOf == 3 || turnOf == 4) {
                         numbHits += countAliveMonInTeam(cpuMons);
                     } else {
                         numbHits += countAliveMonInTeam(playerMons);
@@ -777,7 +730,7 @@ public class TheBossBattle extends TheBattle{
                     }
                     break;
                 case "avenger":
-                    if (turnOf == 1) {
+                    if (turnOf == 1 || turnOf == 3 || turnOf == 4) {
                         if (countAliveMonInTeam(playerMons) == 1) {
                             numbHits++;
                         }
@@ -810,7 +763,7 @@ public class TheBossBattle extends TheBattle{
                 wair(s, 1);
             }
             //if is special
-            if (turnOf == 1) {
+            if (turnOf == 1 || turnOf == 3 || turnOf == 4) {
                 specialMoveHandlerPlayerToCPU(selectedMove, getSmackedBich / numbHits);
                 wair(s, 1);
             } else {
@@ -824,34 +777,13 @@ public class TheBossBattle extends TheBattle{
             System.out.println(cloneMon.name + " used " + cloneMon.moveset[0][selectedMove] + "!");
             wair(s, 1);
 
-            if (turnOf == 1) {
+            if (turnOf == 1 || turnOf == 3 || turnOf == 4) {
                 statusPlayerHandler(cloneMon.moveset[0][selectedMove]);
             } else {
                 statusCPUHandler(cloneMon.moveset[0][selectedMove]);
             }
             wair(s, 2);
         }
-
-        switch (turnOf) {
-			case 1:
-				playerMons[playerMonActive] = cloneMon;
-				cpuMons[cpuMonActive] = enemyMon;
-				break;
-			case 3:
-				playerMons[playerMonActive2] = cloneMon;
-				cpuMons[cpuMonActive] = enemyMon;
-				break;
-			case 4:
-				playerMons[playerMonActive3] = cloneMon;
-				cpuMons[cpuMonActive] = enemyMon;
-				break;
-			case 2:
-				cpuMons[cpuMonActive] = cloneMon;
-				playerMons[playerMonActive] = enemyMon;
-				break;
-			default:
-				break;
-		}
 		
 		return trueDmg; //returns damage dealt
     }
@@ -859,15 +791,15 @@ public class TheBossBattle extends TheBattle{
 	
 	@Override
 	public int plyerTurn() throws IOException, InterruptedException {
-        return pokemonBattleSequence(1);
+        return pokemonBattleSequence(playerMons[playerMonActive], cpuMons[cpuMonActive], 1, moveSelec);
     }
 	
 	public int plyerTurn2() throws IOException, InterruptedException {
-        return pokemonBattleSequence(3);
+        return pokemonBattleSequence(playerMons[playerMonActive2], cpuMons[cpuMonActive], 3, moveSelec3);
     }
 	
 	public int plyerTurn3() throws IOException, InterruptedException {
-        return pokemonBattleSequence(4);
+        return pokemonBattleSequence(playerMons[playerMonActive3], cpuMons[cpuMonActive], 4, moveSelec4);
     }
 	
 	@Override

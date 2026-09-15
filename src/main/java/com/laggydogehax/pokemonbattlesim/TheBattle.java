@@ -139,6 +139,9 @@ public class TheBattle {
             //-------------------------//
 
             //---epic battle preparations----//
+			playerMons[playerMonActive].ability.trigger_startOfTurn(cpuMons[cpuMonActive]);
+			cpuMons[cpuMonActive].ability.trigger_startOfTurn(playerMons[playerMonActive]);
+			
             playerFirst = whoGoesFirst();
             if (plyWillMegaEvolve && playerFirst && !p1SkipTurn && plyCanMegaEvolve) {
                 plyWillMegaEvolve = false;
@@ -153,7 +156,6 @@ public class TheBattle {
             if (playerFirst && !p1SkipTurn) {
                 //player first
                 if (!p1SkipTurn) {
-					playerMons[playerMonActive].ability.trigger_startOfTurn(cpuMons[cpuMonActive]);
                     plyDamageInTurn = plyerTurn();
                     if (cpuMons[cpuMonActive].currentHP == 0) {
                         cpuSkipTurn = true;
@@ -176,7 +178,6 @@ public class TheBattle {
                     }
                     cpuSkipTurn = rollForParalysis(cpuMons[cpuMonActive]);
                     if (!cpuSkipTurn) {
-						cpuMons[cpuMonActive].ability.trigger_startOfTurn(playerMons[playerMonActive]);
                         cpuDamageInTurn = cpuTurn();
                     } else {
                         cpuSkipTurn = false;
@@ -194,7 +195,6 @@ public class TheBattle {
                     }
                     cpuSkipTurn = rollForParalysis(cpuMons[cpuMonActive]);
                     if (!cpuSkipTurn) {
-						cpuMons[cpuMonActive].ability.trigger_startOfTurn(playerMons[playerMonActive]);
                         cpuDamageInTurn = cpuTurn();
                         if (playerMons[playerMonActive].currentHP == 0) {//fainted lol
                             p1SkipTurn = true;
@@ -214,7 +214,6 @@ public class TheBattle {
                     }
                     p1SkipTurn = rollForParalysis(playerMons[playerMonActive]);
                     if (!p1SkipTurn) {
-						playerMons[playerMonActive].ability.trigger_startOfTurn(cpuMons[cpuMonActive]);
                         plyDamageInTurn = plyerTurn();
                         if (playerMons[playerMonActive].energyDrink) {
                             moveSelec = moveSelec2;
@@ -357,26 +356,12 @@ public class TheBattle {
 		}
 	}
 	
-	public int pokemonBattleSequence(int turnOf) throws IOException, InterruptedException {
-        Pokemon cloneMon;
-        Pokemon enemyMon;
-
-        int selectedMove;
+	public int pokemonBattleSequence(Pokemon cloneMon, Pokemon enemyMon, int turnOf, int selectedMove) throws IOException, InterruptedException {
 		int trueDmg = 0;
-		
-		cloneMon = getCloneMon(turnOf);
-		enemyMon = getEnemyMon(turnOf);
-
-        if (turnOf == 1) {
-            selectedMove = moveSelec;
-			cloneMon.ability.trigger_beforeMove(selectedMove);
-        } else {
-            selectedMove = cpuMoveSelec;
-			cloneMon.ability.trigger_beforeMove(selectedMove);
-        }
 
         cloneMon.extraDmg = rng.nextInt(7);
 		
+		cloneMon.ability.trigger_beforeMove(selectedMove);
 		enemyMon.ability.trigger_beforeGettingHit(cloneMon, selectedMove);
 
         if (cloneMon.moveIsAnAttack(selectedMove)) {
@@ -433,15 +418,6 @@ public class TheBattle {
             enemyMon.currentHP -= getSmackedBich;//applies dmg
 			
 			enemyMon.ability.trigger_afterGettingHit(cloneMon, selectedMove);
-
-            // auhgfjdkgkdfd
-            if (turnOf == 1) {
-                playerMons[playerMonActive] = cloneMon;
-                cpuMons[cpuMonActive] = enemyMon;
-            } else {
-                cpuMons[cpuMonActive] = cloneMon;
-                playerMons[playerMonActive] = enemyMon;
-            }
 
             //animation!!!
             Clr color2 = Color.getColorFromMoveType(cloneMon, selectedMove);
@@ -583,21 +559,12 @@ public class TheBattle {
             }
             wair(s, 2);
         }
-
-        //if only java had c++ pointers frfr
-        if (turnOf == 1) {
-            playerMons[playerMonActive] = cloneMon;
-            cpuMons[cpuMonActive] = enemyMon;
-        } else {
-            cpuMons[cpuMonActive] = cloneMon;
-            playerMons[playerMonActive] = enemyMon;
-        }
 		
 		return trueDmg; //returns damage dealt
     }
 
     public int plyerTurn() throws IOException, InterruptedException {
-        return pokemonBattleSequence(1);
+        return pokemonBattleSequence(playerMons[playerMonActive], cpuMons[cpuMonActive], 1, moveSelec);
     }
 	
 	public int playerSwitchMon() throws IOException, InterruptedException {
@@ -684,7 +651,7 @@ public class TheBattle {
     }
 
     public int cpuTurn() throws IOException, InterruptedException {
-        return pokemonBattleSequence(2);
+        return pokemonBattleSequence(cpuMons[cpuMonActive], playerMons[playerMonActive],2, cpuMoveSelec);
     }
 
     public void cpuSwitchMon() throws IOException, InterruptedException {
@@ -1286,114 +1253,130 @@ public class TheBattle {
         // :p
         return ret;
     }
-
-    public void statusPlayerHandler(String movv) throws IOException, InterruptedException {
-        switch (Pokemon.statusMoveHandler(movv)) {
+	
+	public void statusMoveHandler(Pokemon myMon, Pokemon enemyMon, String movv, boolean playerTeam) throws IOException, InterruptedException{
+		//movv = name of move used
+		Pokemon[] myTeam, enemyTeam;
+		boolean[] canFreeFromAilment, enemyCanFreeFromAilment;
+		
+		if(playerTeam){
+			myTeam = playerMons;
+			enemyTeam = cpuMons;
+			canFreeFromAilment = plyCanFreeFromAilment;
+			enemyCanFreeFromAilment = cpuCanFreeFromAilment;
+		}else{ //cpu turn
+			myTeam = cpuMons;
+			enemyTeam = playerMons;
+			canFreeFromAilment = cpuCanFreeFromAilment;
+			enemyCanFreeFromAilment = plyCanFreeFromAilment;
+		}
+		
+		switch (Pokemon.statusMoveHandler(movv)) {
             case "buffatk&def":
-                playerMons[playerMonActive].raiseStat("ATK");
-                playerMons[playerMonActive].raiseStat("DEF");
-                System.out.println(playerMons[playerMonActive].name + "'s ATK & DEF rose!");
+                myMon.raiseStat("ATK");
+                myMon.raiseStat("DEF");
+                System.out.println(myMon.name + "'s ATK & DEF rose!");
                 break;
             case "buffatk":
-                playerMons[playerMonActive].raiseStat("ATK");
-                System.out.println(playerMons[playerMonActive].name + "'s ATK rose!");
+                myMon.raiseStat("ATK");
+                System.out.println(myMon.name + "'s ATK rose!");
                 break;
             case "buffatk2":
-                playerMons[playerMonActive].raiseStat("ATK");
-                playerMons[playerMonActive].raiseStat("ATK");
-                System.out.println(playerMons[playerMonActive].name + "'s ATK rose greatly!");
+                myMon.raiseStat("ATK");
+                myMon.raiseStat("ATK");
+                System.out.println(myMon.name + "'s ATK rose greatly!");
                 break;
             case "buffspeed":
-                playerMons[playerMonActive].raiseStat("SPEED");
-                System.out.println(playerMons[playerMonActive].name + "'s SPEED rose!");
+                myMon.raiseStat("SPEED");
+                System.out.println(myMon.name + "'s SPEED rose!");
                 break;
             case "buffspeed2":
-                playerMons[playerMonActive].raiseStat("SPEED");
-                playerMons[playerMonActive].raiseStat("SPEED");
-                System.out.println(playerMons[playerMonActive].name + "'s SPEED rose greatly!");
+                myMon.raiseStat("SPEED");
+                myMon.raiseStat("SPEED");
+                System.out.println(myMon.name + "'s SPEED rose greatly!");
                 break;
             case "buffatk&speed":
-                playerMons[playerMonActive].raiseStat("ATK");
-                playerMons[playerMonActive].raiseStat("SPEED");
-                System.out.println(playerMons[playerMonActive].name + "'s ATK & SPEED rose!");
+                myMon.raiseStat("ATK");
+                myMon.raiseStat("SPEED");
+                System.out.println(myMon.name + "'s ATK & SPEED rose!");
                 break;
             case "buffdef":
-                playerMons[playerMonActive].raiseStat("DEF");
-                System.out.println(playerMons[playerMonActive].name + "'s DEF rose!");
+                myMon.raiseStat("DEF");
+                System.out.println(myMon.name + "'s DEF rose!");
                 break;
             case "buffdef2":
-                playerMons[playerMonActive].raiseStat("DEF");
-                playerMons[playerMonActive].raiseStat("DEF");
-                System.out.println(playerMons[playerMonActive].name + "'s DEF rose greatly!");
+                myMon.raiseStat("DEF");
+                myMon.raiseStat("DEF");
+                System.out.println(myMon.name + "'s DEF rose greatly!");
                 break;
             case "debuffdef":
-                cpuMons[cpuMonActive].decreaseStat("DEF");
-                System.out.println(cpuMons[cpuMonActive].name + "'s DEF fell!");
+                enemyMon.decreaseStat("DEF");
+                System.out.println(enemyMon.name + "'s DEF fell!");
                 break;
             case "debuffdef2":
-                cpuMons[cpuMonActive].decreaseStat("DEF");
-                cpuMons[cpuMonActive].decreaseStat("DEF");
-                System.out.println(cpuMons[cpuMonActive].name + "'s DEF fell greatly!");
+                enemyMon.decreaseStat("DEF");
+                enemyMon.decreaseStat("DEF");
+                System.out.println(enemyMon.name + "'s DEF fell greatly!");
                 break;
             case "debuffspeed2":
-                cpuMons[cpuMonActive].decreaseStat("SPEED");
-                cpuMons[cpuMonActive].decreaseStat("SPEED");
-                System.out.println(cpuMons[cpuMonActive].name + "'s SPEED fell greatly!");
+                enemyMon.decreaseStat("SPEED");
+                enemyMon.decreaseStat("SPEED");
+                System.out.println(enemyMon.name + "'s SPEED fell greatly!");
                 break;
             case "debuffatk":
-                cpuMons[cpuMonActive].decreaseStat("ATK");
-                System.out.println(cpuMons[cpuMonActive].name + "'s ATK fell!");
+                enemyMon.decreaseStat("ATK");
+                System.out.println(enemyMon.name + "'s ATK fell!");
                 break;
             case "debuffatk2":
-                cpuMons[cpuMonActive].decreaseStat("ATK");
-                cpuMons[cpuMonActive].decreaseStat("ATK");
-                System.out.println(cpuMons[cpuMonActive].name + "'s ATK fell greatly!");
+                enemyMon.decreaseStat("ATK");
+                enemyMon.decreaseStat("ATK");
+                System.out.println(enemyMon.name + "'s ATK fell greatly!");
                 break;
             case "healhalf":
-                playerMons[playerMonActive].healSelf("half");
-                System.out.println(playerMons[playerMonActive].name + " recovered health!");
+                myMon.healSelf("half");
+                System.out.println(myMon.name + " recovered health!");
                 break;
             case "poison":
-                cpuMons[cpuMonActive].isPoisoned = true;
-                System.out.println(cpuMons[cpuMonActive].name + " is badly poisoned!");
-                cpuCanFreeFromAilment[1] = false;
+                enemyMon.isPoisoned = true;
+                System.out.println(enemyMon.name + " is badly poisoned!");
+                enemyCanFreeFromAilment[1] = false;
                 break;
             case "burn":
-                cpuMons[cpuMonActive].isBurning = true;
-                System.out.println(cpuMons[cpuMonActive].name + " is on fire!");
-                cpuCanFreeFromAilment[0] = false;
+                enemyMon.isBurning = true;
+                System.out.println(enemyMon.name + " is on fire!");
+                enemyCanFreeFromAilment[0] = false;
                 break;
             case "paralyze":
-                cpuMons[cpuMonActive].isParalized = true;
-                System.out.println(cpuMons[cpuMonActive].name + " is paralized! it may not move!");
-                cpuCanFreeFromAilment[2] = false;
+                enemyMon.isParalized = true;
+                System.out.println(enemyMon.name + " is paralized! it may not move!");
+                enemyCanFreeFromAilment[2] = false;
                 break;
             case "hot":
-                playerMons[playerMonActive].healingOverTime = true;
-                System.out.println(playerMons[playerMonActive].name + " will recover HP over time!");
+                myMon.healingOverTime = true;
+                System.out.println(myMon.name + " will recover HP over time!");
                 break;
             case "lr":
-                playerMons[playerMonActive].isBurning = true;
-                System.out.println(playerMons[playerMonActive].name + " is in deep trouble!!");
-                if (((playerMons[playerMonActive].currentHP * 2) / 1.65) > playerMons[playerMonActive].baseHP) {
-                    playerMons[playerMonActive].aukBurning();
-                    playerMons[playerMonActive].aukPoisoned();
+                myMon.isBurning = true;
+                System.out.println(myMon.name + " is in deep trouble!!");
+                if (((myMon.currentHP * 2) / 1.65) > myMon.baseHP) {
+                    myMon.aukBurning();
+                    myMon.aukPoisoned();
                 }
-                int lostHP = playerMons[playerMonActive].baseHP - playerMons[playerMonActive].currentHP;
-                playerMons[playerMonActive].currentATK += lostHP;
+                int lostHP = myMon.baseHP - myMon.currentHP;
+                myMon.currentATK += lostHP;
                 wair(s, 1);
-                System.out.println(playerMons[playerMonActive].name + " gained " + lostHP + " ATK!");
+                System.out.println(myMon.name + " gained " + lostHP + " ATK!");
                 break;
             case "assist":
-                String guh = playerMons[playerMonActive].moveset[0][moveSelec];
+                String guh = myMon.moveset[0][moveSelec];
 
-                String[] teamMatesMoves = new String[(playerMons.length - 1) * 4];
+                String[] teamMatesMoves = new String[(myTeam.length - 1) * 4];
 
                 int k = 0;
-                for (int i = 0; i < playerMons.length; i++) {
+                for (int i = 0; i < myTeam.length; i++) {
                     if (i != playerMonActive) {
                         for (int j = 0; j < 4; j++) {
-                            teamMatesMoves[k] = playerMons[i].moveset[0][j];
+                            teamMatesMoves[k] = myTeam[i].moveset[0][j];
                             k++;
                         }
                     }
@@ -1401,219 +1384,126 @@ public class TheBattle {
 
                 String randomMove = teamMatesMoves[rng.nextInt(teamMatesMoves.length)];
 
-                playerMons[playerMonActive].moveset[0][moveSelec] = randomMove;
-                playerMons[playerMonActive].defineSelfMove(moveSelec);
+                myMon.moveset[0][moveSelec] = randomMove;
+                myMon.defineSelfMove(moveSelec);
 
                 plyerTurn();
 
-                playerMons[playerMonActive].moveset[0][moveSelec] = guh;
-                playerMons[playerMonActive].defineSelfMove(moveSelec);
+                myMon.moveset[0][moveSelec] = guh;
+                myMon.defineSelfMove(moveSelec);
 
                 break;
         }
+		
+		//hfjgfdjfdg
+		if(playerTeam){
+			plyCanFreeFromAilment = canFreeFromAilment;
+			cpuCanFreeFromAilment = enemyCanFreeFromAilment;
+		}else{ //cpu turn
+			plyCanFreeFromAilment = enemyCanFreeFromAilment;
+			cpuCanFreeFromAilment = canFreeFromAilment;
+		}
+	}
+
+    public void statusPlayerHandler(String movv) throws IOException, InterruptedException {
+        statusMoveHandler(playerMons[playerMonActive], cpuMons[cpuMonActive], movv, true);
     }
 
     public void statusCPUHandler(String movv) throws IOException, InterruptedException {
-        switch (Pokemon.statusMoveHandler(movv)) {
-            case "buffatk&def":
-                cpuMons[cpuMonActive].raiseStat("ATK");
-                cpuMons[cpuMonActive].raiseStat("DEF");
-                System.out.println(cpuMons[cpuMonActive].name + "'s ATK & DEF rose!");
-                break;
-            case "buffatk":
-                cpuMons[cpuMonActive].raiseStat("ATK");
-                System.out.println(cpuMons[cpuMonActive].name + "'s ATK rose!");
-                break;
-            case "buffatk2":
-                cpuMons[cpuMonActive].raiseStat("ATK");
-                cpuMons[cpuMonActive].raiseStat("ATK");
-                System.out.println(cpuMons[cpuMonActive].name + "'s ATK rose greatly!");
-                break;
-            case "buffatk&speed":
-                cpuMons[cpuMonActive].raiseStat("ATK");
-                cpuMons[cpuMonActive].raiseStat("SPEED");
-                System.out.println(cpuMons[cpuMonActive].name + "'s ATK & SPEED rose!");
-                break;
-            case "buffspeed":
-                cpuMons[cpuMonActive].raiseStat("SPEED");
-                System.out.println(cpuMons[cpuMonActive].name + "'s SPEED rose!");
-                break;
-            case "buffspeed2":
-                cpuMons[cpuMonActive].raiseStat("SPEED");
-                cpuMons[cpuMonActive].raiseStat("SPEED");
-                System.out.println(cpuMons[cpuMonActive].name + "'s SPEED rose greatly!");
-                break;
-            case "buffdef":
-                cpuMons[cpuMonActive].raiseStat("DEF");
-                System.out.println(cpuMons[cpuMonActive].name + "'s DEF rose!");
-                break;
-            case "buffdef2":
-                cpuMons[cpuMonActive].raiseStat("DEF");
-                cpuMons[cpuMonActive].raiseStat("DEF");
-                System.out.println(cpuMons[cpuMonActive].name + "'s DEF rose greatly!");
-                break;
-            case "debuffdef":
-                playerMons[playerMonActive].decreaseStat("DEF");
-                System.out.println(playerMons[playerMonActive].name + "'s DEF fell!");
-                break;
-            case "debuffdef2":
-                playerMons[playerMonActive].decreaseStat("DEF");
-                playerMons[playerMonActive].decreaseStat("DEF");
-                System.out.println(playerMons[playerMonActive].name + "'s DEF fell greatly!");
-                break;
-            case "debuffspeed2":
-                playerMons[playerMonActive].decreaseStat("SPEED");
-                playerMons[playerMonActive].decreaseStat("SPEED");
-                System.out.println(playerMons[playerMonActive].name + "'s SPEED fell greatly!");
-                break;
-            case "debuffatk":
-                playerMons[playerMonActive].decreaseStat("ATK");
-                System.out.println(playerMons[playerMonActive].name + "'s ATK fell!");
-                break;
-            case "debuffatk2":
-                playerMons[playerMonActive].decreaseStat("ATK");
-                playerMons[playerMonActive].decreaseStat("ATK");
-                System.out.println(playerMons[playerMonActive].name + "'s ATK fell greatly!");
-                break;
-            case "healhalf":
-                cpuMons[cpuMonActive].healSelf("half");
-                System.out.println(cpuMons[cpuMonActive].name + " recovered health!");
-                break;
-            case "poison":
-                playerMons[playerMonActive].isPoisoned = true;
-                System.out.println(playerMons[playerMonActive].name + " is badly poisoned!");
-                plyCanFreeFromAilment[1] = false;
-                break;
-            case "burn":
-                playerMons[playerMonActive].isBurning = true;
-                System.out.println(playerMons[playerMonActive].name + " is on fire!");
-                plyCanFreeFromAilment[0] = false;
-                break;
-            case "paralyze":
-                playerMons[playerMonActive].isParalized = true;
-                System.out.println(playerMons[playerMonActive].name + " is paralized! it may not move!");
-                plyCanFreeFromAilment[2] = false;
-                break;
-            case "hot":
-                cpuMons[cpuMonActive].healingOverTime = true;
-                System.out.println(cpuMons[cpuMonActive].name + " will recover HP over time!");
-                break;
-            case "lr":
-                cpuMons[cpuMonActive].isBurning = true;
-                System.out.println(cpuMons[cpuMonActive].name + " is in deep trouble!!");
-                if (((cpuMons[cpuMonActive].currentHP * 2) / 1.65) > cpuMons[cpuMonActive].baseHP) {
-                    cpuMons[cpuMonActive].aukBurning();
-                    cpuMons[cpuMonActive].aukPoisoned();
-                }
-                int lostHP = cpuMons[cpuMonActive].baseHP - cpuMons[cpuMonActive].currentHP;
-                cpuMons[cpuMonActive].currentATK += lostHP;
-                wair(s, 1);
-                System.out.println(cpuMons[cpuMonActive].name + " gained " + lostHP + " ATK!");
-                break;
-            case "assist":
-                String guh = cpuMons[cpuMonActive].moveset[0][cpuMoveSelec];
-
-                String[] teamMatesMoves = new String[(cpuMons.length - 1) * 4];
-
-                int k = 0;
-                for (int i = 0; i < cpuMons.length; i++) {
-                    if (i != cpuMonActive) {
-                        for (int j = 0; j < 4; j++) {
-                            teamMatesMoves[k] = cpuMons[i].moveset[0][j];
-                            k++;
-                        }
-                    }
-                }
-
-                String randomMove = teamMatesMoves[rng.nextInt(teamMatesMoves.length)];
-
-                cpuMons[cpuMonActive].moveset[0][moveSelec] = randomMove;
-                cpuMons[cpuMonActive].defineSelfMove(moveSelec);
-
-                cpuTurn();
-
-                cpuMons[cpuMonActive].moveset[0][moveSelec] = guh;
-                cpuMons[cpuMonActive].defineSelfMove(moveSelec);
-
-                break;
-        }
+        statusMoveHandler(cpuMons[cpuMonActive], playerMons[playerMonActive], movv, false);
     }
 
-    public void specialMoveHandlerPlayerToCPU(int moveSelec, int getSmackedBich) throws IOException, InterruptedException {
-        switch (playerMons[playerMonActive].isSpecialMove(moveSelec)) {
+	public void specialMoveHandler(Pokemon myMon, Pokemon enemyMon, int moveSelec, int getSmackedBich, boolean playerTeam)throws IOException, InterruptedException{
+		
+		Pokemon[] myTeam, enemyTeam;
+		boolean[] canFreeFromAilment, enemyCanFreeFromAilment;
+		
+		if(playerTeam){
+			myTeam = playerMons;
+			enemyTeam = cpuMons;
+			canFreeFromAilment = plyCanFreeFromAilment;
+			enemyCanFreeFromAilment = cpuCanFreeFromAilment;
+		}else{ //cpu turn
+			myTeam = cpuMons;
+			enemyTeam = playerMons;
+			canFreeFromAilment = cpuCanFreeFromAilment;
+			enemyCanFreeFromAilment = plyCanFreeFromAilment;
+		}
+		
+		switch (myMon.isSpecialMove(moveSelec)) {
             case "lifedrain":
                 int healfor = getSmackedBich / 2;
-                if ((healfor + playerMons[playerMonActive].currentHP) > playerMons[playerMonActive].baseHP) {
-                    healfor = playerMons[playerMonActive].currentHP - playerMons[playerMonActive].baseHP;
+                if ((healfor + myMon.currentHP) > myMon.baseHP) {
+                    healfor = myMon.currentHP - myMon.baseHP;
                     //bandaid patch
                     if (healfor < 0) {
-                        healfor = playerMons[playerMonActive].baseHP - playerMons[playerMonActive].currentHP;
+                        healfor = myMon.baseHP - myMon.currentHP;
                     }
                 }
-                playerMons[playerMonActive].currentHP += healfor;//heal half of dmg dealt
+                myMon.currentHP += healfor;//heal half of dmg dealt
 
-                System.out.println(playerMons[playerMonActive].name + " healed for " + healfor + " points");
+                System.out.println(myMon.name + " healed for " + healfor + " points");
                 wair(s, 1);
                 break;
             case "rngBurn":
                 if (rng.nextInt(10) > 7) {
-                    cpuMons[cpuMonActive].isBurning = true;
-                    System.out.println(cpuMons[cpuMonActive].name + " is on fire!");
-                    cpuCanFreeFromAilment[0] = false;
+                    enemyMon.isBurning = true;
+                    System.out.println(enemyMon.name + " is on fire!");
+                    enemyCanFreeFromAilment[0] = false;
                     wair(s, 1);
                 }
                 break;
             case "rngPoison":
                 if (rng.nextInt(10) > 7) {
-                    cpuMons[cpuMonActive].isPoisoned = true;
-                    System.out.println(cpuMons[cpuMonActive].name + " is badly poisoned!");
-                    cpuCanFreeFromAilment[1] = false;
+                    enemyMon.isPoisoned = true;
+                    System.out.println(enemyMon.name + " is badly poisoned!");
+                    enemyCanFreeFromAilment[1] = false;
                     wair(s, 1);
                 }
                 break;
             case "rngParalysis":
                 if (rng.nextInt(10) > 7) {
-                    cpuMons[cpuMonActive].isParalized = true;
-                    System.out.println(cpuMons[cpuMonActive].name + " is paralyzed! it may not move!");
-                    cpuCanFreeFromAilment[2] = false;
+                    enemyMon.isParalized = true;
+                    System.out.println(enemyMon.name + " is paralyzed! it may not move!");
+                    enemyCanFreeFromAilment[2] = false;
                     wair(s, 1);
                 }
                 break;
             case "paralyze":
-                cpuMons[cpuMonActive].isParalized = true;
-                System.out.println(cpuMons[cpuMonActive].name + " is paralyzed! it may not move!");
-                cpuCanFreeFromAilment[2] = false;
+                enemyMon.isParalized = true;
+                System.out.println(enemyMon.name + " is paralyzed! it may not move!");
+                enemyCanFreeFromAilment[2] = false;
                 wair(s, 1);
                 break;
             case "rngDebuffSpeed":
                 if (rng.nextInt(10) > 5) {
-                    cpuMons[cpuMonActive].decreaseStat("SPEED");
-                    System.out.println(cpuMons[cpuMonActive].name + "'s SPEED fell!");
+                    enemyMon.decreaseStat("SPEED");
+                    System.out.println(enemyMon.name + "'s SPEED fell!");
                     wair(s, 1);
                 }
                 break;
             case "rngDebuffDef":
                 if (rng.nextInt(10) > 7) {
-                    cpuMons[cpuMonActive].decreaseStat("DEF");
-                    System.out.println(cpuMons[cpuMonActive].name + "'s DEF fell!");
+                    enemyMon.decreaseStat("DEF");
+                    System.out.println(enemyMon.name + "'s DEF fell!");
                     wair(s, 1);
                 }
                 break;
             case "rngDebuffAtk":
                 if (rng.nextInt(10) > 7) {
-                    cpuMons[cpuMonActive].decreaseStat("ATK");
-                    System.out.println(cpuMons[cpuMonActive].name + "'s ATK fell!");
+                    enemyMon.decreaseStat("ATK");
+                    System.out.println(enemyMon.name + "'s ATK fell!");
                     wair(s, 1);
                 }
                 break;
             case "debuffatk":
-                cpuMons[cpuMonActive].decreaseStat("ATK");
-                System.out.println(cpuMons[cpuMonActive].name + "'s ATK fell!");
+                enemyMon.decreaseStat("ATK");
+                System.out.println(enemyMon.name + "'s ATK fell!");
                 wair(s, 1);
                 break;
             case "buffspeed":
-                playerMons[playerMonActive].raiseStat("SPEED");
-                System.out.println(playerMons[playerMonActive].name + "'s SPEED rose!");
+                myMon.raiseStat("SPEED");
+                System.out.println(myMon.name + "'s SPEED rose!");
                 wair(s, 1);
                 break;
             case "doublehit":
@@ -1625,77 +1515,87 @@ public class TheBattle {
                 }
                 break;
             case "overclock"://debuff self atk after using
-                playerMons[playerMonActive].decreaseStat("ATK");
-                playerMons[playerMonActive].decreaseStat("ATK");
-                System.out.println(playerMons[playerMonActive].name + "'s ATK fell greatly!");
+                myMon.decreaseStat("ATK");
+                myMon.decreaseStat("ATK");
+                System.out.println(myMon.name + "'s ATK fell greatly!");
                 wair(s, 1);
                 break;
             case "recoil":
-                playerMons[playerMonActive].currentHP -= (getSmackedBich / 3);
-                if (playerMons[playerMonActive].currentHP < 0) {
-                    playerMons[playerMonActive].currentHP = 0;
+				int recoildmg = getSmackedBich / 3;
+                myMon.currentHP -= recoildmg;
+                if (myMon.currentHP < 0) {
+                    myMon.currentHP = 0;
                 }
                 bufferedClear();
                 printBattleHUDThing();
-                System.out.println(playerMons[playerMonActive].name + " hurt itself in recoil!");
+                System.out.println(myMon.name + " hurt itself in recoil! (-"+recoildmg+")");
                 wair(s, 1);
                 break;
             case "adversity":
-                if (playerMons[playerMonActive].moveset[0][moveSelec].equals("Ascension")) {
-                    playerMons[playerMonActive].healingOverTime = true;
+                if (myMon.moveset[0][moveSelec].equals("Ascension")) {
+                    myMon.healingOverTime = true;
                 }
-                int lostHP = playerMons[playerMonActive].baseHP - playerMons[playerMonActive].currentHP;
-                playerMons[playerMonActive].currentATK += lostHP / 20;
+                int lostHP = myMon.baseHP - myMon.currentHP;
+                myMon.currentATK += lostHP / 20;
                 break;
             case "powerboost":
-                playerMons[playerMonActive].decreaseStat("SPEED");
-                System.out.println(playerMons[playerMonActive].name + "'s SPEED fell!");
+                myMon.decreaseStat("SPEED");
+                System.out.println(myMon.name + "'s SPEED fell!");
                 wair(s, 1);
                 break;
             case "kamikaze":
-                playerMons[playerMonActive].currentHP = 0;
-                System.out.println(playerMons[playerMonActive].name + " Exploded!!!");
+                myMon.currentHP = 0;
+                System.out.println(myMon.name + " Exploded!!!");
                 wair(s, 1);
                 break;
             case "debuffIfBoosted":
-                Pokemon enemiMon = cpuMons[cpuMonActive];
+                Pokemon enemiMon = enemyMon;
                 if (enemiMon.currentATK > enemiMon.baseATK || enemiMon.currentDEF > enemiMon.baseDEF || enemiMon.currentSPEED > enemiMon.baseSPEED) {
                     int todebuff = rng.nextInt(3);
                     if (todebuff == 0) {
-                        cpuMons[cpuMonActive].decreaseStat("ATK");
-                        System.out.println(cpuMons[cpuMonActive].name + "'s ATK fell!");
+                        enemyMon.decreaseStat("ATK");
+                        System.out.println(enemyMon.name + "'s ATK fell!");
                         wair(s, 1);
                     }
                     if (todebuff == 1) {
-                        cpuMons[cpuMonActive].decreaseStat("DEF");
-                        System.out.println(cpuMons[cpuMonActive].name + "'s DEF fell!");
+                        enemyMon.decreaseStat("DEF");
+                        System.out.println(enemyMon.name + "'s DEF fell!");
                         wair(s, 1);
                     } else {
-                        cpuMons[cpuMonActive].decreaseStat("SPEED");
-                        System.out.println(cpuMons[cpuMonActive].name + "'s SPEED fell!");
+                        enemyMon.decreaseStat("SPEED");
+                        System.out.println(enemyMon.name + "'s SPEED fell!");
                         wair(s, 1);
                     }
                 }
                 break;
             case "rngBuffDef":
                 if (rng.nextInt(2) > 0) {
-                    playerMons[playerMonActive].raiseStat("DEF");
-                    System.out.println(playerMons[playerMonActive].name + "'s DEF rose!");
+                    myMon.raiseStat("DEF");
+                    System.out.println(myMon.name + "'s DEF rose!");
                     wair(s, 1);
                 }
                 break;
             case "osmash":
-                playerMons[playerMonActive].raiseStat("ATK");
-                playerMons[playerMonActive].raiseStat("ATK");
-                System.out.println(playerMons[playerMonActive].name + "'s ATK rose greatly!");
+                myMon.raiseStat("ATK");
+                myMon.raiseStat("ATK");
+                System.out.println(myMon.name + "'s ATK rose greatly!");
                 wair(s, 1);
                 break;
             case "brokenCardMove":
-                for (int i = 0; i < playerMons.length; i++) {
-                    playerMons[i].baseATK += 25;
-                    playerMons[i].currentATK += 25;
+                for (int i = 0; i < myTeam.length; i++) {
+                    myTeam[i].baseATK += 25;
+                    myTeam[i].currentATK += 25;
                 }
-                System.out.println("Your entire team recieved a boost!!");
+				
+				if(playerTeam){
+					playerMons = myTeam;
+				}else{
+					cpuMons = enemyTeam;
+				}
+				
+				
+				
+                System.out.println(myMon+"'s team recieved a boost!!");
                 wair(s, 1);
                 break;
             case "rngPoisonBurnPara":
@@ -1703,220 +1603,47 @@ public class TheBattle {
                     int crippling = rng.nextInt(3);
                     switch (crippling) {
                         case 0:
-                            cpuMons[cpuMonActive].isBurning = true;
-                            System.out.println(cpuMons[cpuMonActive].name + " is on fire!");
-                            cpuCanFreeFromAilment[0] = false;
+                            enemyMon.isBurning = true;
+                            System.out.println(enemyMon.name + " is on fire!");
+                            enemyCanFreeFromAilment[0] = false;
                             break;
                         case 1:
-                            cpuMons[cpuMonActive].isPoisoned = true;
-                            System.out.println(cpuMons[cpuMonActive].name + " is badly poisoned!");
-                            cpuCanFreeFromAilment[1] = false;
+                            enemyMon.isPoisoned = true;
+                            System.out.println(enemyMon.name + " is badly poisoned!");
+                            enemyCanFreeFromAilment[1] = false;
                             break;
                         case 2:
-                            cpuMons[cpuMonActive].isParalized = true;
-                            System.out.println(cpuMons[cpuMonActive].name + " is paralyzed! it may not move!");
-                            cpuCanFreeFromAilment[2] = false;
+                            enemyMon.isParalized = true;
+                            System.out.println(enemyMon.name + " is paralyzed! it may not move!");
+                            enemyCanFreeFromAilment[2] = false;
                             break;
                     }
                     wair(s, 1);
                 }
                 break;
             case "debuffselfdef":
-                playerMons[playerMonActive].decreaseStat("DEF");
-                System.out.println(playerMons[playerMonActive].name + "'s DEF fell!");
+                myMon.decreaseStat("DEF");
+                System.out.println(myMon.name + "'s DEF fell!");
                 wair(s, 1);
                 break;
         }
+		
+		//hyegfgdhsfsdffsd
+		if(playerTeam){
+			plyCanFreeFromAilment = canFreeFromAilment;
+			cpuCanFreeFromAilment = enemyCanFreeFromAilment;
+		}else{ //cpu turn
+			plyCanFreeFromAilment = enemyCanFreeFromAilment;
+			cpuCanFreeFromAilment = canFreeFromAilment;
+		}
+	}
+	
+    public void specialMoveHandlerPlayerToCPU(int moveSelec, int getSmackedBich) throws IOException, InterruptedException {
+        specialMoveHandler(playerMons[playerMonActive], cpuMons[cpuMonActive], moveSelec, getSmackedBich, true);
     }
 
     public void specialMoveHandlerCPUToPlayer(int moveSelec, int getSmackedBich) throws IOException, InterruptedException {
-        switch (cpuMons[cpuMonActive].isSpecialMove(moveSelec)) {
-            case "lifedrain":
-                int healfor = getSmackedBich / 2;
-                if ((healfor + cpuMons[cpuMonActive].currentHP) > cpuMons[cpuMonActive].baseHP) {
-                    healfor = cpuMons[cpuMonActive].currentHP - cpuMons[cpuMonActive].baseHP;
-                    //bandaid patch lol
-                    if (healfor < 0) {
-                        healfor = cpuMons[cpuMonActive].baseHP - cpuMons[cpuMonActive].currentHP;
-                    }
-                }
-                cpuMons[cpuMonActive].currentHP += healfor;//heal half of dmg dealt
-
-                System.out.println(cpuMons[cpuMonActive].name + " healed for " + healfor + " points");
-                wair(s, 1);
-                break;
-            case "rngBurn":
-                if (rng.nextInt(10) > 7) {
-                    playerMons[playerMonActive].isBurning = true;
-                    System.out.println(playerMons[playerMonActive].name + " is on fire!");
-                    plyCanFreeFromAilment[0] = false;
-                    wair(s, 1);
-                }
-                break;
-            case "rngPoison":
-                if (rng.nextInt(10) > 7) {
-                    playerMons[playerMonActive].isPoisoned = true;
-                    System.out.println(playerMons[playerMonActive].name + " is badly poisoned!");
-                    plyCanFreeFromAilment[1] = false;
-                    wair(s, 1);
-                }
-                break;
-            case "rngParalysis":
-                if (rng.nextInt(10) > 7) {
-                    playerMons[playerMonActive].isParalized = true;
-                    System.out.println(playerMons[playerMonActive].name + " is paralyzed! it may not move!");
-                    plyCanFreeFromAilment[2] = false;
-                    wair(s, 1);
-                }
-                break;
-            case "paralyze":
-                playerMons[playerMonActive].isParalized = true;
-                System.out.println(playerMons[playerMonActive].name + " is paralyzed! it may not move!");
-                plyCanFreeFromAilment[2] = false;
-                wair(s, 1);
-                break;
-            case "rngDebuffSpeed":
-                if (rng.nextInt(10) > 5) {
-                    playerMons[playerMonActive].decreaseStat("SPEED");
-                    System.out.println(playerMons[playerMonActive].name + "'s SPEED fell!");
-                    wair(s, 1);
-                }
-                break;
-            case "rngDebuffDef":
-                if (rng.nextInt(10) > 7) {
-                    playerMons[playerMonActive].decreaseStat("DEF");
-                    System.out.println(playerMons[playerMonActive].name + "'s DEF fell!");
-                    wair(s, 1);
-                }
-                break;
-            case "rngDebuffAtk":
-                if (rng.nextInt(10) > 7) {
-                    playerMons[playerMonActive].decreaseStat("ATK");
-                    System.out.println(playerMons[playerMonActive].name + "'s ATK fell!");
-                    wair(s, 1);
-                }
-                break;
-            case "debuffatk":
-                playerMons[playerMonActive].decreaseStat("ATK");
-                System.out.println(playerMons[playerMonActive].name + "'s ATK fell!");
-                wair(s, 1);
-                break;
-            case "buffspeed":
-                cpuMons[cpuMonActive].raiseStat("SPEED");
-                System.out.println(cpuMons[cpuMonActive].name + "'s SPEED rose!");
-                wair(s, 1);
-                break;
-            case "doublehit":
-                if (!doublehitCpu) {
-                    doublehitCpu = true;
-                    cpuTurn();
-                } else {
-                    doublehitCpu = false;
-                }
-                break;
-            case "overclock"://debuff self atk after using
-                cpuMons[cpuMonActive].decreaseStat("ATK");
-                cpuMons[cpuMonActive].decreaseStat("ATK");
-                System.out.println(cpuMons[cpuMonActive].name + "'s ATK fell greatly!");
-                wair(s, 1);
-                break;
-            case "recoil":
-                cpuMons[cpuMonActive].currentHP -= (getSmackedBich / 3);
-                if (cpuMons[cpuMonActive].currentHP < 0) {
-                    cpuMons[cpuMonActive].currentHP = 0;
-                }
-                bufferedClear();
-                printBattleHUDThing();
-                System.out.println(cpuMons[cpuMonActive].name + " hurt itself in recoil!");
-                wair(s, 1);
-                break;
-            case "adversity":
-                if (cpuMons[cpuMonActive].moveset[0][cpuMoveSelec].equals("Ascension")) {
-                    cpuMons[cpuMonActive].healingOverTime = true;
-                }
-                int lostHP = cpuMons[cpuMonActive].baseHP - cpuMons[cpuMonActive].currentHP;
-                cpuMons[cpuMonActive].currentATK += lostHP / 20;
-                break;
-            case "powerboost":
-                cpuMons[cpuMonActive].decreaseStat("SPEED");
-                System.out.println(cpuMons[cpuMonActive].name + "'s SPEED fell!");
-                wair(s, 1);
-                break;
-            case "kamikaze":
-                cpuMons[cpuMonActive].currentHP = 0;
-                System.out.println(cpuMons[cpuMonActive].name + " Exploded!!!");
-                wair(s, 1);
-                break;
-            case "debuffIfBoosted":
-                Pokemon enemiMon = playerMons[playerMonActive];
-                if (enemiMon.currentATK > enemiMon.baseATK || enemiMon.currentDEF > enemiMon.baseDEF || enemiMon.currentSPEED > enemiMon.baseSPEED) {
-                    int todebuff = rng.nextInt(3);
-                    if (todebuff == 0) {
-                        playerMons[playerMonActive].decreaseStat("ATK");
-                        System.out.println(playerMons[playerMonActive].name + "'s ATK fell!");
-                        wair(s, 1);
-                    }
-                    if (todebuff == 1) {
-                        playerMons[playerMonActive].decreaseStat("DEF");
-                        System.out.println(playerMons[playerMonActive].name + "'s DEF fell!");
-                        wair(s, 1);
-                    } else {
-                        playerMons[playerMonActive].decreaseStat("SPEED");
-                        System.out.println(playerMons[playerMonActive].name + "'s SPEED fell!");
-                        wair(s, 1);
-                    }
-                }
-                break;
-            case "rngBuffDef":
-                if (rng.nextInt(2) > 0) {
-                    cpuMons[cpuMonActive].raiseStat("DEF");
-                    System.out.println(cpuMons[cpuMonActive].name + "'s DEF rose!");
-                    wair(s, 1);
-                }
-                break;
-            case "osmash":
-                cpuMons[cpuMonActive].raiseStat("ATK");
-                cpuMons[cpuMonActive].raiseStat("ATK");
-                System.out.println(cpuMons[cpuMonActive].name + "'s ATK rose greatly!");
-                wair(s, 1);
-                break;
-            case "brokenCardMove":
-                for (int i = 0; i < cpuMons.length; i++) {
-                    cpuMons[i].baseATK += 25;
-                    cpuMons[i].currentATK += 25;
-                }
-                System.out.println(cpuName + "'s entire team recieved a boost!!");
-                wair(s, 1);
-                break;
-            case "rngPoisonBurnPara":
-                if (rng.nextInt(2) == 0) {
-                    int crippling = rng.nextInt(3);
-                    switch (crippling) {
-                        case 0:
-                            playerMons[playerMonActive].isBurning = true;
-                            System.out.println(playerMons[playerMonActive].name + " is on fire!");
-                            plyCanFreeFromAilment[0] = false;
-                            break;
-                        case 1:
-                            playerMons[playerMonActive].isPoisoned = true;
-                            System.out.println(playerMons[playerMonActive].name + " is badly poisoned!");
-                            plyCanFreeFromAilment[1] = false;
-                            break;
-                        case 2:
-                            playerMons[playerMonActive].isParalized = true;
-                            System.out.println(playerMons[playerMonActive].name + " is paralyzed! it may not move!");
-                            plyCanFreeFromAilment[2] = false;
-                            break;
-                    }
-                    wair(s, 1);
-                }
-                break;
-            case "debuffselfdef":
-                cpuMons[cpuMonActive].decreaseStat("DEF");
-                System.out.println(cpuMons[cpuMonActive].name + "'s DEF fell!");
-                wair(s, 1);
-                break;
-        }
+        specialMoveHandler(cpuMons[cpuMonActive], playerMons[playerMonActive], moveSelec, getSmackedBich, false);
     }
 
     public void statusAilmentsHandler() throws IOException, InterruptedException {
@@ -1927,140 +1654,80 @@ public class TheBattle {
         boolean playerFirst = whoGoesFirst();
 
         if (playerFirst) {
-            statusAilmentsPlayer();
-            statusAilmentsCPU();
+			statusAilments(playerMons[playerMonActive], plyCanFreeFromAilment);
+			statusAilments(cpuMons[cpuMonActive], cpuCanFreeFromAilment);
         } else {
-            statusAilmentsCPU();
-            statusAilmentsPlayer();
+            statusAilments(cpuMons[cpuMonActive], cpuCanFreeFromAilment);
+            statusAilments(playerMons[playerMonActive], plyCanFreeFromAilment);
         }
     }
-
-    public void statusAilmentsPlayer() throws IOException, InterruptedException {
-        //------playerer
-        if (playerMons[playerMonActive].currentHP != 0) {
-            if (playerMons[playerMonActive].healingOverTime && playerMons[playerMonActive].currentHP != playerMons[playerMonActive].baseHP) {
+	
+	public void statusAilments(Pokemon statusMon, boolean[] canFreeFromAilment)throws IOException, InterruptedException{
+		//statusMon is the pokemon to recieve the status effeks
+		
+		if (!statusMon.isDed()) {
+            if (statusMon.healingOverTime && !statusMon.isAtMaxHP()) {
                 bufferedClear();
                 printBattleHUDThing();
-                System.out.println(playerMons[playerMonActive].name + " recovered health!");
+                System.out.println(statusMon.name + " recovered health!");
                 wair(s, 1);
                 bufferedClear();
-                playerMons[playerMonActive].healOverTime();
+                statusMon.healOverTime();
                 printBattleHUDThing();
-                System.out.println(playerMons[playerMonActive].name + " recovered health!");
-                wair(s, 1);
-            }
-            if (playerMons[playerMonActive].isBurning) {
-                bufferedClear();
-                printBattleHUDThing();
-                System.out.println(playerMons[playerMonActive].name + " is burning up!");
-                wair(s, 1);
-                bufferedClear();
-                playerMons[playerMonActive].aukBurning();
-                printBattleHUDThing();
-                System.out.println(playerMons[playerMonActive].name + " is burning up!");
+                System.out.println(statusMon.name + " recovered health!");
                 wair(s, 1);
             }
-            if (playerMons[playerMonActive].isPoisoned) {
+            if (statusMon.isBurning) {
                 bufferedClear();
                 printBattleHUDThing();
-                System.out.println(playerMons[playerMonActive].name + " is hurt by poison!");
+                System.out.println(statusMon.name + " is burning up!");
                 wair(s, 1);
                 bufferedClear();
-                playerMons[playerMonActive].aukPoisoned();
+                statusMon.aukBurning();
                 printBattleHUDThing();
-                System.out.println(playerMons[playerMonActive].name + " is hurt by poison!");
+                System.out.println(statusMon.name + " is burning up!");
+                wair(s, 1);
+            }
+            if (statusMon.isPoisoned) {
+                bufferedClear();
+                printBattleHUDThing();
+                System.out.println(statusMon.name + " is hurt by poison!");
+                wair(s, 1);
+                bufferedClear();
+                statusMon.aukPoisoned();
+                printBattleHUDThing();
+                System.out.println(statusMon.name + " is hurt by poison!");
                 wair(s, 1);
             }
         } else {
-            playerMons[playerMonActive].resetStats();
+            statusMon.resetStats();
         }
+		
         // try to free from status ailment
-        if ((playerMons[playerMonActive].isBurning && !playerMons[playerMonActive].permaBurn) && plyCanFreeFromAilment[0]) {
-            if (rng.nextInt(10) > 6) {
-                playerMons[playerMonActive].isBurning = false;
-                System.out.println(playerMons[playerMonActive].name + " freed from burn!");
-                wair(s, 2);
-            }
-        }
-        if (playerMons[playerMonActive].isPoisoned && plyCanFreeFromAilment[1]) {
-            if (rng.nextInt(10) > 6) {
-                playerMons[playerMonActive].isPoisoned = false;
-                System.out.println(playerMons[playerMonActive].name + " cured itself from poison!");
-                wair(s, 2);
-            }
-        }
-        if (playerMons[playerMonActive].isParalized && plyCanFreeFromAilment[2]) {
-            if (rng.nextInt(10) > 5) {
-                playerMons[playerMonActive].isParalized = false;
-                System.out.println(playerMons[playerMonActive].name + " freed from paralysis!");
-                wair(s, 2);
-            }
-        }
-    }
-
-    public void statusAilmentsCPU() throws IOException, InterruptedException {
-        //--------cpu
-        if (cpuMons[cpuMonActive].currentHP != 0) {
-            if (cpuMons[cpuMonActive].healingOverTime && cpuMons[cpuMonActive].currentHP != cpuMons[cpuMonActive].baseHP) {
-                bufferedClear();
-                printBattleHUDThing();
-                System.out.println(cpuMons[cpuMonActive].name + " recovered health!");
-                wair(s, 1);
-                bufferedClear();
-                cpuMons[cpuMonActive].healOverTime();
-                printBattleHUDThing();
-                System.out.println(cpuMons[cpuMonActive].name + " recovered health!");
-                wair(s, 1);
-            }
-            if (cpuMons[cpuMonActive].isBurning) {
-                bufferedClear();
-                printBattleHUDThing();
-                System.out.println(cpuMons[cpuMonActive].name + " is burning up!");
-                wair(s, 1);
-                bufferedClear();
-                cpuMons[cpuMonActive].aukBurning();
-                printBattleHUDThing();
-                System.out.println(cpuMons[cpuMonActive].name + " is burning up!");
-                wair(s, 1);
-            }
-            if (cpuMons[cpuMonActive].isPoisoned) {
-                bufferedClear();
-                printBattleHUDThing();
-                System.out.println(cpuMons[cpuMonActive].name + " is hurt by poison!");
-                wair(s, 1);
-                bufferedClear();
-                cpuMons[cpuMonActive].aukPoisoned();
-                printBattleHUDThing();
-                System.out.println(cpuMons[cpuMonActive].name + " is hurt by poison!");
-                wair(s, 1);
-            }
-        } else {
-            cpuMons[cpuMonActive].resetStats();
-        }
-
-        // try to free from status ailment
-        if ((cpuMons[cpuMonActive].isBurning && !cpuMons[cpuMonActive].permaBurn) && cpuCanFreeFromAilment[0]) {
-            if (rng.nextInt(10) > 7) {
-                cpuMons[cpuMonActive].isBurning = false;
-                System.out.println(cpuMons[cpuMonActive].name + " freed from burn!");
-                wair(s, 2);
-            }
-        }
-        if (cpuMons[cpuMonActive].isPoisoned && cpuCanFreeFromAilment[1]) {
-            if (rng.nextInt(10) > 7) {
-                cpuMons[cpuMonActive].isPoisoned = false;
-                System.out.println(cpuMons[cpuMonActive].name + " cured itself from poison!");
-                wair(s, 2);
-            }
-        }
-        if (cpuMons[cpuMonActive].isParalized && cpuCanFreeFromAilment[2]) {
-            if (rng.nextInt(10) > 6) {
-                cpuMons[cpuMonActive].isParalized = false;
-                System.out.println(cpuMons[cpuMonActive].name + " freed from paralysis!");
-                wair(s, 2);
-            }
-        }
-    }
+		if (!statusMon.isDed()) {
+			if ((statusMon.isBurning && !statusMon.permaBurn) && canFreeFromAilment[0]) {
+				if (rng.nextInt(10) > 6) {
+					statusMon.isBurning = false;
+					System.out.println(statusMon.name + " freed from burn!");
+					wair(s, 2);
+				}
+			}
+			if (statusMon.isPoisoned && canFreeFromAilment[1]) {
+				if (rng.nextInt(10) > 6) {
+					statusMon.isPoisoned = false;
+					System.out.println(statusMon.name + " cured itself from poison!");
+					wair(s, 2);
+				}
+			}
+			if (statusMon.isParalized && canFreeFromAilment[2]) {
+				if (rng.nextInt(10) > 5) {
+					statusMon.isParalized = false;
+					System.out.println(statusMon.name + " freed from paralysis!");
+					wair(s, 2);
+				}
+			}
+		}
+	}
 
     public void playerMegaEvolveSequence() throws IOException, InterruptedException {
         for (int i = 0; i < playerMons[playerMonActive].items.length; i++) {

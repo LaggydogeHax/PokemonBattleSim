@@ -115,6 +115,14 @@ class Pokemon{
 		
 		return 0;
 	}
+	
+	protected boolean isDed(){
+		return (this.currentHP < 1);
+	}
+	
+	protected boolean isAtMaxHP(){
+		return (this.currentHP == this.baseHP);
+	}
 
 	protected boolean isOfType(String typ){
 		if(this.type.equals(typ)){

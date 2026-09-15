@@ -23,9 +23,8 @@ class AbilityFactory{
 			case "Mewtwo":
 				
 			break;
-			case "Gengar":
+			case "Gengar": return new Ability_Levitate(nam);
 				
-			break;
 			case "Dragonite": return new Ability_Levitate(nam);
 				
 			case "Absol": return new Ability_SuperLuck(nam);
@@ -46,24 +45,20 @@ class AbilityFactory{
 			case "Golisopod":
 				
 			break;
-			case "Heracross":
+			case "Heracross": return new Ability_Moxie(nam);
 				
-			break;
 			case "Rampardos":
 				
 			break;
 			case "Lycanroc":
 				
 			break;
-			case "Aurorus":
+			case "Aurorus": return new Ability_Refrigerate(nam);
 				
-			break;
-			case "Dugtrio":
+			case "Dugtrio": return new Ability_SandRush(nam);
 				
-			break;
-			case "Sandlash":
+			case "Sandlash": return new Ability_SandRush(nam);
 				
-			break;
 			case "Arbok":
 				
 			break;
@@ -72,9 +67,8 @@ class AbilityFactory{
 			case "Pidgeot":
 				
 			break;
-			case "Lugia":
+			case "Lugia": return new Ability_Multiscale(nam);
 				
-			break;
 			case "Urshifu":
 				
 			break;
@@ -150,12 +144,10 @@ class AbilityFactory{
 			case "Florges":
 				
 			break;
-			case "Lopunny":
+			case "Lopunny": return new Ability_Limber(nam);
 				
-			break;
-			case "Cinccino":
+			case "Cinccino": return new Ability_Guts(nam);
 				
-			break;
 			case "Hawlucha":
 				
 			break;
@@ -228,9 +220,8 @@ class AbilityFactory{
 			break;
 			case "Umbreon": return new Ability_Synchronize(nam);
 				
-			case "Jolteon":
+			case "Jolteon": return new Ability_QuickFeet(nam);
 				
-			break;
 			case "Espeon":
 				
 			break;
@@ -330,6 +321,7 @@ class AbilityFactory{
 
 //this is practically a skeleton
 class Ability{
+	Pokemon me;
 	String name="";
 	
 	public Ability(){
@@ -382,7 +374,7 @@ class Ability{
 }
 
 class Ability_Pixilate extends Ability {
-	Pokemon me;
+	
 	
 	public Ability_Pixilate(Pokemon me) {
 		this.me = me;
@@ -406,7 +398,6 @@ class Ability_Pixilate extends Ability {
 }
 
 class Ability_SuperLuck extends Ability{
-	Pokemon me;
 	
 	public Ability_SuperLuck(Pokemon me) {
 		this.me = me;
@@ -425,7 +416,6 @@ class Ability_SuperLuck extends Ability{
 }
 
 class Ability_Protean extends Ability {
-	Pokemon me;
 	
 	public Ability_Protean(Pokemon me) {
 		this.me = me;
@@ -458,7 +448,6 @@ class Ability_Protean extends Ability {
 }
 
 class Ability_Justified extends Ability {
-	Pokemon me;
 	
 	public Ability_Justified(Pokemon me) {
 		this.me = me;
@@ -474,7 +463,6 @@ class Ability_Justified extends Ability {
 }
 
 class Ability_Overgrow extends Ability{
-	Pokemon me;
 	
 	public Ability_Overgrow(Pokemon me){
 		this.me = me;
@@ -497,7 +485,6 @@ class Ability_Overgrow extends Ability{
 }
 
 class Ability_Blaze extends Ability{
-	Pokemon me;
 	
 	public Ability_Blaze(Pokemon me){
 		this.me = me;
@@ -520,7 +507,6 @@ class Ability_Blaze extends Ability{
 }
 
 class Ability_Torrent extends Ability{
-	Pokemon me;
 	
 	public Ability_Torrent(Pokemon me){
 		this.me = me;
@@ -543,7 +529,6 @@ class Ability_Torrent extends Ability{
 }
 
 class Ability_FlashFire extends Ability{
-	Pokemon me;
 	
 	public Ability_FlashFire(Pokemon me){
 		this.me = me;
@@ -576,7 +561,6 @@ class Ability_FlashFire extends Ability{
 }
 
 class Ability_Competitive extends Ability{
-	Pokemon me;
 	
 	public Ability_Competitive(Pokemon me){
 		this.me = me;
@@ -595,7 +579,6 @@ class Ability_Competitive extends Ability{
 }
 
 class Ability_LightningRod extends Ability {
-	Pokemon me;
 	
 	public Ability_LightningRod(Pokemon me){
 		this.me = me;
@@ -620,7 +603,6 @@ class Ability_LightningRod extends Ability {
 }
 
 class Ability_Trace extends Ability{
-	Pokemon me;
 	
 	public Ability_Trace(Pokemon me){
 		this.me = me;
@@ -637,7 +619,6 @@ class Ability_Trace extends Ability{
 }
 
 class Ability_IceBody extends Ability{
-	Pokemon me;
 	
 	public Ability_IceBody(Pokemon me){
 		this.me = me;
@@ -654,7 +635,6 @@ class Ability_IceBody extends Ability{
 
 
 class Ability_Guts extends Ability{
-	Pokemon me;
 	
 	public Ability_Guts(Pokemon me){
 		this.me = me;
@@ -679,7 +659,6 @@ class Ability_Guts extends Ability{
 }
 
 class Ability_Levitate extends Ability{
-	Pokemon me;
 	
 	public Ability_Levitate(Pokemon me){
 		this.me = me;
@@ -704,7 +683,6 @@ class Ability_Levitate extends Ability{
 }
 
 class Ability_SpeedBoost extends Ability{
-	Pokemon me;
 	
 	public Ability_SpeedBoost(Pokemon me){
 		this.me = me;
@@ -718,7 +696,6 @@ class Ability_SpeedBoost extends Ability{
 }
 
 class Ability_WaterAbsorb extends Ability{
-	Pokemon me;
 	
 	public Ability_WaterAbsorb(Pokemon me){
 		this.me = me;
@@ -734,7 +711,6 @@ class Ability_WaterAbsorb extends Ability{
 }
 
 class Ability_Synchronize extends Ability{
-	Pokemon me;
 	
 	public Ability_Synchronize(Pokemon me){
 		this.me = me;
@@ -758,7 +734,6 @@ class Ability_Synchronize extends Ability{
 }
 
 class Ability_Unburden extends Ability{
-	Pokemon me;
 	
 	public Ability_Unburden(Pokemon me){
 		this.me = me;
@@ -779,3 +754,135 @@ class Ability_Unburden extends Ability{
 		}
 	}
 }
+
+class Ability_Moxie extends Ability {
+	
+	public Ability_Moxie(Pokemon me){
+		this.me = me;
+		this.name = "Moxie";
+	}
+	
+	@Override
+	public void trigger_endOfTurn(Pokemon enemyMon, int moveSelec){
+		if(enemyMon.currentHP < 1){
+			this.me.raiseStat("ATK");
+			this.me.raiseStat("ATK");
+		}
+	}
+}
+
+class Ability_Refrigerate extends Ability {
+	
+	public Ability_Refrigerate(Pokemon me){
+		this.me = me;
+		this.name = "Refrigerate";
+	}
+	
+	@Override
+	public void trigger_beforeMove(int moveSelec){
+		if(this.me.moveset[1][moveSelec].contains("Normal")){
+			this.me.raiseStat("ATK");
+		}
+	}
+	
+	@Override
+	public void trigger_endOfTurn(Pokemon enemyMon, int moveSelec){
+		if(this.me.moveset[1][moveSelec].contains("Normal")){
+			this.me.decreaseStat("ATK");
+			this.me.moveset[1][moveSelec] = "Ice Attack";
+		}
+	}
+}
+
+class Ability_SandRush extends Ability {
+	
+	public Ability_SandRush(Pokemon me){
+		this.me = me;
+		this.name = "Sand Rush";
+	}
+	
+	@Override
+	public void trigger_startOfTurn(){
+		if(this.me.hasStatusAilment()){
+			this.me.currentSPEED *= 2;
+		}
+	}
+	
+	@Override
+	public void trigger_endOfTurn(){
+		if(this.me.hasStatusAilment()){
+			this.me.currentSPEED /= 2;
+		}
+	}
+	
+}
+
+class Ability_Multiscale extends Ability{
+	private boolean gothit = false;
+	
+	public Ability_Multiscale(Pokemon me){
+		this.me = me;
+		this.name = "Multiscale";
+	}
+	
+	@Override
+	public void trigger_beforeGettingHit(){
+		if(this.me.isAtMaxHP()){
+			gothit = true;
+			this.me.raiseStat("DEF");
+			this.me.raiseStat("DEF");
+		}
+	}
+	
+	@Override
+	public void trigger_afterGettingHit(){
+		if(gothit){
+			gothit = false;
+			this.me.decreaseStat("DEF");
+			this.me.decreaseStat("DEF");
+		}
+	}
+}
+
+class Ability_Limber extends Ability {
+	
+	public Ability_Limber(Pokemon nam){
+		this.me = nam;
+		this.name = "Limber";
+	}
+	
+	@Override
+	public void trigger_endOfTurn(){
+		if(this.me.isParalized){
+			this.me.isParalized = false;
+		}
+	}
+}
+
+class Ability_QuickFeet extends Ability {
+	private boolean triggerd = false;
+	
+	public Ability_QuickFeet(Pokemon nam){
+		this.me = nam;
+		this.name = "Quick Feet";
+	}
+	
+	@Override
+	public void trigger_startOfTurn(){
+		if(this.me.hasStatusAilment()){
+			triggerd = true;
+			this.me.raiseStat("SPEED");
+			this.me.raiseStat("SPEED");
+		}
+	}
+	
+	@Override
+	public void trigger_endOfTurn(){
+		if(triggerd){
+			triggerd = false;
+			this.me.decreaseStat("SPEED");
+			this.me.decreaseStat("SPEED");
+		}
+	}
+}
+
