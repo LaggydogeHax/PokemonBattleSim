@@ -26,11 +26,16 @@ class Pokemon{
 		"Dragon"=15,  "Dark"=16,    "Fairy"=17
 	*/
 
-	protected boolean resistsType(String typ){
+	/**
+	 * 
+	 * @param type the Pokemon.type to check, also accepts move types
+	 * @return Boolean
+	 */
+	protected boolean resistsType(String type){
 		String[] vec = PokemonMaker3000.getTypesVector();
 
 		for (int i=0;i<vec.length;i++){
-			if(typ.contains(vec[i])){
+			if(type.contains(vec[i])){
 				if(this.weakToMults[i]<0){
 					return true;
 				}
@@ -164,8 +169,23 @@ class Pokemon{
 		this.extraDmg=0;
 	}
 	
-	protected void resetAbility(){
+	public void resetAbility(){
 		this.ability = AbilityFactory.create(this);
+	}
+	
+	public void resetItems(){
+		items = new String[]{"Potion","X-Attack","X-Defense","X-Speed","",
+			"Dash Earring","Strike Earrings","Energy Drink",""};
+		//fifth slot is for pokemon that can mega-evolve
+		//nineth slot is for arceus' plates, it is set in its constructor
+		
+		if(this.canMegaEvolve()){
+			items[4]="Mega Stone";
+		}
+		
+		if(this.ability instanceof Ability_Multitype){ //gives arceus' plates item
+			this.ability = new Ability_Multitype(this);
+		}
 	}
 
 	protected void raiseStat(String stat){
@@ -278,7 +298,7 @@ class Pokemon{
 			"Aggron","Blaziken","Gengar","Lucario", "Cinccino", "Audino","Alakazam","Pidgeot", "Heracross",
 			"Gardevoir","Mawile","Sceptile","Eevee","Citrus","Gyarados","Garchomp","Zamazenta","Zacian","Gallade",
 			"Diance","Yanmega","Lapras","Togekiss","Weavile","Zygarde","Hawlucha","Baxcalibur","Delphox","Greninja",
-			"Chandelure","Aurorus"
+			"Chandelure","Aurorus","Sandslash"
 		};
 
 		for(int i=0;i<list.length;i++){
@@ -528,6 +548,21 @@ class Pokemon{
 				addAtk=10;
 				this.type2="Steel"; // xd
 			break;
+			case "Sandslash": //guess what made me realize that the name had a typo since day 1
+				this.type = "Ice";
+				addDef = 15;
+				addAtk = 40;
+				addSpeed = -15;
+				
+				this.moveset[0][0] = "Triple Axel";
+				this.moveset[0][3] = "Sword Dance";
+				break;
+			case "Golisopod":
+				addAtk=35;
+				addDef=10;
+				
+				this.moveset[0][0] = "X-Scissor";
+				break;
 			case "Eevee": //eevee must go last in the switch statement o.o
 				String listVee[] = new String[]{"Vaporeon","Jolteon","Flareon","Espeon","Umbreon","Leafeon","Glaceon","Sylveon"};
 				Random rng = new Random(); 
@@ -552,6 +587,7 @@ class Pokemon{
 				this.setTypesWnR();
 				this.moveset=newVeeVee.moveset;
 				this.name=newVeeVee.name;
+				this.ability = AbilityFactory.create(this);
 				
 				if(this.currentATK<20){
 					this.currentATK=20;
@@ -601,9 +637,7 @@ class Pokemon{
 				return;
 			}
 			
-			for(int i=5;i<this.name.length();i++){
-				nam+=this.name.charAt(i);
-			}
+			this.name = nam.substring(5);
 			
 			//reset stats from base
 			this.baseHP=ref.baseHP;
@@ -1035,14 +1069,29 @@ class Pokemon{
 		energyDrink=false; //+1 move per turn
 		this.defineAllMoves();
 		
-		items= new String[]{"Potion","X-Attack","X-Defense","X-Speed","","Dash Earring","Strike Earrings","Energy Drink"};
-		if(this.canMegaEvolve()){
-			items[4]="Mega Stone";
-		}
+		this.resetItems();
 		
 		this.resetAbility();
 		
 	}//class Pokemon constructor ends
+	
+	public void setType(String type, String type2){
+		this.type = type;
+		this.type2 = type2;
+
+		this.setTypesWnR();
+		if (this.energyDrink) {
+			this.resists = new String[]{"Nothing!"};
+		}
+	}
+	
+	/**
+	 * 
+	 * @param type type1 to set, type2 will be erased if this Pokemon had one
+	 */
+	public void setType(String type){
+		this.setType(type, "");
+	}
 	
 	protected String[] getListOfWnR(String typ, int returntype){
 		String[] weakTo = new String[1];
