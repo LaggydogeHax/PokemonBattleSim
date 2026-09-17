@@ -891,7 +891,7 @@ public class PokemonBattleSim {
                 cout.write(", ");
             }
         }
-        cout.write("\n\n");
+        cout.write("\n");
 
         cout.write("Resists: ");
 
@@ -901,7 +901,6 @@ public class PokemonBattleSim {
                 cout.write(", ");
             }
         }
-        cout.write("\n");
         cout.write("\n");
         
         cout.write("Moveset: "+"\n");
