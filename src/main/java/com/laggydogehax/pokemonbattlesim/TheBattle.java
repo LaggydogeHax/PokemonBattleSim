@@ -39,7 +39,7 @@ public class TheBattle {
                         p1SkipTurn = battleItemsHandler(selecItem);
                         if (p1SkipTurn) {
                             break;
-                        } else { //will mega evolve :)
+                        }else if (playerMons[playerMonActive].canMegaEvolve()){
                             plyWillMegaEvolve = true;
                         }
                     }
@@ -1893,6 +1893,38 @@ public class TheBattle {
                 System.out.println(playerMons[playerMonActive].name + " can use 2 moves per turn!");
                 wair(s, 2);
                 break;
+			case "Arceus' Plates":{
+				if(playerMons[playerMonActive].ability instanceof Ability_Multitype){
+					
+					int selectedPlate = printSelecPlateItem();
+					
+					if(selectedPlate != 69){
+
+						String[] plateNames = {"Flame", "Splash", "Meadow", "Blank", "Fist",
+									"Sky", "Toxic", "Earth", "Stone", "Insect", "Spooky", "Iron",
+									"Zap", "Mind", "Icicle", "Draco", "Dread", "Pixie"};
+						String[] typesVector = PokemonMaker3000.getTypesVector();
+						
+						bufferedClear();
+						printBattleHUDThing();
+						System.out.println("You gave "+playerMons[playerMonActive].name+ " a "+ plateNames[selectedPlate]+ " plate!");
+						wair(s, 1);
+						System.out.println(playerMons[playerMonActive].name+" changed into the "
+							+ typesVector[selectedPlate]
+							+ " type!");
+						wair(s, 2);
+						
+						playerMons[playerMonActive].setType(typesVector[selectedPlate]);
+						playerMons[playerMonActive].disableAllItems();
+					}
+
+				}else{
+					System.out.println("Something went wrong!!!");
+					wair(s, 2);
+				}
+				
+				return false;
+			}
             case "Mega Stone":
                 if (plyCanMegaEvolve) {
                     if (playerMons[playerMonActive].name.equals("Eevee")) {
@@ -2138,6 +2170,77 @@ public class TheBattle {
         selec--;
         return selec;
     }
+	
+	public int printSelecPlateItem() throws IOException, InterruptedException {
+		//the order of the plates here are the same as in the typesVector for easier handling
+		String[] plateNames = {"Flame", "Splash", "Meadow", "Blank", "Fist",
+			"Sky", "Toxic", "Earth", "Stone", "Insect", "Spooky", "Iron",
+			"Zap", "Mind", "Icicle", "Draco", "Dread", "Pixie"};
+
+		for(int i=0; i < plateNames.length ; i++ ){
+			plateNames[i] += " Plate"; 
+		}
+		
+		String[] typesVector = PokemonMaker3000.getTypesVector();
+		Clr[] colors = new Clr[typesVector.length];
+		
+		for (int i = 0; i < typesVector.length; i++){
+			colors[i] = Color.getBrightColorFromString(typesVector[i]);
+		}
+
+        bufferedClear();
+        printBattleHUDThing();
+        cout.write("Select a plate to use"+"\n");
+		cout.write("────────────────────────┬───────────────────────\n");
+		
+        
+        int coumter = 0;
+		for (int i = 0; i < plateNames.length; i++) {
+			if (coumter < 2) {
+				cout.write("[" + (i + 1) + "] " + colors[i] +plateNames[i] + Clr.R);
+				for (int j = 0; j < 19 - (plateNames[i].length()); j++) {
+					cout.write(" ");
+				}
+				if(i<9){
+					cout.write(" ");
+				}
+				coumter++;
+				if (coumter < 2) {
+					cout.write("│ ");
+				}
+			} else {
+				coumter = 0;
+				cout.write("\n");
+				i--;
+			}
+
+		}
+        cout.write("\n");
+        cout.write("[c]: Cancel"+"\n");
+		cout.flush();
+        int selec = 0;
+        String selecSt = "";
+		
+        do {
+            try {
+                selecSt = tcl.nextLine();
+                if (selecSt.equals("c")) {
+                    return 69;
+                }
+                selec = Integer.parseInt(selecSt);
+            } catch (NumberFormatException e) {
+                selec = 0;
+                selecSt = "";
+                tcl.nextLine();
+            }
+            if (selec > plateNames.length || selec < 1) {
+                selec = 0;
+            }
+        } while (selec < 1);
+
+        selec--;
+        return selec;
+    }
 
     public void printBattleMenuOptions() throws IOException {
         //System.out.println("Your active Pokemon:       CPU's active Pokemon:");
@@ -2361,13 +2464,15 @@ public class TheBattle {
             printMoveInfo();
             return;
         }
-        clear();
+        bufferedClear();
         if (input == 1) {
             tempPkmn = playerMons[playerMonActive];
-            System.out.println("Your current Pokemon:");
+            cout.write("Your current Pokemon:");
+			cout.write("\n");
         } else {
             tempPkmn = cpuMons[cpuMonActive];
-            System.out.println(cpuName + "'s current Pokemon:");
+            cout.write(cpuName + "'s current Pokemon:");
+			cout.write("\n");
         }
 
         //shows reduction percentage
@@ -2400,40 +2505,45 @@ public class TheBattle {
             typ2 = "/" + Color.getColorFromString(tempPkmn.type2) + tempPkmn.type2 + Clr.R;
         }
 
-        System.out.println("The Pokemon's stats are reset when switching out \n");//<-- C++ reference!?? //<-- huh?
-        System.out.println("Name:    " + tempPkmn.name);
-        System.out.println("Type:    " + typ1 + typ2);
-        System.out.println("Ability: " + tempPkmn.ability.name);
-        System.out.println("HP:      " + tempPkmn.currentHP + "/" + tempPkmn.baseHP);
-        System.out.println("Attack:  " + tempPkmn.currentATK + "/" + tempPkmn.baseATK);
-        System.out.println("Defense: " + tempPkmn.currentDEF + "/" + tempPkmn.baseDEF + " (" + perc + "% reduction)");
-        System.out.println("Speed:   " + tempPkmn.currentSPEED + "/" + tempPkmn.baseSPEED + " (" + cperc + "% crit. chance)");
-        System.out.print("Weak to: ");
+        cout.write("The Pokemon's stats are reset when switching out \n"); cout.write("\n");
+        cout.write("Name:    " + tempPkmn.name); cout.write("\n");
+        cout.write("Type:    " + typ1 + typ2); cout.write("\n");
+        cout.write("Ability: " + tempPkmn.ability.name); cout.write("\n");
+        cout.write("HP:      " + tempPkmn.currentHP + "/" + tempPkmn.baseHP); cout.write("\n");
+        cout.write("Attack:  " + tempPkmn.currentATK + "/" + tempPkmn.baseATK); cout.write("\n");
+        cout.write("Defense: " + tempPkmn.currentDEF + "/" + tempPkmn.baseDEF + " (" + perc + "% reduction)"); cout.write("\n");
+        cout.write("Speed:   " + tempPkmn.currentSPEED + "/" + tempPkmn.baseSPEED + " (" + cperc + "% crit. chance)"); cout.write("\n");
+        cout.write("Weak to: ");
 
         for (int i = 0; i < tempPkmn.weakTo.length; i++) {
-            System.out.print(Color.getColorFromString(tempPkmn.weakTo[i]) + tempPkmn.weakTo[i] + Clr.R);
+            cout.write(Color.getColorFromString(tempPkmn.weakTo[i]) + tempPkmn.weakTo[i] + Clr.R);
             if (i != tempPkmn.weakTo.length - 1) {
-                System.out.print(", ");
+                cout.write(", ");
             }
         }
-        System.out.println("");
+        cout.write("\n");
+        cout.write("\n");
 
-        System.out.print("Resists: ");
+        cout.write("Resists: ");
 
         for (int i = 0; i < tempPkmn.resists.length; i++) {
-            System.out.print(Color.getColorFromString(tempPkmn.resists[i]) + tempPkmn.resists[i] + Clr.R);
+            cout.write(Color.getColorFromString(tempPkmn.resists[i]) + tempPkmn.resists[i] + Clr.R);
             if (i != tempPkmn.resists.length - 1) {
-                System.out.print(", ");
+                cout.write(", ");
             }
         }
-        System.out.println("");
+        cout.write("\n");
+        cout.write("\n");
 
-        System.out.println("Moveset: ");
+        cout.write("Moveset: ");
+		cout.write("\n");
         for (int i = 0; i < tempPkmn.moveset[0].length; i++) {
-            System.out.println("        " + (i + 1) + ": " + tempPkmn.moveset[0][i] + " (" + Color.getBrightColorFromMoveType(tempPkmn, i) + tempPkmn.moveset[1][i] + Clr.R + ")");
-        }
-        System.out.println("");
-        System.out.println("Press Enter to go back");
+            cout.write("        " + (i + 1) + ": " + tempPkmn.moveset[0][i] + " (" + Color.getBrightColorFromMoveType(tempPkmn, i) + tempPkmn.moveset[1][i] + Clr.R + ")");
+			cout.write("\n");
+		}
+        cout.write("\n");
+        cout.write("Press Enter to go back"); cout.write("\n");
+		cout.flush();
         tcl.nextLine();
         tcl.nextLine(); //java shenanigans
     }

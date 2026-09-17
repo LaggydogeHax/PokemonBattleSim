@@ -14,19 +14,20 @@ class PokemonMaker3000{
 	//funny class name
 	static final char s='s', m='m';
         
-	private static void printTypes(){
+	public static void printTypes(){
 		String[] typesVector=getTypesVector();
 		int coumter=0;
 		for(int i=0;i<typesVector.length;i++){
 			if(coumter<3){
-				System.out.print("["+(i+1)+"]"+typesVector[i]);
+				Clr typecolor = Color.getBrightColorFromString(typesVector[i]);
+				System.out.print("[" + (i + 1) + "] " + typecolor + typesVector[i] + Clr.R);
 				for(int j=0;j<8-typesVector[i].length();j++){
 					System.out.print(" ");
 				}
 				if(i<9){
 					System.out.print(" "); //ajdfjshdfjdskjfds
 				}
-				System.out.print("| ");
+				System.out.print("│ ");
 				coumter++;
 			}else{
 				System.out.println("");

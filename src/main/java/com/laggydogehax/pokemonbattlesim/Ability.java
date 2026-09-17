@@ -1,6 +1,6 @@
 package com.laggydogehax.pokemonbattlesim;
 
-class AbilityFactory{
+class AbilityFactory{	
 	public static Ability create(Pokemon nam){ //ENORMOUS SWITCH STATEMENT!!!!!!!!!!!!!!!
 		switch(nam.name){
 			default:
@@ -172,9 +172,8 @@ class AbilityFactory{
 			case "Scizor":
 				
 			break;
-			case "Mew":
+			case "Mew": return new Ability_Synchronize(nam);
 				
-			break;
 			case "Alakazam":
 				
 			break;
@@ -202,16 +201,14 @@ class AbilityFactory{
 			case "Gyarados":
 				
 			break;
-			case "Sceptile":
+			case "Sceptile": return new Ability_Unburden(nam);
 				
-			break;
 			case "Typhlosion": return new Ability_FlashFire(nam);
 				
 			case "Greninja": return new Ability_Protean(nam);
 
 			case "Leafeon":
 				
-			break;
 			case "Donphan":
 				
 			break;
@@ -228,9 +225,8 @@ class AbilityFactory{
 			case "Eevee":
 				
 			break;
-			case "Arceus":
+			case "Arceus": return new Ability_Multitype(nam);
 				
-			break;
 			case "Citrus":
 				
 			break;
@@ -436,13 +432,8 @@ class Ability_Protean extends Ability {
 				}
 			}
 
-			me.type = typeToUse;
-			me.type2 = "";
-
-			me.setTypesWnR();
-			if (me.energyDrink) {
-				me.resists = new String[]{"Nothing!"};
-			}
+			me.setType(typeToUse);
+			
 		}
 	}
 }
@@ -886,3 +877,28 @@ class Ability_QuickFeet extends Ability {
 	}
 }
 
+class Ability_Multitype extends Ability {
+	
+	public Ability_Multitype(Pokemon me){
+		this.me = me;
+		this.name = "Multitype";
+		
+		if(me.items.length > 1){
+			me.items[8] = "Arceus' Plates";
+		}
+	}
+	//basically this just gives STAB to Judgement no matter what type Arceus is
+	@Override
+	public void trigger_beforeMove() {
+		for (int i = 0; i < 4; i++) {
+			if (me.moveset[1][i].equals("Normal Attack")) {
+				me.moveset[1][i] = me.type+" Attack";
+			}
+		}
+	}
+	
+	@Override
+	public void trigger_endOfTurn(){
+		me.defineAllMoves();
+	}
+}

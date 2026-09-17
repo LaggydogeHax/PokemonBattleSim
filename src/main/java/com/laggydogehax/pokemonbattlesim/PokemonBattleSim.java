@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 public class PokemonBattleSim {
 
     static final String OsName = System.getProperty("os.name");
-    static final String version = "beta5 dev20";
+    static final String version = "beta5 dev21";
     static final char s = 's', m = 'm';
 
     static boolean battleAnimations = true;
@@ -266,7 +266,7 @@ public class PokemonBattleSim {
                         wair(s, 2);
                     }
                     break;
-					case "Order Def":
+					case "Order Def", "Order Default":
 						orderOfNames="default";
 						pkmnNamesVector = orderPkmnNamesVector(getPkmnNamesVector());
 						break;
@@ -352,10 +352,10 @@ public class PokemonBattleSim {
 
         } while (!correctName || playerMons[(playerMons.length) - 1] == null);
 
-        //----------ASSIGN RANDOM POKEMON TO CPU------------//
-        for (int i = 0; i < cpuMons.length; i++) {
-            savePokemonInCPUTeam(pkmnNamesVector[rng.nextInt(pkmnNamesVector.length)]);
-        }
+		//----------ASSIGN RANDOM POKEMON TO CPU------------//
+		for (Pokemon i : cpuMons) {
+			savePokemonInCPUTeam(pkmnNamesVector[rng.nextInt(pkmnNamesVector.length)]);
+		}
 
         //-----------SHOW PLAYER AND CPU TEAMS------------//
         clear();
@@ -828,16 +828,16 @@ public class PokemonBattleSim {
 	
 	public static void printSelectedMonInfo(String selecshon) throws IOException, InterruptedException {
         clear();
-        System.out.println("Selected Pokemon: ");
+        cout.write("Selected Pokemon: "+"\n");
 
         Pokemon tempPkmn = new Pokemon(selecshon);
         if (tempPkmn.name.equals("Missing No")) {
-            System.out.println("Name:    " + tempPkmn.name);
-            System.out.println("Type:    " + tempPkmn.type);
-            System.out.println("HP:      ???");
-            System.out.println("Attack:  ???");
-            System.out.println("Defense: ???");
-            System.out.println("Speed:   ???");
+            cout.write("Name:    " + tempPkmn.name+"\n");
+            cout.write("Type:    " + tempPkmn.type+"\n");
+            cout.write("HP:      ???"+"\n");
+            cout.write("Attack:  ???"+"\n");
+            cout.write("Defense: ???"+"\n");
+            cout.write("Speed:   ???"+"\n");
         } else {
 
             float reducPerc = 0;
@@ -873,44 +873,52 @@ public class PokemonBattleSim {
                 typ2 = "/" + Color.getColorFromString(tempPkmn.type2) + tempPkmn.type2 + Clr.R;
             }
 
-            System.out.println("The Pokemon's stats are reset when switching out \n");//<-- C++ reference!?? //<-- huh?
-            System.out.println("Name:    " + tempPkmn.name);
-            System.out.println("Type:    " + typ1 + typ2);
-            System.out.println("Ability: " + tempPkmn.ability.name);
-            System.out.println("HP:      " + tempPkmn.baseHP);
-            System.out.println("Attack:  " + tempPkmn.baseATK);
-            System.out.println("Defense: " + tempPkmn.baseDEF + " (" + perc + "% reduction)");
-            System.out.println("Speed:   " + tempPkmn.baseSPEED + " (" + cperc + "% crit. chance)");
+            cout.write("The Pokemon's stats are reset when switching out \n"+"\n");
+            cout.write("Name:    " + tempPkmn.name+"\n");
+            cout.write("Type:    " + typ1 + typ2+"\n");
+            cout.write("Ability: " + tempPkmn.ability.name+"\n");
+            cout.write("HP:      " + tempPkmn.baseHP+"\n");
+            cout.write("Attack:  " + tempPkmn.baseATK+"\n");
+            cout.write("Defense: " + tempPkmn.baseDEF + " (" + perc + "% reduction)"+"\n");
+            cout.write("Speed:   " + tempPkmn.baseSPEED + " (" + cperc + "% crit. chance)"+"\n");
         }
 
-        System.out.print("Weak to: ");
+        cout.write("Weak to: ");
 
         for (int i = 0; i < tempPkmn.weakTo.length; i++) {
-            System.out.print(Color.getColorFromString(tempPkmn.weakTo[i]) + tempPkmn.weakTo[i] + Clr.R);
+            cout.write(Color.getColorFromString(tempPkmn.weakTo[i]) + tempPkmn.weakTo[i] + Clr.R);
             if (i != tempPkmn.weakTo.length - 1) {
-                System.out.print(", ");
+                cout.write(", ");
             }
         }
-        System.out.println("");
+        cout.write("\n\n");
 
-        System.out.print("Resists: ");
+        cout.write("Resists: ");
 
         for (int i = 0; i < tempPkmn.resists.length; i++) {
-            System.out.print(Color.getColorFromString(tempPkmn.resists[i]) + tempPkmn.resists[i] + Clr.R);
+            cout.write(Color.getColorFromString(tempPkmn.resists[i]) + tempPkmn.resists[i] + Clr.R);
             if (i != tempPkmn.resists.length - 1) {
-                System.out.print(", ");
+                cout.write(", ");
             }
         }
-        System.out.println("");
-
-        System.out.println("Moveset: ");
-        for (int i = 0; i < 4; i++) {
-            System.out.println("        " + (i + 1) + ":" + tempPkmn.moveset[0][i] + " (" + Color.getBrightColorFromMoveType(tempPkmn, i) + tempPkmn.moveset[1][i] + Clr.R + ")");
-        }
-        System.out.println("");
+        cout.write("\n");
+        cout.write("\n");
+        
+        cout.write("Moveset: "+"\n");
+		for (int i = 0; i < 4; i++) {
+			cout.write("        "
+				+ (i + 1)
+				+ ":"
+				+ tempPkmn.moveset[0][i]
+				+ " (" + Color.getBrightColorFromMoveType(tempPkmn, i) + tempPkmn.moveset[1][i] + Clr.R + ")"
+				+ "\n");
+		}
+        cout.write("\n");
 
         int totalstats = tempPkmn.baseATK + tempPkmn.baseDEF + tempPkmn.baseHP + tempPkmn.baseSPEED;
-        System.out.println("Total stat points: " + totalstats);
+        cout.write("Total stat points: " + totalstats+"\n");
+		
+		cout.flush();
     }
 
     static void printMiscStats() {
@@ -1005,6 +1013,11 @@ public class PokemonBattleSim {
         return false;
     }
 
+	/**
+	 * compares the damage with the highest recorded number then saves it along with the name of the Pokemon
+	 * @param name the name of the Pokemon
+	 * @param damag the damage dealt to save
+	 */
     static public void saveHighestDmg(String name, int damag) {
         if (damag > highestDamage) {
             highestDamage = damag;
