@@ -2522,7 +2522,7 @@ public class TheBattle {
             }
         }
         cout.write("\n");
-        cout.write("\n");
+        
 
         cout.write("Resists: ");
 
@@ -2533,7 +2533,7 @@ public class TheBattle {
             }
         }
         cout.write("\n");
-        cout.write("\n");
+        
 
         cout.write("Moveset: ");
 		cout.write("\n");

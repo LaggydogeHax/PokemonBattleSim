@@ -298,7 +298,7 @@ class Pokemon{
 			"Aggron","Blaziken","Gengar","Lucario", "Cinccino", "Audino","Alakazam","Pidgeot", "Heracross",
 			"Gardevoir","Mawile","Sceptile","Eevee","Citrus","Gyarados","Garchomp","Zamazenta","Zacian","Gallade",
 			"Diance","Yanmega","Lapras","Togekiss","Weavile","Zygarde","Hawlucha","Baxcalibur","Delphox","Greninja",
-			"Chandelure","Aurorus","Sandslash"
+			"Chandelure","Aurorus","Sandslash","Golisopod"
 		};
 
 		for(int i=0;i<list.length;i++){
