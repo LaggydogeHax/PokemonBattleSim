@@ -125,6 +125,9 @@ class MoveCalcHandler {
             case "nihilLight":
                 this.nihilLight();
                 break;
+			case "staticstrike":
+				this.staticStrike();
+				break;
         }//special move switch ends
 	}
 
@@ -376,6 +379,13 @@ class MoveCalcHandler {
 		atk1 *= 3; //perfectly balanced
 		if (def2 > pkmn2.baseDEF) {
 			def2 = pkmn2.baseDEF;
+		}
+	}
+	
+	private void staticStrike(){
+		atk1 -= atk1/2;
+		if(pkmn2.isParalized){
+			nHits +=2;
 		}
 	}
 }
