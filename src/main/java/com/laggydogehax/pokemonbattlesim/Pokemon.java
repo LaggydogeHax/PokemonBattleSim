@@ -398,6 +398,7 @@ class Pokemon{
 				addSpeed=10;
 				this.type="Fairy";
 				this.moveset[0][1]="Moonblast";
+				this.moveset[0][3]="Last Resort";
 			break;
 			case "Alakazam":
 				addHP=10;
@@ -688,6 +689,8 @@ class Pokemon{
 			case "Electroweb": return "rngDebuffSpeed";
 			case "Muddy Water": return "rngDebuffSpeed";
 			case "Iron Head": return "rngDebuffSpeed";
+			case "Aura Sphere": return "rngDebuffSpeed";
+			case "Ice Beam": return "rngDebuffSpeed";
 			
 			//debuff enemy def at random
 			case "Crunch": return "rngDebuffDef";
@@ -698,6 +701,7 @@ class Pokemon{
 			case "Energy Ball": return "rngDebuffDef";
 			case "Focus Blast": return "rngDebuffDef";
 			case "Psychic": return "rngDebuffDef";
+			case "Rock Smash": return "rngDebuffDef";
 			
 			//debuff enemy atk at random
 			case "Play Rough": return "rngDebuffAtk";
@@ -850,6 +854,9 @@ class Pokemon{
 			case "Venoshock": return "critIfPoisoned";
 			
 			case "Hex": return "critIfEnemyHasStatusAil";
+			
+			//-50% atk, +2 hit if enemy paralyzed
+			case "StaticStrike": return "staticstrike";
 		}
 		
 		//----type only----//

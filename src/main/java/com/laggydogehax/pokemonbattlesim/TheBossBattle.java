@@ -701,6 +701,11 @@ public class TheBossBattle extends TheBattle{
                 case "plus2hit":
                     numbHits += 2;
                     break;
+				case "staticstrike":
+					if(enemyMon.isParalized){
+						numbHits +=2;
+					}
+					break;
                 case "plus3hit":
                     numbHits += 3;
                     break;

@@ -59,9 +59,8 @@ class AbilityFactory{
 				
 			case "Sandlash": return new Ability_SandRush(nam);
 				
-			case "Arbok":
+			case "Arbok": return new Ability_Intimidate(nam);
 				
-			break;
 			case "Sneasler": return new Ability_Unburden(nam);
 				
 			case "Pidgeot":
@@ -72,14 +71,12 @@ class AbilityFactory{
 			case "Urshifu":
 				
 			break;
-			case "Audino":
+			case "Audino": return new Ability_Regenerator(nam);
 				
-			break;
 			case "Tauros":
 				
 			break;
-			case "Sylveon":
-				return new Ability_Pixilate(nam);
+			case "Sylveon": return new Ability_Pixilate(nam);
 
 			case "Tinkaton":
 				
@@ -90,9 +87,8 @@ class AbilityFactory{
 			case "Dragapult":
 				
 			break;
-			case "Mawile":
+			case "Mawile": return new Ability_Intimidate(nam);
 				
-			break;
 			//--------wave 2 of pokemen--------//
 			case "Blaziken": return new Ability_SpeedBoost(nam);
 				
@@ -198,9 +194,8 @@ class AbilityFactory{
 			//-------- wave 3 ---------//
 			case "Delphox": return new Ability_Blaze(nam);
 				
-			case "Gyarados":
+			case "Gyarados": return new Ability_Intimidate(nam);
 				
-			break;
 			case "Sceptile": return new Ability_Unburden(nam);
 				
 			case "Typhlosion": return new Ability_FlashFire(nam);
@@ -245,9 +240,8 @@ class AbilityFactory{
 			case "Galvantula":
 				
 			break;
-			case "Ceruledge":
+			case "Ceruledge": return new Ability_WeakArmor(nam);
 				
-			break;
 			case "Chandelure":
 				
 			break;
@@ -319,10 +313,11 @@ class AbilityFactory{
 class Ability{
 	Pokemon me;
 	String name="";
+	String[] desc = new String[1];
 	
 	public Ability(){
 		this.name = "";
-		//this.defineTriggerTime();
+		this.desc[0] = "";
 	}
 	
 	
@@ -367,6 +362,18 @@ class Ability{
 		this.trigger_endOfTurn();
 	}
 	
+	public void trigger_switchedOut(){
+		
+	}
+	
+	public void trigger_switchedIn(){
+		
+	}
+	
+	public void trigger_switchedIn(Pokemon enemyMon){
+		this.trigger_switchedIn();
+	}
+	
 }
 
 class Ability_Pixilate extends Ability {
@@ -375,6 +382,8 @@ class Ability_Pixilate extends Ability {
 	public Ability_Pixilate(Pokemon me) {
 		this.me = me;
 		this.name="Pixilate";
+		this.desc= new String[]{"All Normal-type attacks from this Pokemon",
+		"are treated as if they were Fairy-type"};
 	}
 	
 	@Override
@@ -398,6 +407,7 @@ class Ability_SuperLuck extends Ability{
 	public Ability_SuperLuck(Pokemon me) {
 		this.me = me;
 		this.name="Super Luck";
+		this.desc= new String[]{"Critical hit chance is","x2 higher for this Pokemon."};
 	}
 	
 	@Override
@@ -416,6 +426,8 @@ class Ability_Protean extends Ability {
 	public Ability_Protean(Pokemon me) {
 		this.me = me;
 		this.name="Protean";
+		this.desc= new String[]{"Before the Pokemon uses a move,",
+			"it becomes a pure Pokemon of that type."};
 	}
 	
 	@Override
@@ -443,6 +455,8 @@ class Ability_Justified extends Ability {
 	public Ability_Justified(Pokemon me) {
 		this.me = me;
 		this.name="Justified";
+		this.desc = new String[]{"When this Pokemon gets hit by a",
+		"Dark-type move, its attack raises by 25%"};
 	}
 	
 	@Override
@@ -458,6 +472,8 @@ class Ability_Overgrow extends Ability{
 	public Ability_Overgrow(Pokemon me){
 		this.me = me;
 		this.name = "Overgrow";
+		this.desc = new String[]{"When HP is below 1/3rd its maximum,",
+			"the power of Grass-type moves is increased by 50%."};
 	}
 	
 	@Override
@@ -480,6 +496,8 @@ class Ability_Blaze extends Ability{
 	public Ability_Blaze(Pokemon me){
 		this.me = me;
 		this.name = "Blaze";
+		this.desc = new String[]{"When HP is below 1/3rd its maximum,",
+			"the power of Fire-type moves is increased by 50%."};
 	}
 	
 	@Override
@@ -502,6 +520,8 @@ class Ability_Torrent extends Ability{
 	public Ability_Torrent(Pokemon me){
 		this.me = me;
 		this.name = "Torrent";
+		this.desc = new String[]{"When HP is below 1/3rd its maximum,",
+			"the power of Water-type moves is increased by 50%."};
 	}
 	
 	@Override
@@ -524,6 +544,10 @@ class Ability_FlashFire extends Ability{
 	public Ability_FlashFire(Pokemon me){
 		this.me = me;
 		this.name = "Flash Fire";
+		this.desc = new String[]{"Raises ATK by 50% when the Pokemon",
+			"gets hit by a Fire-type move or",
+			"when it's burning, also cures",
+			"the burning status."};
 	}
 	
 	@Override
@@ -556,6 +580,8 @@ class Ability_Competitive extends Ability{
 	public Ability_Competitive(Pokemon me){
 		this.me = me;
 		this.name = "Competitive";
+		this.desc = new String[]{"Raises ATK by 50% when the opponent",
+			"uses a Status move that decreases any stat."};
 	}
 	
 	@Override
@@ -574,6 +600,8 @@ class Ability_LightningRod extends Ability {
 	public Ability_LightningRod(Pokemon me){
 		this.me = me;
 		this.name = "Lightning Rod";
+		this.desc = new String[]{"Raises ATK by 50% when the Pokemon",
+			"gets hit by an Electric-type move"};
 	}
 	
 	@Override
@@ -598,6 +626,8 @@ class Ability_Trace extends Ability{
 	public Ability_Trace(Pokemon me){
 		this.me = me;
 		this.name = "Trace";
+		this.desc = new String[]{"Raises ATK by 50% when the Pokemon",
+			"gets hit by a Fire-type move or"};
 	}
 	
 	@Override
@@ -614,6 +644,8 @@ class Ability_IceBody extends Ability{
 	public Ability_IceBody(Pokemon me){
 		this.me = me;
 		this.name = "Ice Body";
+		this.desc = new String[]{"Heals itself a bit when using",
+			"an Ice-type move."};
 	}
 	
 	@Override
@@ -630,6 +662,8 @@ class Ability_Guts extends Ability{
 	public Ability_Guts(Pokemon me){
 		this.me = me;
 		this.name = "Guts";
+		this.desc = new String[]{"Raises ATK by 50% when the Pokemon",
+			"has a status-ailment."};
 	}
 	
 	@Override
@@ -654,6 +688,8 @@ class Ability_Levitate extends Ability{
 	public Ability_Levitate(Pokemon me){
 		this.me = me;
 		this.name = "Levitate";
+		this.desc = new String[]{"Grants huge damage reduction against",
+			"Ground-type moves."};
 	}
 	
 	@Override //can't add full immunity so this will do for now
@@ -678,6 +714,8 @@ class Ability_SpeedBoost extends Ability{
 	public Ability_SpeedBoost(Pokemon me){
 		this.me = me;
 		this.name = "Speed Boost";
+		this.desc = new String[]{"Raises SPEED by 25% at",
+			"the end of every turn."};
 	}
 	
 	@Override
@@ -817,8 +855,8 @@ class Ability_Multiscale extends Ability{
 	}
 	
 	@Override
-	public void trigger_beforeGettingHit(){
-		if(this.me.isAtMaxHP()){
+	public void trigger_beforeGettingHit(Pokemon enemyPokemon, int move){
+		if(this.me.isAtMaxHP() && enemyPokemon.moveIsAnAttack(move)){
 			gothit = true;
 			this.me.raiseStat("DEF");
 			this.me.raiseStat("DEF");
@@ -840,6 +878,8 @@ class Ability_Limber extends Ability {
 	public Ability_Limber(Pokemon nam){
 		this.me = nam;
 		this.name = "Limber";
+		this.desc = new String[]{"Cures itself from Paralysis",
+			"at the end of a turn."};
 	}
 	
 	@Override
@@ -856,6 +896,8 @@ class Ability_QuickFeet extends Ability {
 	public Ability_QuickFeet(Pokemon nam){
 		this.me = nam;
 		this.name = "Quick Feet";
+		this.desc = new String[]{"Raises SPEED by 50% when the Pokemon",
+		"has a status-ailment."};
 	}
 	
 	@Override
@@ -883,6 +925,10 @@ class Ability_Multitype extends Ability {
 		this.me = me;
 		this.name = "Multitype";
 		
+		this.desc = new String[]{"Allows the Pokemon to change types once.",
+		"also transforms Normal-type attacks into",
+		"the Pokemon's new type."};
+		
 		if(me.items.length > 1){
 			me.items[8] = "Arceus' Plates";
 		}
@@ -900,5 +946,47 @@ class Ability_Multitype extends Ability {
 	@Override
 	public void trigger_endOfTurn(){
 		me.defineAllMoves();
+	}
+}
+
+class Ability_Regenerator extends Ability {
+	public Ability_Regenerator(Pokemon me){
+		this.me = me;
+		this.name = "Regenerator";
+		this.desc = new String[]{"The Pokemon heals 1/3rd of its max HP",
+		"when switched out."};
+	}
+	
+	@Override
+	public void trigger_switchedOut(){
+		me.healSelf("third");
+	}
+}
+
+class Ability_Intimidate extends Ability {
+	public Ability_Intimidate(Pokemon me){
+		this.me = me;
+		this.name = "Intimidate";
+	}
+	
+	@Override
+	public void trigger_switchedIn(Pokemon enemyMon){
+		enemyMon.decreaseStat("ATK");
+	}
+}
+
+class Ability_WeakArmor extends Ability {
+	public Ability_WeakArmor(Pokemon me){
+		this.me = me;
+		this.name = "Weak Armor";
+	}
+	
+	@Override
+	public void trigger_afterGettingHit(Pokemon enemyMon,int move){
+		if(enemyMon.moveIsAnAttack(move)){
+			me.decreaseStat("DEF");
+			me.raiseStat("SPEED");
+			me.raiseStat("SPEED");
+		}
 	}
 }

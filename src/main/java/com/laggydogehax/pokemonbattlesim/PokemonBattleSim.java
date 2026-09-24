@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 public class PokemonBattleSim {
 
     static final String OsName = System.getProperty("os.name");
-    static final String version = "beta5 dev21";
+    static final String version = "beta5 dev22";
     static final char s = 's', m = 'm';
 
     static boolean battleAnimations = true;
