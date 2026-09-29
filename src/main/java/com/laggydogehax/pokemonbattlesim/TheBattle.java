@@ -6,11 +6,14 @@ import java.util.InputMismatchException;
 
 public class TheBattle {
 	
+	static boolean playerFirst = true;
+	static boolean playerSkipTurn = false;
+	static boolean cpuSkipTurn = false;
+	static boolean plyWillMegaEvolve = false;
+	static boolean cpuWillMegaEvolve = false;
+
 	public void doTheBattling() throws IOException, InterruptedException {
-        boolean playerFirst = whoGoesFirst();
-        boolean p1SkipTurn = false, cpuSkipTurn = false;
-        boolean plyWillMegaEvolve = false;
-        boolean cpuWillMegaEvolve = false;
+        playerFirst = whoGoesFirst();
 		
 		if(playerFirst){
 			playerMons[playerMonActive].ability.trigger_switchedIn(cpuMons[cpuMonActive]);
@@ -23,8 +26,238 @@ public class TheBattle {
         do {//---------------BATTLE!!!!!!!!!---------------//
 			int plyDamageInTurn = 0;
 			int cpuDamageInTurn = 0;
+            
+			playerTurnAction();
+            //-----------cpu ai---------//
+            cpuTurnAction();
+            //-------------------------//
 
-            do {//get player inputs frfr
+            //---epic battle preparations----//
+			playerMons[playerMonActive].ability.trigger_startOfTurn(cpuMons[cpuMonActive]);
+			cpuMons[cpuMonActive].ability.trigger_startOfTurn(playerMons[playerMonActive]);
+			
+            playerFirst = whoGoesFirst();
+            if (plyWillMegaEvolve && playerFirst && !playerSkipTurn && plyCanMegaEvolve) {
+                plyWillMegaEvolve = false;
+                playerMegaEvolveSequence();
+            }
+			
+            if (playerMons[playerMonActive].isParalized && playerFirst && !playerSkipTurn) {
+                playerSkipTurn = rollForParalysis(playerMons[playerMonActive]);
+            }
+
+            //-------------------------------//
+			
+            //this is where da epic battle takes place
+            if (playerFirst && !playerSkipTurn) {
+                //player first
+                if (!playerSkipTurn) {
+                    plyDamageInTurn = playerTurn();
+                    if (cpuMons[cpuMonActive].isDed()) {
+                        cpuSkipTurn = true;
+                    }
+                    if (playerMons[playerMonActive].energyDrink) {
+                        moveSelec = moveSelec2;
+                        plyDamageInTurn += playerTurn();
+                        if (cpuMons[cpuMonActive].isDed()) {
+                            cpuSkipTurn = true;
+                        }
+                    }
+                } else {
+                    playerSkipTurn = false;
+                }
+                if (!cpuSkipTurn) {
+                    if (cpuWillMegaEvolve && cpuCanMegaEvolve) {
+                        cpuCanMegaEvolve = false;
+                        cpuMegaEvolveSequence();
+                    }
+                    cpuSkipTurn = rollForParalysis(cpuMons[cpuMonActive]);
+                    if (!cpuSkipTurn) {
+                        cpuDamageInTurn = cpuTurn();
+                    } else {
+                        cpuSkipTurn = false;
+                    }
+                } else {
+                    cpuSkipTurn = false;
+                }
+
+            } else {
+                //cpu first
+                if (!cpuSkipTurn) {
+                    if (cpuWillMegaEvolve && cpuCanMegaEvolve) {
+                        cpuCanMegaEvolve = false;
+                        cpuMegaEvolveSequence();
+                    }
+                    cpuSkipTurn = rollForParalysis(cpuMons[cpuMonActive]);
+                    if (!cpuSkipTurn) {
+                        cpuDamageInTurn = cpuTurn();
+                        if (playerMons[playerMonActive].isDed()) {//fainted lol
+                            playerSkipTurn = true;
+                            //let the block of code below handle pkmon switching
+                            wair(s, 1);
+                        }
+                    } else {
+                        cpuSkipTurn = false;
+                    }
+                } else {
+                    cpuSkipTurn = false;
+                }
+                if (!playerSkipTurn) {
+                    if (plyCanMegaEvolve && plyWillMegaEvolve) {//mega evolve
+                        plyWillMegaEvolve = false;
+                        playerMegaEvolveSequence();
+                    }
+                    playerSkipTurn = rollForParalysis(playerMons[playerMonActive]);
+                    if (!playerSkipTurn) {
+                        plyDamageInTurn = playerTurn();
+                        if (playerMons[playerMonActive].energyDrink) {
+                            moveSelec = moveSelec2;
+                            plyDamageInTurn = playerTurn();
+                            if (cpuMons[cpuMonActive].isDed()) {
+                                cpuSkipTurn = true;
+                            }
+                        }
+                    } else {
+                        playerSkipTurn = false;
+                    }
+                } else {
+                    playerSkipTurn = false;
+                }
+            }
+			
+			playerMons[playerMonActive].ability.trigger_endOfTurn(cpuMons[cpuMonActive],moveSelec);
+			cpuMons[cpuMonActive].ability.trigger_endOfTurn(playerMons[playerMonActive],cpuMoveSelec);
+            statusAilmentsHandler(); //burn, poison, HoT, paralysis statuses
+
+            //----------------------CPU------------------//
+			boolean waitabit = false;
+            if (cpuMons[cpuMonActive].isDed()) {//if mon ded-- i mean fainted
+                //change mon
+				if(plyDamageInTurn >= cpuMons[cpuMonActive].baseHP * 3){
+					System.out.println(cpuMons[cpuMonActive].name + " straight up died!");
+				}else{
+					System.out.println(cpuMons[cpuMonActive].name + " fainted!");
+				}
+                
+                wair(s, 2);
+                if (checkAllCPUMons()) {
+                    cpuSwitchMon();
+                    cpuSkipTurn = false;
+					if(playerMons[playerMonActive].isDed()){
+						waitabit=true;
+					}else{
+						cpuMons[cpuMonActive].ability.trigger_switchedIn(playerMons[playerMonActive]);
+					}
+					//waits for the player to switch in before triggering the ability
+                } else {
+                    System.out.println(cpuName + " is out of Pokemon!");
+                    wair(s, 2);
+                }
+            }
+            //-------------end of cpu section--------------// <---bro is out of cpus after this
+
+            //player's mon fainted 
+            if (playerMons[playerMonActive].isDed()) {
+				
+				if(cpuDamageInTurn >= playerMons[playerMonActive].baseHP * 3){
+					System.out.println(playerMons[playerMonActive].name + " straight up died!");
+				}else{
+					System.out.println(playerMons[playerMonActive].name + " fainted!");
+				}
+                
+                wair(s, 2);
+                if (checkAllPlayerMons()) {
+                    playerSwitchMon();
+					playerMons[playerMonActive].ability.trigger_switchedIn(cpuMons[cpuMonActive]);
+					if(waitabit){
+						cpuMons[cpuMonActive].ability.trigger_switchedIn(playerMons[playerMonActive]);
+						waitabit = false;
+					}
+                } else {
+                    System.out.println("You're out of Pokemon!!");
+                    wair(s, 3);
+                }
+            }
+
+            //---- end of turn stuff ----//
+            endOfTurnStuff();
+
+        } while (checkAllPlayerMons() && checkAllCPUMons());
+
+        //--------end result screen-------//
+        if (checkAllCPUMons()) {
+            //player dieded
+            clear();
+            System.out.println("...");
+            wair(s, 2);
+            System.out.println("Your team got wiped out!!");
+            wair(s, 2);
+            System.out.println("");
+            printPlayerTeam();
+            printCPUTeam();
+            System.out.println("");
+            wair(s, 2);
+            System.out.println(cpuName + " Won!!");
+            System.out.println("Better Luck next time!");
+            wair(s, 1);
+            printMiscStats();
+            wair(s, 5);
+        } else {//<-- this means that if somehow both are wiped out, cpu wins by deault- ACTUALLY, TH PLAYER WINS
+            // but im too lazy to add an extremely rare "YOU TIED!" screen so imma leave it like this
+            //cpu dieded
+            clear();
+            System.out.println("...");
+            wair(s, 2);
+            System.out.println(cpuName + "'s team got wiped out!!");
+            wair(s, 2);
+            System.out.println("");
+            printPlayerTeam();
+            printCPUTeam();
+            System.out.println("");
+            wair(s, 2);
+            System.out.println("You Won!!");
+            System.out.println("Congratulations!!!!!!!!!!");
+            wair(s, 1);
+            printMiscStats();
+            wair(s, 3);
+        }
+        System.out.println("");
+        System.out.println("Press Enter to exit");
+        wair(s, 1);
+        tcl.nextLine();
+    }
+	
+	public void endOfTurnStuff() {
+		numbahOfTurns++;
+		plyWillMegaEvolve = false;
+		cpuWillMegaEvolve = false;
+		plyCanFreeFromAilment = new boolean[]{true, true, true};
+		cpuCanFreeFromAilment = new boolean[]{true, true, true};
+
+		if (playerMons[playerMonActive].permaBurn) {
+			playerMons[playerMonActive].isBurning = true;
+			plyCanFreeFromAilment[0] = false;
+		}
+		if (cpuMons[cpuMonActive].permaBurn) {
+			cpuMons[cpuMonActive].isBurning = true;
+			cpuCanFreeFromAilment[0] = false;
+		}
+
+		for (int i = 0; i < playerMons.length; i++){
+			if(i!=playerMonActive && !playerMons[i].isDed()){
+				playerMons[i].ability.trigger_turnInBench();
+			}
+		}
+		
+		for (int i = 0; i < cpuMons.length; i++){
+			if(i!=cpuMonActive && !cpuMons[i].isDed()){
+				cpuMons[i].ability.trigger_turnInBench();
+			}
+		}
+	}
+	
+	public void playerTurnAction()throws IOException, InterruptedException{
+		do {//get player inputs frfr
                 bufferedClear();
                 battleMenuSelec = 0;
                 moveSelec = 0;
@@ -40,12 +273,13 @@ public class TheBattle {
                     battleMenuSelec = 0;
                     tcl.nextLine();
                 }
+				
                 if (battleMenuSelec == 3 && !epicSoftLockPrevention1()) { //select an item to use
                     tcl.nextLine();
                     int selecItem = printSelectBattleItem();
                     if (selecItem != 69) {
-                        p1SkipTurn = battleItemsHandler(selecItem);
-                        if (p1SkipTurn) {
+                        playerSkipTurn = battleItemsHandler(selecItem);
+                        if (playerSkipTurn) {
                             break;
                         }else if (playerMons[playerMonActive].canMegaEvolve()){
                             plyWillMegaEvolve = true;
@@ -58,7 +292,7 @@ public class TheBattle {
 				
 				if (battleMenuSelec == 2 && !epicSoftLockPrevention1()) { //SWITCH PLAYER POKEMON
 					if(playerSwitchMon(true)==0){ //returns 1 if the player canceled the operation
-						p1SkipTurn = true;
+						playerSkipTurn = true;
 					}else{
 						battleMenuSelec = 0;
 						playerMons[playerMonActive].ability.trigger_switchedIn(cpuMons[cpuMonActive]);
@@ -121,11 +355,10 @@ public class TheBattle {
                 }
 
             } while ((battleMenuSelec != 1 && battleMenuSelec != 2) || epicSoftLockPrevention1());
-
-            
-
-            //-----------cpu ai---------//
-            cpuMoveSelec = 0;
+	}
+	
+	public void cpuTurnAction() throws IOException, InterruptedException{
+		cpuMoveSelec = 0;
             cpuMoveSelec = cpuAIHandler();
             if (cpuMoveSelec == 69) {//cpu switch mon
                 cpuSkipTurn = true;
@@ -146,214 +379,7 @@ public class TheBattle {
                 cpuBattleItemsHandler(cpuMoveSelec);
                 cpuMoveSelec = 0;
             }
-            //-------------------------//
-
-            //---epic battle preparations----//
-			playerMons[playerMonActive].ability.trigger_startOfTurn(cpuMons[cpuMonActive]);
-			cpuMons[cpuMonActive].ability.trigger_startOfTurn(playerMons[playerMonActive]);
-			
-            playerFirst = whoGoesFirst();
-            if (plyWillMegaEvolve && playerFirst && !p1SkipTurn && plyCanMegaEvolve) {
-                plyWillMegaEvolve = false;
-                playerMegaEvolveSequence();
-            }
-            if (playerMons[playerMonActive].isParalized && playerFirst && !p1SkipTurn) {
-                p1SkipTurn = rollForParalysis(playerMons[playerMonActive]);
-            }
-
-            //-------------------------------//
-            //this is where da epic battle takes place
-            if (playerFirst && !p1SkipTurn) {
-                //player first
-                if (!p1SkipTurn) {
-                    plyDamageInTurn = plyerTurn();
-                    if (cpuMons[cpuMonActive].isDed()) {
-                        cpuSkipTurn = true;
-                    }
-                    if (playerMons[playerMonActive].energyDrink) {
-                        moveSelec = moveSelec2;
-                        plyDamageInTurn += plyerTurn();
-                        if (cpuMons[cpuMonActive].isDed()) {
-                            cpuSkipTurn = true;
-                        }
-                    }
-                } else {
-                    p1SkipTurn = false;
-                }
-
-                if (!cpuSkipTurn) {
-                    if (cpuWillMegaEvolve && cpuCanMegaEvolve) {
-                        cpuCanMegaEvolve = false;
-                        cpuMegaEvolveSequence();
-                    }
-                    cpuSkipTurn = rollForParalysis(cpuMons[cpuMonActive]);
-                    if (!cpuSkipTurn) {
-                        cpuDamageInTurn = cpuTurn();
-                    } else {
-                        cpuSkipTurn = false;
-                    }
-                } else {
-                    cpuSkipTurn = false;
-                }
-
-            } else {
-                //cpu first
-                if (!cpuSkipTurn) {
-                    if (cpuWillMegaEvolve && cpuCanMegaEvolve) {
-                        cpuCanMegaEvolve = false;
-                        cpuMegaEvolveSequence();
-                    }
-                    cpuSkipTurn = rollForParalysis(cpuMons[cpuMonActive]);
-                    if (!cpuSkipTurn) {
-                        cpuDamageInTurn = cpuTurn();
-                        if (playerMons[playerMonActive].isDed()) {//fainted lol
-                            p1SkipTurn = true;
-                            //let the block of code below handle pkmon switching
-                            wair(s, 1);
-                        }
-                    } else {
-                        cpuSkipTurn = false;
-                    }
-                } else {
-                    cpuSkipTurn = false;
-                }
-                if (!p1SkipTurn) {
-                    if (plyCanMegaEvolve && plyWillMegaEvolve) {//mega evolve
-                        plyWillMegaEvolve = false;
-                        playerMegaEvolveSequence();
-                    }
-                    p1SkipTurn = rollForParalysis(playerMons[playerMonActive]);
-                    if (!p1SkipTurn) {
-                        plyDamageInTurn = plyerTurn();
-                        if (playerMons[playerMonActive].energyDrink) {
-                            moveSelec = moveSelec2;
-                            plyDamageInTurn = plyerTurn();
-                            if (cpuMons[cpuMonActive].isDed()) {
-                                cpuSkipTurn = true;
-                            }
-                        }
-                    } else {
-                        p1SkipTurn = false;
-                    }
-                } else {
-                    p1SkipTurn = false;
-                }
-            }
-			
-			playerMons[playerMonActive].ability.trigger_endOfTurn(cpuMons[cpuMonActive],moveSelec);
-			cpuMons[cpuMonActive].ability.trigger_endOfTurn(playerMons[playerMonActive],cpuMoveSelec);
-            statusAilmentsHandler(); //burn, poison, HoT, paralysis statuses
-
-            //----------------------CPU------------------//
-			boolean waitabit = false;
-            if (cpuMons[cpuMonActive].isDed()) {//if mon ded-- i mean fainted
-                //change mon
-				if(plyDamageInTurn >= cpuMons[cpuMonActive].baseHP * 3){
-					System.out.println(cpuMons[cpuMonActive].name + " straight up died!");
-				}else{
-					System.out.println(cpuMons[cpuMonActive].name + " fainted!");
-				}
-                
-                wair(s, 2);
-                if (checkAllCPUMons()) {
-                    cpuSwitchMon();
-                    cpuSkipTurn = false;
-					if(playerMons[playerMonActive].isDed()){
-						waitabit=true;
-					}else{
-						cpuMons[cpuMonActive].ability.trigger_switchedIn(playerMons[playerMonActive]);
-					}
-					//waits for the player to switch in before triggering the ability
-                } else {
-                    System.out.println(cpuName + " is out of Pokemon!");
-                    wair(s, 2);
-                }
-            }
-            //-------------end of cpu section--------------// <---bro is out of cpus after this
-
-            //player's mon fainted 
-            if (playerMons[playerMonActive].isDed()) {
-				
-				if(cpuDamageInTurn >= playerMons[playerMonActive].baseHP * 3){
-					System.out.println(playerMons[playerMonActive].name + " straight up died!");
-				}else{
-					System.out.println(playerMons[playerMonActive].name + " fainted!");
-				}
-                
-                wair(s, 2);
-                if (checkAllPlayerMons()) {
-                    playerSwitchMon();
-					playerMons[playerMonActive].ability.trigger_switchedIn(cpuMons[cpuMonActive]);
-					if(waitabit){
-						cpuMons[cpuMonActive].ability.trigger_switchedIn(playerMons[playerMonActive]);
-						waitabit = false;
-					}
-                } else {
-                    System.out.println("You're out of Pokemon!!");
-                    wair(s, 3);
-                }
-            }
-
-            //---- end of turn stuff ----//
-            numbahOfTurns++;
-            plyWillMegaEvolve = false;
-            cpuWillMegaEvolve = false;
-            plyCanFreeFromAilment = new boolean[]{true, true, true};
-            cpuCanFreeFromAilment = new boolean[]{true, true, true};
-
-            if (playerMons[playerMonActive].permaBurn) {
-                playerMons[playerMonActive].isBurning = true;
-                plyCanFreeFromAilment[0] = false;
-            }
-            if (cpuMons[cpuMonActive].permaBurn) {
-                cpuMons[cpuMonActive].isBurning = true;
-                cpuCanFreeFromAilment[0] = false;
-            }
-
-        } while (checkAllPlayerMons() && checkAllCPUMons());
-
-        //--------end result screen-------//
-        if (checkAllCPUMons()) {
-            //player dieded
-            clear();
-            System.out.println("...");
-            wair(s, 2);
-            System.out.println("Your team got wiped out!!");
-            wair(s, 2);
-            System.out.println("");
-            printPlayerTeam();
-            printCPUTeam();
-            System.out.println("");
-            wair(s, 2);
-            System.out.println(cpuName + " Won!!");
-            System.out.println("Better Luck next time!");
-            wair(s, 1);
-            printMiscStats();
-            wair(s, 5);
-        } else {//<-- this means that if somehow both are wiped out, cpu wins by deault- ACTUALLY, TH PLAYER WINS
-            // but im too lazy to add an extremely rare "YOU TIED!" screen so imma leave it like this
-            //cpu dieded
-            clear();
-            System.out.println("...");
-            wair(s, 2);
-            System.out.println(cpuName + "'s team got wiped out!!");
-            wair(s, 2);
-            System.out.println("");
-            printPlayerTeam();
-            printCPUTeam();
-            System.out.println("");
-            wair(s, 2);
-            System.out.println("You Won!!");
-            System.out.println("Congratulations!!!!!!!!!!");
-            wair(s, 1);
-            printMiscStats();
-            wair(s, 3);
-        }
-        System.out.println("");
-        System.out.println("Press Enter to exit");
-        wair(s, 1);
-        tcl.nextLine();
-    }
+	}
 	
 	public Pokemon getCloneMon(int turnOf){
 		switch(turnOf){
@@ -427,10 +453,11 @@ public class TheBattle {
                 getSmackedBich = enemyMon.currentHP;
             }
 
+			Clr moveColor = Color.getBrightColorFromMoveType(cloneMon, selectedMove);
             //start printing... now!
             bufferedClear();
             printBattleHUDThing();
-            System.out.println(cloneMon.name + " used " + cloneMon.moveset[0][selectedMove] + "!");
+            System.out.println(cloneMon.name + " used " + moveColor + cloneMon.moveset[0][selectedMove] + Clr.R + "!");
             if (cloneMon.isSpecialMove(selectedMove).equals("magnitude")) {
                 wair(m, 750000);
                 System.out.println("Magnitude " + (cloneMon.extraDmg + 4) + "!");
@@ -441,23 +468,22 @@ public class TheBattle {
 			
 			enemyMon.ability.trigger_afterGettingHit(cloneMon, selectedMove);
 
-            //animation!!!
-            Clr color2 = Color.getColorFromMoveType(cloneMon, selectedMove);
-            Clr color1 = Color.getBrightColorFromMoveType(cloneMon, selectedMove);
-            int colorName;
-            if (turnOf == 1) {
-                colorName = 2;
-            } else {
-                colorName = 1;
-            }
-
             if (battleAnimations) {
-                printBattleHUDSequence(colorName, color1, color2, shakeScreen, cloneMon.name + " used " + cloneMon.moveset[0][selectedMove] + "!"); //animation!!
-                System.out.println(cloneMon.name + " used " + cloneMon.moveset[0][selectedMove] + "!");
-            } else {
-                printBattleHUDThing(0, Clr.R, cloneMon.name + " used " + cloneMon.moveset[0][selectedMove] + "!");
-                wair(m, 500000);
-            }
+				//animation!!!
+				Clr color2 = Color.getColorFromMoveType(cloneMon, selectedMove);
+				Clr color1 = Color.getBrightColorFromMoveType(cloneMon, selectedMove);
+				int colorName;
+				if (turnOf == 1) {
+					colorName = 2;
+				} else {
+					colorName = 1;
+				}
+				printBattleHUDSequence(colorName, color1, color2, shakeScreen, cloneMon.name + " used " + moveColor + cloneMon.moveset[0][selectedMove] + Clr.R + "!");//animation!!
+				System.out.println(cloneMon.name + " used " + moveColor + cloneMon.moveset[0][selectedMove] + Clr.R + "!");
+			} else {
+				printBattleHUDThing(0, Clr.R, cloneMon.name + " used " + moveColor + cloneMon.moveset[0][selectedMove] + Clr.R + "!");
+				wair(m, 500000);
+			}
 
             if (cloneMon.isSpecialMove(selectedMove).equals("magnitude")) {
                 System.out.println("Magnitude " + (cloneMon.extraDmg + 4) + "!");
@@ -591,7 +617,7 @@ public class TheBattle {
 		return trueDmg; //returns damage dealt
     }
 
-    public int plyerTurn() throws IOException, InterruptedException {
+    public int playerTurn() throws IOException, InterruptedException {
         return pokemonBattleSequence(playerMons[playerMonActive], cpuMons[cpuMonActive], 1, moveSelec);
     }
 	
@@ -1417,7 +1443,7 @@ public class TheBattle {
                 myMon.moveset[0][moveSelec] = randomMove;
                 myMon.defineSelfMove(moveSelec);
 
-                plyerTurn();
+                playerTurn();
 
                 myMon.moveset[0][moveSelec] = guh;
                 myMon.defineSelfMove(moveSelec);
@@ -1537,12 +1563,16 @@ public class TheBattle {
                 wair(s, 1);
                 break;
             case "doublehit":
-                if (!doublehitPlayer) {
-                    doublehitPlayer = true;
-                    plyerTurn();
-                } else {
-                    doublehitPlayer = false;
-                }
+				if(!myMon.doubleHit){
+					myMon.doubleHit = true;
+					if(!playerTeam){
+						cpuTurn();
+					}else{
+						playerTurn();
+					}
+				}else{
+					myMon.doubleHit = false;
+				}
                 break;
             case "overclock"://debuff self atk after using
                 myMon.decreaseStat("ATK");
@@ -1893,15 +1923,12 @@ public class TheBattle {
                 playerMons[playerMonActive].isBurning = true;
                 playerMons[playerMonActive].strike = true;
                 playerMons[playerMonActive].permaBurn = true;
-                playerMons[playerMonActive].decreaseStat("DEF");
                 playerMons[playerMonActive].decreaseStat("SPEED");
                 playerMons[playerMonActive].decreaseStat("SPEED");
                 playerMons[playerMonActive].baseSPEED /= 2;
-                System.out.println(playerMons[playerMonActive].name + "'s DEF fell!");
-                wair(s, 1);
                 System.out.println(playerMons[playerMonActive].name + "'s SPEED fell greatly!");
                 wair(s, 1);
-                System.out.println(playerMons[playerMonActive].name + " will only deal " + Clr.RED_B + "Critical hits!" + Clr.R);
+                System.out.println(playerMons[playerMonActive].name + " has guaranteed " + Clr.RED_B + "Critical hits!" + Clr.R);
                 wair(s, 2);
                 break;
             case "Energy Drink":
@@ -2046,15 +2073,12 @@ public class TheBattle {
                 cpuMons[cpuMonActive].isBurning = true;
                 cpuMons[cpuMonActive].strike = true;
                 cpuMons[cpuMonActive].permaBurn = true;
-                cpuMons[cpuMonActive].decreaseStat("DEF");
                 cpuMons[cpuMonActive].decreaseStat("SPEED");
                 cpuMons[cpuMonActive].decreaseStat("SPEED");
                 cpuMons[cpuMonActive].baseSPEED /= 2;
-                System.out.println(cpuMons[cpuMonActive].name + "'s DEF fell!");
-                wair(s, 1);
                 System.out.println(cpuMons[cpuMonActive].name + "'s SPEED fell greatly!");
                 wair(s, 1);
-                System.out.println(cpuMons[cpuMonActive].name + " will only deal " + Clr.RED_B + "Critical hits!" + Clr.R);
+                System.out.println(cpuMons[cpuMonActive].name + " has guaranteed " + Clr.RED_B + "Critical hits!" + Clr.R);
                 wair(s, 2);
                 break;
         }
@@ -2511,9 +2535,16 @@ public class TheBattle {
             cout.write(cpuName + "'s current Pokemon:");
 			cout.write("\n");
         }
+		
+		int resic = 0;
+		//if it has the resilient ability
+		if(tempPkmn.ability instanceof Ability_Resilient){
+			Ability_Resilient abi = new Ability_Resilient(tempPkmn);
+			resic = abi.calcDefGained();
+		}
 
         //shows reduction percentage
-        reducPerc = (float) tempPkmn.currentDEF / 400;
+        reducPerc = (float) (tempPkmn.currentDEF + resic) / 400;
         reducPerc *= 100;
         String rpString = reducPerc + "";
         String perc = "";
@@ -2548,7 +2579,13 @@ public class TheBattle {
         cout.write("Ability: " + tempPkmn.ability.name); cout.write("\n");
         cout.write("HP:      " + tempPkmn.currentHP + "/" + tempPkmn.baseHP); cout.write("\n");
         cout.write("Attack:  " + tempPkmn.currentATK + "/" + tempPkmn.baseATK); cout.write("\n");
-        cout.write("Defense: " + tempPkmn.currentDEF + "/" + tempPkmn.baseDEF + " (" + perc + "% reduction)"); cout.write("\n");
+		
+		if(resic > 0){
+			cout.write("Defense: " + tempPkmn.currentDEF + "+"+resic+"/" + tempPkmn.baseDEF + " (" + perc + "% reduction)"); cout.write("\n");
+		}else{
+			cout.write("Defense: " + tempPkmn.currentDEF + "/" + tempPkmn.baseDEF + " (" + perc + "% reduction)"); cout.write("\n");
+		}
+		
         cout.write("Speed:   " + tempPkmn.currentSPEED + "/" + tempPkmn.baseSPEED + " (" + cperc + "% crit. chance)"); cout.write("\n");
         cout.write("Weak to: ");
 
@@ -2737,7 +2774,7 @@ public class TheBattle {
                     System.out.println("Adds +" + value2 + "% ATK for every alive Pokemon in the enemy team.");
                     break;
                 case "MegaEvolutionHater":
-                    System.out.println("Doubles ATK for this move if the enemy Pokemon is Mega-Evolved.");
+                    System.out.println("Doubles ATK for this move \nif the enemy Pokemon is Mega-Evolved.");
                     break;
                 case "avenger":
                     value = 0;
