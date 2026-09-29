@@ -125,6 +125,9 @@ class MoveCalcHandler {
             case "nihilLight":
                 this.nihilLight();
                 break;
+			case "avenger":
+				this.avenger();
+				break;
 			case "staticstrike":
 				this.staticStrike();
 				break;
@@ -281,12 +284,12 @@ class MoveCalcHandler {
 		int reduce = 0;
 		//fallen allies = more power for this move
 		atk1 -= atk1 / 4;
-		if (turnOf == 0) {
-			monlist = new Pokemon[playerMons.length];
-			monlist = playerMons;
-		} else {
+		if (turnOf != 0) {
 			monlist = new Pokemon[cpuMons.length];
 			monlist = cpuMons;
+		} else {
+			monlist = new Pokemon[playerMons.length];
+			monlist = playerMons;
 		}
 
 		if (monlist.length > 3) {

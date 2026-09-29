@@ -1,314 +1,5 @@
 package com.laggydogehax.pokemonbattlesim;
 
-class AbilityFactory{	
-	public static Ability create(Pokemon nam){ //ENORMOUS SWITCH STATEMENT!!!!!!!!!!!!!!!
-		switch(nam.name){
-			default:
-				return new Ability();
-			
-			case "Venusaur": return new Ability_Overgrow(nam);
-				
-			case "Charizard": return new Ability_Blaze(nam);
-					
-			case "Blastoise": return new Ability_Torrent(nam);
-				
-			case "Meowscarada": return new Ability_Protean(nam);
-			
-			case "Ninetales": return new Ability_FlashFire(nam);
-				
-			case "Empoleon": return new Ability_Competitive(nam);
-				
-			case "Raichu": return new Ability_LightningRod(nam);
-				
-			case "Mewtwo":
-				
-			break;
-			case "Gengar": return new Ability_Levitate(nam);
-				
-			case "Dragonite": return new Ability_Levitate(nam);
-				
-			case "Absol": return new Ability_SuperLuck(nam);
-				
-			case "Gardevoir": return new Ability_Trace(nam);
-				
-			case "Glaceon": return new Ability_IceBody(nam);
-				
-			case "Luxray": return new Ability_Guts(nam);
-
-			case "Lucario": return new Ability_Justified(nam);
-			
-			case "Duraludon":
-				
-			break;
-			case "Mismagius": return new Ability_Levitate(nam);
-				
-			case "Golisopod":
-				
-			break;
-			case "Heracross": return new Ability_Moxie(nam);
-				
-			case "Rampardos":
-				
-			break;
-			case "Lycanroc":
-				
-			break;
-			case "Aurorus": return new Ability_Refrigerate(nam);
-				
-			case "Dugtrio": return new Ability_SandRush(nam);
-				
-			case "Sandlash": return new Ability_SandRush(nam);
-				
-			case "Arbok": return new Ability_Intimidate(nam);
-				
-			case "Sneasler": return new Ability_Unburden(nam);
-				
-			case "Pidgeot":
-				
-			break;
-			case "Lugia": return new Ability_Multiscale(nam);
-				
-			case "Urshifu":
-				
-			break;
-			case "Audino": return new Ability_Regenerator(nam);
-				
-			case "Tauros":
-				
-			break;
-			case "Sylveon": return new Ability_Pixilate(nam);
-
-			case "Tinkaton":
-				
-			break;
-			case "Zarude":
-				
-			break;
-			case "Dragapult":
-				
-			break;
-			case "Mawile": return new Ability_Intimidate(nam);
-				
-			//--------wave 2 of pokemen--------//
-			case "Blaziken": return new Ability_SpeedBoost(nam);
-				
-			case "Vaporeon": return new Ability_WaterAbsorb(nam);
-				
-			case "Ursaluna":
-				
-			break;
-			case "Decidueye": return new Ability_Overgrow(nam);
-				
-			case "Flareon": return new Ability_Guts(nam);
-				
-			case "Lapras":
-				
-			break;
-			case "Tsareena":
-				
-			break;
-			case "Braviary":
-				
-			break;
-			case "Toxtricity":
-				
-			break;
-			case "Krookodile":
-				
-			break;
-			case "Toucannon":
-				
-			break;
-			case "Zeraora":
-				
-			break;
-			case "Weezing":
-				
-			break;
-			case "Drapion":
-				
-			break;
-			case "Walking Wake":
-				
-			break;
-			case "Roaring Moon":
-				
-			break;
-			case "Togekiss":
-				
-			break;
-			case "Florges":
-				
-			break;
-			case "Lopunny": return new Ability_Limber(nam);
-				
-			case "Cinccino": return new Ability_Guts(nam);
-				
-			case "Hawlucha":
-				
-			break;
-			case "Flutter Mane":
-				
-			break;
-			case "Trevenant":
-				
-			break;
-			case "Volcarona":
-				
-			break;
-			case "Vespiquen":
-				
-			break;
-			case "Pangoro":
-				
-			break;
-			case "Aggron":
-				
-			break;
-			case "Scizor":
-				
-			break;
-			case "Mew": return new Ability_Synchronize(nam);
-				
-			case "Alakazam":
-				
-			break;
-			case "Froslass":
-				
-			break;
-			case "Baxcalibur":
-				
-			break;
-			case "Hydreigon":
-				
-			break;
-			case "Zoroark":
-				
-			break;
-			case "Solrock":
-				
-			break;
-			case "Lunatone":
-				
-			break;
-			//-------- wave 3 ---------//
-			case "Delphox": return new Ability_Blaze(nam);
-				
-			case "Gyarados": return new Ability_Intimidate(nam);
-				
-			case "Sceptile": return new Ability_Unburden(nam);
-				
-			case "Typhlosion": return new Ability_FlashFire(nam);
-				
-			case "Greninja": return new Ability_Protean(nam);
-
-			case "Leafeon":
-				
-			case "Donphan":
-				
-			break;
-			case "Corviknight":
-				
-			break;
-			case "Umbreon": return new Ability_Synchronize(nam);
-				
-			case "Jolteon": return new Ability_QuickFeet(nam);
-				
-			case "Espeon":
-				
-			break;
-			case "Eevee":
-				
-			break;
-			case "Arceus": return new Ability_Multitype(nam);
-				
-			case "Citrus":
-				
-			break;
-			case "Toxicroak":
-				
-			break;
-			case "Cyclizar":
-				
-			break;
-			case "Garchomp":
-				
-			break;
-			case "Gholdengo":
-				
-			break;
-			case "Galvantula":
-				
-			break;
-			case "Ceruledge": return new Ability_WeakArmor(nam);
-				
-			case "Chandelure":
-				
-			break;
-			case "Flamigo":
-				
-			break;
-			case "Zamazenta":
-				
-			break;
-			case "Zacian":
-				
-			break;
-			case "Magearna":
-				
-			break;
-			case "Celebi ex":
-				
-			break;
-			case "Cresselia":
-				
-			break;
-			case "Kingambit":
-				
-			break;
-			case "Azumarill": return new Ability_Guts(nam);
-				
-			case "Gallade":
-				
-			break;
-			case "Regieleki":
-				
-			break;
-			case "Seviper":
-				
-			break;
-			case "Garganacl":
-				
-			break;
-			case "Diance":
-				
-			break;
-			case "Weavile":
-				
-			break;
-			case "Chien-Pao":
-				
-			break;
-			case "Yanmega":
-				
-			break;
-			case "Kleavor":
-				
-			break;
-			case "ADP GX":
-				
-			break;
-			case "Missing No":
-				
-			break;
-		}
-		
-		return new Ability();
-
-	}
-	
-}
-
 //this is practically a skeleton
 class Ability{
 	Pokemon me;
@@ -319,8 +10,7 @@ class Ability{
 		this.name = "";
 		this.desc[0] = "";
 	}
-	
-	
+
 	//template methods jumpscare
 	public void trigger_beforeMove(){
 		
@@ -374,10 +64,13 @@ class Ability{
 		this.trigger_switchedIn();
 	}
 	
+	public void trigger_turnInBench(){
+		
+	}
+	
 }
 
 class Ability_Pixilate extends Ability {
-	
 	
 	public Ability_Pixilate(Pokemon me) {
 		this.me = me;
@@ -534,6 +227,30 @@ class Ability_Torrent extends Ability{
 	@Override
 	public void trigger_endOfTurn(Pokemon enemyMon, int moveSelec){
 		if(me.currentHP < me.baseHP/3 && me.moveset[1][moveSelec].contains("Water")){
+			me.currentATK -= me.baseATK/2;
+		}
+	}
+}
+
+class Ability_Swarm extends Ability{
+	
+	public Ability_Swarm(Pokemon me){
+		this.me = me;
+		this.name = "Swarm";
+		this.desc = new String[]{"When HP is below 1/3rd its maximum,",
+			"the power of Bug-type moves is increased by 50%."};
+	}
+	
+	@Override
+	public void trigger_beforeMove(int moveSelec){
+		if(me.currentHP < me.baseHP/3 && me.moveset[1][moveSelec].contains("Bug")){
+			me.currentATK += me.baseATK/2;
+		}
+	}
+	
+	@Override
+	public void trigger_endOfTurn(Pokemon enemyMon, int moveSelec){
+		if(me.currentHP < me.baseHP/3 && me.moveset[1][moveSelec].contains("Bug")){
 			me.currentATK -= me.baseATK/2;
 		}
 	}
@@ -959,7 +676,9 @@ class Ability_Regenerator extends Ability {
 	
 	@Override
 	public void trigger_switchedOut(){
-		me.healSelf("third");
+		if(!me.isDed()){
+			me.healSelf("third");
+		}
 	}
 }
 
@@ -989,4 +708,84 @@ class Ability_WeakArmor extends Ability {
 			me.raiseStat("SPEED");
 		}
 	}
+}
+
+class Ability_Dash extends Ability {
+	public Ability_Dash(Pokemon me){
+		this.me = me;
+		this.name = "Dash";
+		this.desc = new String[]{"The Pokemon gets -48% less ATK at all times,",
+		"but gains +1 hit."};
+	}
+	
+	int reducedAtk = 0;
+	
+	@Override
+	public void trigger_beforeMove(){
+		this.reducedAtk = this.me.currentATK * 48 / 100;
+		this.me.currentATK -= reducedAtk;
+		this.me.numberOfHits +=1;
+	}
+	
+	@Override
+	public void trigger_endOfTurn(){
+		this.me.currentATK += this.reducedAtk;
+		this.me.numberOfHits -=1;
+	}
+}
+
+class Ability_Resilient extends Ability {
+	public Ability_Resilient(Pokemon me){
+		this.me = me;
+		this.name = "Resilient";
+		this.desc = new String[]{"The Pokemon gains DEF based on % of missing HP",
+		"up to +50 DEF when at 25% of max HP."};
+	}
+	
+	int defGained = 0;
+	
+	public int calcDefGained(){
+		// ??????????????????????????????????
+		float perc = this.me.currentHP - this.me.baseHP;
+		perc = perc / this.me.baseHP;
+		perc = perc * -100;
+		perc = (float) (perc * 1.333);
+		perc = perc / 2;
+		
+		if(perc > 50){
+			perc = 50;
+		}
+		
+		return Math.round(perc);
+	}
+	
+	@Override
+	public void trigger_startOfTurn(){
+		this.defGained= calcDefGained();
+		
+		this.me.currentDEF += defGained;
+	}
+	
+	@Override
+	public void trigger_endOfTurn(){
+		this.me.currentDEF -= this.defGained;
+	}
+}
+
+class Ability_SuperOverlord extends Ability{
+	public Ability_SuperOverlord(Pokemon me){
+		this.me = me;
+		this.name = "SuperOverlord";
+		this.desc = new String[]{"The Pokemon gains +6 base ATK",
+		"for every turn it isn't the",
+		"active Pokemon"};
+	}
+	
+	@Override
+	public void trigger_turnInBench(){
+		me.baseATK += 6;
+		me.currentATK = me.baseATK;
+	}
+	
+	
 }

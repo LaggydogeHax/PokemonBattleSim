@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 public class PokemonBattleSim {
 
     static final String OsName = System.getProperty("os.name");
-    static final String version = "beta5 dev22";
+    static final String version = "beta5 dev23";
     static final char s = 's', m = 'm';
 
     static boolean battleAnimations = true;
@@ -649,8 +649,6 @@ public class PokemonBattleSim {
     static int battleMenuSelec = 0;  //<-- quite the important variables if i say so myself
     static int cpuMoveSelec = 0;
     static boolean cpuJustSwitched = false; //<--prevent cpu from switching twice in a row
-    static boolean doublehitPlayer = false;
-    static boolean doublehitCpu = false;
     static boolean plyCanMegaEvolve = true; //can only mega-evolve once per battle
     static boolean cpuCanMegaEvolve = true;
     static boolean[] plyCanFreeFromAilment = new boolean[]{true, true, true};

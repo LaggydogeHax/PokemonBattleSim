@@ -9,7 +9,7 @@ class Pokemon{
 	int extraDmg=0;
 	String name,type="";
 	String type2="";
-	boolean isPoisoned,isBurning,isParalized,healingOverTime,megaEvolved,strike,permaBurn,energyDrink;
+	boolean isPoisoned,isBurning,isParalized,healingOverTime,megaEvolved,strike,permaBurn,energyDrink,doubleHit;
 	Ability ability=null;
 	String[] weakTo = new String[5];	//listing-weaknesses
 	int[] weakToMults = new int[18]; //multis!!!!!!!!!!!!!!!
@@ -170,7 +170,11 @@ class Pokemon{
 	}
 	
 	public void resetAbility(){
-		this.ability = AbilityFactory.create(this);
+		if(this.ability.name == null || this.ability.name.equals("")){
+			this.ability = AbilityFactory.create(this);
+		}else{
+			this.ability = AbilityFactory.create(this.ability.name, this);
+		}
 	}
 	
 	public void resetItems(){
@@ -767,6 +771,7 @@ class Pokemon{
 			
 			//more power but recieve a bit of dmg dealt as recoil
 			case "Brave Bird": return "recoil";
+			case "Wood Hammer": return "recoil";
 
 			// random amount of hits 1-6;
 			case "Pin Missile": return "rngMultihit";
@@ -1077,6 +1082,8 @@ class Pokemon{
 		this.defineAllMoves();
 		
 		this.resetItems();
+		
+		this.ability = new Ability();
 		
 		this.resetAbility();
 		

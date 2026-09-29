@@ -370,7 +370,7 @@ public class TheBossBattle extends TheBattle{
             if (playerFirst && !p1SkipTurn) {
                 //player first
                 if (!p1SkipTurn) {
-                    plyDamageInTurn = plyerTurn();
+                    plyDamageInTurn = playerTurn();
 					plyDamageInTurn += plyerTurn2();
 					plyDamageInTurn += plyerTurn3();
                     if (cpuMons[cpuMonActive].currentHP == 0) {
@@ -378,7 +378,7 @@ public class TheBossBattle extends TheBattle{
                     }
                     if (playerMons[playerMonActive].energyDrink) {
                         moveSelec = moveSelec2;
-                        plyDamageInTurn += plyerTurn();
+                        plyDamageInTurn += playerTurn();
                         if (cpuMons[cpuMonActive].currentHP == 0) {
                             cpuSkipTurn = true;
                         }
@@ -430,12 +430,12 @@ public class TheBossBattle extends TheBattle{
                     }
                     p1SkipTurn = rollForParalysis(playerMons[playerMonActive]);
                     if (!p1SkipTurn) {
-                        plyDamageInTurn = plyerTurn();
+                        plyDamageInTurn = playerTurn();
 						plyDamageInTurn += plyerTurn2();
 						plyDamageInTurn += plyerTurn3();
                         if (playerMons[playerMonActive].energyDrink) {
                             moveSelec = moveSelec2;
-                            plyDamageInTurn = plyerTurn();
+                            plyDamageInTurn = playerTurn();
                             if (cpuMons[cpuMonActive].currentHP == 0) {
                                 cpuSkipTurn = true;
                             }
@@ -795,7 +795,7 @@ public class TheBossBattle extends TheBattle{
 
 	
 	@Override
-	public int plyerTurn() throws IOException, InterruptedException {
+	public int playerTurn() throws IOException, InterruptedException {
         return pokemonBattleSequence(playerMons[playerMonActive], cpuMons[cpuMonActive], 1, moveSelec);
     }
 	
